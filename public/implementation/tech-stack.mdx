@@ -1,0 +1,68 @@
+## Tech Stack Overview
+
+### Frontend
+
+- **Next.js 14+** (App Router) - For page routing and server components
+- **TypeScript** - For type safety and better developer experience
+- normal styling, no tailwind
+- **React Query or SWR** - For efficient data fetching and caching
+- **Framer Motion** - For animations on timers, progress bars, and transitions
+- **React Hook Form** - For form handling
+- **Chart.js or D3.js** - For analytics visualizations and heatmaps
+
+### Backend
+
+- **Next.js API Routes** - For serverless API endpoints
+- **Prisma** - Type-safe ORM for database interactions
+- **NextAuth.js** - For authentication system
+- **Stripe** - For payment processing (one-time $9.99 payment)
+- **Pusher or Socket.io** - For real-time features (group challenges, leaderboards)
+
+### Database
+
+- **PostgreSQL** - Primary database (via Supabase, Neon, or Railway)
+- **Redis** - For leaderboards and real-time features (via Upstash)
+
+### Deployment
+
+- **Vercel** - For hosting the Next.js application
+- **Supabase or Neon** - For managed PostgreSQL
+
+## Folder Structure
+
+focus/
+├── public/ # Static assets
+├── src/
+│ ├── app/ # Next.js App Router pages
+│ │ ├── (auth)/ # Auth routes group
+│ │ ├── dashboard/ # Main user dashboard
+│ │ ├── timer/ # Focus timer page
+│ │ ├── groups/ # Study groups
+│ │ ├── analytics/ # User progress analytics
+│ │ ├── leaderboard/ # Leaderboards page
+│ │ ├── achievements/ # User achievements
+│ │ ├── settings/ # User settings
+│ │ ├── pricing/ # Pricing page
+│ │ └── api/ # API routes
+│ ├── components/ # Reusable React components
+│ │ ├── ui/ # UI components (buttons, cards, etc.)
+│ │ ├── timer/ # Timer-related components
+│ │ ├── groups/ # Group-related components
+│ │ ├── charts/ # Analytics visualization components
+│ │ ├── achievements/ # Achievement components
+│ │ └── layouts/ # Layout components
+│ ├── lib/ # Utility functions and libraries
+│ │ ├── db.ts # Database client
+│ │ ├── auth.ts # Authentication utilities
+│ │ ├── timer.ts # Timer logic utilities
+│ │ └── stripe.ts # Payment processing utilities
+│ ├── hooks/ # Custom React hooks
+│ ├── types/ # TypeScript type definitions
+│ ├── server/ # Server-only code
+│ │ ├── actions/ # Server actions
+│ │ └── api/ # API route handlers
+│ └── styles/ # Global styles
+├── prisma/ # Prisma schema and migrations
+│ ├── schema.prisma
+│ └── migrations/
+└── config files (.env, etc.)
