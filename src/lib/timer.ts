@@ -27,6 +27,19 @@ export const defaultActivityCategories = [
   'Other'
 ];
 
+export interface Goal {
+  id: string;
+  title: string;
+  description?: string;
+  type: 'time' | 'sessions';
+  target: number; // minutes or number of sessions
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  startDate: string; // ISO date string
+  endDate?: string; // ISO date string (for custom periods)
+  createdAt: string; // ISO date string
+  activity?: string; // Add this to filter by specific activity
+}
+
 export enum TimerState {
   IDLE = 'idle',
   RUNNING = 'running',
@@ -100,3 +113,101 @@ export const getSettings = (): TimerSettings => {
   return settingsData ? JSON.parse(settingsData) : defaultSettings;
 };
 
+
+// Get all goals from localStorage
+export const getGoals = (): Goal[] => {
+  if (typeof window === 'undefined') return [];
+  
+  const goalsData = localStorage.getItem('focusGoals');
+  return goalsData ? JSON.parse(goalsData) : [];
+};
+
+// Save a new goal
+export const saveGoal = (goal: Goal): void => {
+  if (typeof window === 'undefined') return;
+  
+  const goals = getGoals();
+  goals.push(goal);
+  localStorage.setItem('focusGoals', JSON.stringify(goals));
+};
+
+// Update an existing goal
+export const updateGoal = (updatedGoal: Goal): void => {
+  if (typeof window === 'undefined') return;
+  
+  const goals = getGoals();
+  const index = goals.findIndex(g => g.id === updatedGoal.id);
+  if (index !== -1) {
+    goals[index] = updatedGoal;
+    localStorage.setItem('focusGoals', JSON.stringify(goals));
+  }
+};
+
+// Delete a goal
+export const deleteGoal = (goalId: string): void => {
+  if (typeof window === 'undefined') return;
+  
+  const goals = getGoals();
+  const updatedGoals = goals.filter(g => g.id !== goalId);
+  localStorage.setItem('focusGoals', JSON.stringify(updatedGoals));
+};
+
+
+export const calculateGoalProgress = (goal: Goal): {
+  current: number;
+  percentage: number;
+} => {
+  const sessions = getSessions();
+  const focusSessions = sessions.filter(s => s.type === 'focus');
+  
+  // Determine date range based on goal period
+  const now = new Date();
+  let startDate: Date;
+  
+  switch (goal.period) {
+    case 'daily':
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      break;
+    case 'weekly':
+      startDate = new Date(now);
+      startDate.setDate(now.getDate() - now.getDay());
+      startDate.setHours(0, 0, 0, 0);
+      break;
+    case 'monthly':
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      break;
+    case 'yearly':
+      startDate = new Date(now.getFullYear(), 0, 1);
+      break;
+    default:
+      startDate = new Date(goal.startDate);
+  }
+  
+  // Filter sessions within the time period and matching the activity if specified
+  const relevantSessions = focusSessions.filter(session => {
+    const sessionDate = new Date(session.date);
+    
+    // Check if it's within the date range
+    if (sessionDate < startDate || sessionDate > now) return false;
+    
+    // If goal has a specific activity, filter by that activity
+    if (goal.activity && session.activity !== goal.activity) return false;
+    
+    return true;
+  });
+  
+  let current = 0;
+  
+  if (goal.type === 'time') {
+    // Sum up minutes
+    current = Math.round(relevantSessions.reduce((total, s) => total + s.duration / 60, 0));
+  } else {
+    // Count sessions
+    current = relevantSessions.length;
+  }
+  
+  // Calculate percentage
+  const percentage = Math.min(100, Math.round((current / goal.target) * 100));
+  
+  return { current, percentage };
+};
