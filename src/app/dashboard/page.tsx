@@ -1,4 +1,4 @@
-// src/app/dashboard/page.tsx (updated)
+// src/app/dashboard/page.tsx
 'use client';
 
 import { useSession } from 'next-auth/react';
@@ -63,7 +63,12 @@ export default function Dashboard() {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateString = getLocalDateString(date);
-      weeklyLabels.push(dateString.slice(5)); // MM-DD format
+
+      // Format as "Mon", "Tue", etc. for better readability
+      const dayName = new Date(dateString).toLocaleDateString('en-US', {
+        weekday: 'short',
+      });
+      weeklyLabels.push(dayName);
 
       const dayMinutes = focusSessions
         .filter((s) => (s.localDate || s.date.split('T')[0]) === dateString)
@@ -88,7 +93,7 @@ export default function Dashboard() {
     const topActivities = Array.from(activityMap.entries())
       .map(([name, minutes]) => ({ name, minutes: Math.round(minutes) }))
       .sort((a, b) => b.minutes - a.minutes)
-      .slice(0, 3);
+      .slice(0, 5);
 
     setStats({
       focusTimeToday: Math.round(focusTimeToday),
@@ -102,10 +107,18 @@ export default function Dashboard() {
     });
   }, []);
 
-  // Update the chart options in your dashboard page.tsx file
+  // Helper function to format time
+  const formatTimeValue = (minutes: number) => {
+    if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}h ${mins > 0 ? `${mins}m` : ''}`;
+  };
+
+  // Update the chart options for better styling
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // This allows better control of height
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false,
@@ -115,7 +128,7 @@ export default function Dashboard() {
         padding: 10,
         titleFont: {
           size: 14,
-          weight: 'bold' as const, // Use 'as const' to specify this is one of the allowed values
+          weight: 'bold' as const,
         },
         bodyFont: {
           size: 13,
@@ -134,14 +147,14 @@ export default function Dashboard() {
       y: {
         beginAtZero: true,
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(var(--gray-rgb), 0.1)',
           drawBorder: false,
         },
         ticks: {
           font: {
             size: 12,
           },
-          color: 'rgba(255, 255, 255, 0.7)',
+          color: 'rgba(var(--gray-rgb), 0.7)',
           padding: 10,
           callback: function (value: any) {
             if (value % 1 === 0) {
@@ -159,7 +172,7 @@ export default function Dashboard() {
           font: {
             size: 12,
           },
-          color: 'rgba(255, 255, 255, 0.7)',
+          color: 'rgba(var(--gray-rgb), 0.7)',
           padding: 10,
         },
       },
@@ -172,11 +185,11 @@ export default function Dashboard() {
     datasets: [
       {
         data: stats.weeklyData.values,
-        backgroundColor: 'rgba(0, 136, 204, 0.8)', // Brighter blue
-        hoverBackgroundColor: 'rgba(0, 149, 224, 1)',
+        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+        hoverBackgroundColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 0,
-        borderRadius: 4,
-        barThickness: 16, // Control width of bars
+        borderRadius: 6,
+        barThickness: 16,
       },
     ],
   };
@@ -184,12 +197,17 @@ export default function Dashboard() {
   return (
     <div className={styles.dashboard}>
       <h1>Dashboard</h1>
-      <p>Welcome, {session?.user?.name || 'User'}!</p>
+      <p>
+        Welcome back, {session?.user?.name || 'User'}! Here's an overview of
+        your focus activity.
+      </p>
 
       <div className={styles.stats}>
         <div className={styles.statCard}>
-          <h3>Focus Time Today</h3>
-          <p className={styles.statValue}>{stats.focusTimeToday} minutes</p>
+          <h3>Today's Focus Time</h3>
+          <p className={styles.statValue}>
+            {formatTimeValue(stats.focusTimeToday)}
+          </p>
         </div>
         <div className={styles.statCard}>
           <h3>Sessions Completed</h3>
@@ -217,7 +235,7 @@ export default function Dashboard() {
                 <li key={index} className={styles.topActivity}>
                   <span className={styles.activityName}>{activity.name}</span>
                   <span className={styles.activityTime}>
-                    {activity.minutes} min
+                    {formatTimeValue(activity.minutes)}
                   </span>
                 </li>
               ))}
