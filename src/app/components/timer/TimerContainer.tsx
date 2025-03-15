@@ -1,9 +1,10 @@
+// src/app/components/timer/TimerContainer.tsx
 'use client';
 
-// src/components/timer/TimerContainer.tsx
 import { useState, useEffect, useRef } from 'react';
 import TimerDisplay from './TimerDisplay';
 import TimerSettings from './TimerSetting';
+import ActivitySelector from './ActivitySelector'; // NEW: Import the new component
 import {
   TimerData,
   TimerState,
@@ -12,6 +13,7 @@ import {
   defaultSettings,
   getSettings,
   saveSession,
+  defaultActivityCategories, // NEW: Import from timer.ts
 } from '@/lib/timer';
 import styles from './timer.module.css';
 
@@ -23,6 +25,11 @@ export default function TimerContainer() {
     totalSessions: 4,
     settings: defaultSettings,
   });
+
+  // NEW: Add state for selected activity
+  const [selectedActivity, setSelectedActivity] = useState(
+    defaultActivityCategories[0]
+  );
 
   const [showSettings, setShowSettings] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -69,11 +76,13 @@ export default function TimerContainer() {
             const sessionType =
               prev.state === TimerState.BREAK ? 'break' : 'focus';
 
+            // UPDATED: Include activity in session data
             const session: TimerSession = {
               date: new Date().toISOString(),
               duration: sessionDuration,
               type: sessionType,
               completed: true,
+              activity: selectedActivity, // NEW: Include selected activity
             };
 
             saveSession(session);
@@ -168,11 +177,13 @@ export default function TimerContainer() {
           ? 'break'
           : 'focus';
 
+      // UPDATED: Include activity in session data
       const session: TimerSession = {
         date: new Date().toISOString(),
         duration: sessionDuration,
         type: sessionType,
         completed: false,
+        activity: selectedActivity, // NEW: Include selected activity
       };
 
       saveSession(session);
@@ -213,6 +224,11 @@ export default function TimerContainer() {
         />
       ) : (
         <>
+          {/* NEW: Add the ActivitySelector component */}
+          <ActivitySelector
+            selectedActivity={selectedActivity}
+            onSelectActivity={setSelectedActivity}
+          />
           <TimerDisplay
             timerData={timerData}
             onStart={startTimer}
