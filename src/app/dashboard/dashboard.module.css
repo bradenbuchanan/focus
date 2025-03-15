@@ -1,0 +1,47 @@
+/* src/app/dashboard/dashboard.module.css */
+.dashboard {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  .dashboard h1 {
+    margin-bottom: 1rem;
+  }
+  
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  
+  .statCard {
+    background-color: var(--gray-alpha-100);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+  }
+  
+  .statValue {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+  }
+  
+  .actions {
+    margin-top: 2rem;
+  }
+  
+  .actionButton {
+    display: inline-block;
+    background-color: var(--foreground);
+    color: var(--background);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  
+  .actionButton:hover {
+    opacity: 0.9;
+  }
