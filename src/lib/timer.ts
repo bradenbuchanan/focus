@@ -17,6 +17,16 @@ export const defaultSettings: TimerSettings = {
   autoStartPomodoros: false
 };
 
+export const defaultActivityCategories = [
+  'Reading',
+  'Studying',
+  'Programming',
+  'Working',
+  'Writing',
+  'Meditating',
+  'Other'
+];
+
 export enum TimerState {
   IDLE = 'idle',
   RUNNING = 'running',
@@ -29,6 +39,7 @@ export interface TimerSession {
   duration: number;  // in seconds
   type: 'focus' | 'break';
   completed: boolean;
+  activity?: string; // New field for activity category
 }
 
 export interface TimerData {
