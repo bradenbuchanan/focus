@@ -4,7 +4,7 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { TimerSession, getSessions } from '@/lib/timer';
+import { TimerSession, getSessions, getLocalDateString } from '@/lib/timer';
 import styles from './dashboard.module.css';
 
 // Import a simple chart component for dashboard preview
@@ -38,12 +38,12 @@ export default function Dashboard() {
     const focusSessions = sessions.filter((s) => s.type === 'focus');
 
     // Calculate stats from sessions
-    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    const today = getLocalDateString(new Date());
 
     // Calculate focus time for today (in minutes)
     const focusTimeToday =
       focusSessions
-        .filter((s) => s.date.startsWith(today))
+        .filter((s) => (s.localDate || s.date.split('T')[0]) === today)
         .reduce((total, session) => total + session.duration, 0) / 60;
 
     // Count completed sessions
@@ -62,11 +62,11 @@ export default function Dashboard() {
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateString = date.toISOString().split('T')[0];
+      const dateString = getLocalDateString(date);
       weeklyLabels.push(dateString.slice(5)); // MM-DD format
 
       const dayMinutes = focusSessions
-        .filter((s) => s.date.startsWith(dateString))
+        .filter((s) => (s.localDate || s.date.split('T')[0]) === dateString)
         .reduce((total, session) => total + session.duration / 60, 0);
 
       weeklyValues.push(Math.round(dayMinutes));

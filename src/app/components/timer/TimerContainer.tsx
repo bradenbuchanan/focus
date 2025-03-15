@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import TimerDisplay from './TimerDisplay';
 import TimerSettings from './TimerSetting';
-import ActivitySelector from './ActivitySelector'; // NEW: Import the new component
+import ActivitySelector from './ActivitySelector';
 import {
   TimerData,
   TimerState,
@@ -13,7 +13,8 @@ import {
   defaultSettings,
   getSettings,
   saveSession,
-  defaultActivityCategories, // NEW: Import from timer.ts
+  defaultActivityCategories,
+  getLocalDateString,
 } from '@/lib/timer';
 import styles from './timer.module.css';
 
@@ -79,10 +80,11 @@ export default function TimerContainer() {
             // UPDATED: Include activity in session data
             const session: TimerSession = {
               date: new Date().toISOString(),
+              localDate: getLocalDateString(new Date()),
               duration: sessionDuration,
               type: sessionType,
               completed: true,
-              activity: selectedActivity, // NEW: Include selected activity
+              activity: selectedActivity,
             };
 
             saveSession(session);
@@ -180,10 +182,11 @@ export default function TimerContainer() {
       // UPDATED: Include activity in session data
       const session: TimerSession = {
         date: new Date().toISOString(),
+        localDate: getLocalDateString(new Date()),
         duration: sessionDuration,
         type: sessionType,
-        completed: false,
-        activity: selectedActivity, // NEW: Include selected activity
+        completed: true,
+        activity: selectedActivity,
       };
 
       saveSession(session);
