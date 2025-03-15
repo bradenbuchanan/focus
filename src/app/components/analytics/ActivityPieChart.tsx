@@ -3,13 +3,14 @@
 
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TimerSession, getSessions } from '@/lib/timer';
 import styles from './analytics.module.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function ActivityPieChart() {
+  const chartRef = useRef(null);
   const [chartData, setChartData] = useState({
     labels: [] as string[],
     datasets: [
@@ -72,10 +73,36 @@ export default function ActivityPieChart() {
     });
   }, []);
 
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right' as const,
+        labels: {
+          boxWidth: 10,
+          font: {
+            size: 10,
+          },
+        },
+      },
+    },
+  };
+
   return (
     <div className={styles.chartContainer}>
       <h3>Time by Activity</h3>
-      <Pie data={chartData} options={{ responsive: true }} />
+      <div
+        style={{
+          height: '350px',
+          position: 'relative',
+          width: '100%',
+          maxWidth: '340px',
+          margin: '0 auto',
+        }}
+      >
+        <Pie ref={chartRef} data={chartData} options={options} />
+      </div>
     </div>
   );
 }
