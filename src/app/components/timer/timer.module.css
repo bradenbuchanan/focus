@@ -152,6 +152,60 @@
     margin-top: 2rem;
     justify-content: center;
   }
+
+  /* Activity selector styles */
+.activitySelector {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.activitySelector h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.activityOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.activityButton {
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  border: 1px solid var(--gray-alpha-200);
+  background-color: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.activityButtonSelected {
+  background-color: var(--foreground);
+  color: var(--background);
+  border-color: var(--foreground);
+}
+
+.activityButton:hover:not(.activityButtonSelected) {
+  background-color: var(--gray-alpha-100);
+}
+
+.customActivityForm {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.customActivityInput {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--gray-alpha-200);
+  background-color: var(--background);
+  min-width: 200px;
+}
   
   @media (max-width: 600px) {
     .progressRing {
