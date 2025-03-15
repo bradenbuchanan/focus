@@ -25,7 +25,7 @@ export enum TimerState {
 }
 
 export interface TimerSession {
-  date: string;
+  date: string;  // ISO string format (YYYY-MM-DDTHH:mm:ss.sssZ)
   duration: number;  // in seconds
   type: 'focus' | 'break';
   completed: boolean;
