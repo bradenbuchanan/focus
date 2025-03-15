@@ -1,0 +1,170 @@
+/* src/components/timer/timer.module.css */
+.timerPage {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    text-align: center;
+  }
+  
+  .timerPage h1 {
+    margin-bottom: 1rem;
+  }
+  
+  .timerPage p {
+    color: var(--foreground);
+    opacity: 0.7;
+    margin-bottom: 2.5rem;
+  }
+  
+  .timerContainer {
+    background-color: var(--gray-alpha-100);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin: 0 auto;
+    max-width: 500px;
+  }
+  
+  .timerDisplay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .progressRing {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .progressInner {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background-color: var(--background);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .focusProgress {
+    color: var(--foreground);
+  }
+  
+  .breakProgress {
+    color: #4caf50;
+  }
+  
+  .time {
+    font-size: 3rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  .sessionInfo {
+    font-size: 1.2rem;
+    margin-top: 0.25rem;
+  }
+  
+  .sessionTracker {
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+  
+  .controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .primaryButton {
+    background-color: var(--foreground);
+    color: var(--background);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 100px;
+  }
+  
+  .secondaryButton {
+    background-color: var(--gray-alpha-200);
+    color: var(--foreground);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .primaryButton:hover,
+  .secondaryButton:hover {
+    opacity: 0.9;
+  }
+  
+  /* Settings styles */
+  .settingsContainer {
+    width: 100%;
+  }
+  
+  .settingsContainer h2 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .settingGroup {
+    margin-bottom: 1.25rem;
+  }
+  
+  .settingGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .settingGroup input[type="number"] {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--gray-alpha-200);
+    background-color: var(--background);
+  }
+  
+  .checkboxContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .checkboxContainer input {
+    margin: 0;
+  }
+  
+  .settingsButtons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: center;
+  }
+  
+  @media (max-width: 600px) {
+    .progressRing {
+      width: 200px;
+      height: 200px;
+    }
+    
+    .progressInner {
+      width: 170px;
+      height: 170px;
+    }
+    
+    .time {
+      font-size: 2.5rem;
+    }
+  }
