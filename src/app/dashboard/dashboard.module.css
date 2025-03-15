@@ -2,70 +2,241 @@
 .dashboard {
   max-width: 1000px;
   margin: 2rem auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dashboard h1 {
   margin-bottom: 0.5rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .dashboard > p {
   color: var(--foreground);
   opacity: 0.7;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+  font-size: 1.1rem;
 }
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
 }
 
 .statCard {
   background-color: var(--gray-alpha-100);
-  padding: 1.5rem;
-  border-radius: 0.75rem;
+  padding: 1.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--gray-alpha-200);
+  box-shadow: 0 4px 12px rgba(var(--gray-rgb), 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(var(--gray-rgb), 0.08);
+}
+
+.statCard h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-bottom: 0.75rem;
 }
 
 .statValue {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
   margin-top: 10px;
+  letter-spacing: -0.03em;
 }
 
-/* Add or update these styles in your dashboard.module.css */
+/* Charts preview section */
 .chartsPreview {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .chartCard {
-  background-color: var(--gray-alpha-100);
-  padding: 1.5rem;
-  border-radius: 0.75rem;
+  background-color: var(--background);
+  padding: 1.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--gray-alpha-200);
+  box-shadow: 0 4px 12px rgba(var(--gray-rgb), 0.05);
+  transition: transform 0.3s ease;
+}
+
+.chartCard:hover {
+  transform: translateY(-5px);
 }
 
 .chartCard h3 {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   font-size: 1.1rem;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.chartCard h3::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  height: 3px;
+  background-color: var(--gray-alpha-200);
+  border-radius: 3px;
 }
 
 .miniChart {
   width: 100%;
-  height: 250px; /* Give it a fixed height */
+  height: 250px;
   position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Top activities card */
+.topActivitiesCard {
+  background-color: var(--background);
+  padding: 1.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--gray-alpha-200);
+  box-shadow: 0 4px 12px rgba(var(--gray-rgb), 0.05);
+  transition: transform 0.3s ease;
+}
+
+.topActivitiesCard:hover {
+  transform: translateY(-5px);
+}
+
+.topActivitiesCard h3 {
+  margin-bottom: 1.25rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.topActivitiesCard h3::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  height: 3px;
+  background-color: var(--gray-alpha-200);
+  border-radius: 3px;
+}
+
+.topActivitiesList {
+  list-style: none;
+  padding: 0;
+}
+
+.topActivity {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--gray-alpha-100);
+}
+
+.topActivity:last-child {
+  border-bottom: none;
+}
+
+.activityName {
+  font-weight: 500;
+}
+
+.activityTime {
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.noData {
+  color: var(--foreground);
+  opacity: 0.6;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.actionButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.actionButton {
+  background-color: var(--foreground);
+  color: var(--background);
+  border: none;
+  flex: 1;
+  max-width: 230px;
+}
+
+.actionButton:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.actionButton.secondaryAction {
+  background-color: var(--gray-alpha-200);
+  color: var(--foreground);
 }
 
 /* Make responsive adjustments */
 @media (max-width: 768px) {
+  .dashboard h1 {
+    font-size: 1.8rem;
+  }
+  
+  .dashboard > p {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  
   .chartsPreview {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
   
   .miniChart {
-    height: 200px;
+    height: 220px;
+  }
+  
+  .statValue {
+    font-size: 1.75rem;
+  }
+  
+  .actions {
+    flex-direction: column;
+  }
+  
+  .actionButton {
+    max-width: none;
   }
 }

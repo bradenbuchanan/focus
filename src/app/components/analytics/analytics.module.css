@@ -221,6 +221,39 @@
     height: 13px;
     border-radius: 2px;
   }
+
+  .chartControls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .timeframeSelector {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .timeframeButton {
+    background-color: var(--gray-alpha-100);
+    color: var(--foreground);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  
+  .timeframeButton:hover {
+    background-color: var(--gray-alpha-200);
+  }
+  
+  .timeframeButton.active {
+    background-color: var(--foreground);
+    color: var(--background);
+  }
   
   /* Mobile responsiveness */
   @media (max-width: 768px) {
@@ -235,4 +268,15 @@
     .dayLabel, .monthLabel {
       font-size: 0.7rem;
     }
+
+    .timeframeSelector {
+      gap: 0.25rem;
+    }
+    
+    .timeframeButton {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
   }
+
+
