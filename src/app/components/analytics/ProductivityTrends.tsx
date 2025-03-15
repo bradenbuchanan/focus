@@ -26,7 +26,11 @@ ChartJS.register(
   Legend
 );
 
+// Define timeframe options
+type TimeFrame = '4w' | '3m' | '6m' | '1y';
+
 export default function ProductivityTrends() {
+  const [timeframe, setTimeframe] = useState<TimeFrame>('4w');
   const [chartData, setChartData] = useState({
     labels: [] as string[],
     datasets: [
@@ -49,43 +53,94 @@ export default function ProductivityTrends() {
     const sessions = getSessions();
     const focusSessions = sessions.filter((s) => s.type === 'focus');
 
-    // Group by week (last 4 weeks)
+    // Configure based on timeframe
+    let periodCount: number;
+    let periodName: string;
+    let daysPerPeriod: number;
+
+    switch (timeframe) {
+      case '3m':
+        periodCount = 12; // 12 weeks
+        periodName = 'Week';
+        daysPerPeriod = 7;
+        break;
+      case '6m':
+        periodCount = 6; // 6 months
+        periodName = 'Month';
+        daysPerPeriod = 30;
+        break;
+      case '1y':
+        periodCount = 12; // 12 months
+        periodName = 'Month';
+        daysPerPeriod = 30;
+        break;
+      default: // '4w'
+        periodCount = 4; // 4 weeks
+        periodName = 'Week';
+        daysPerPeriod = 7;
+        break;
+    }
+
     const now = new Date();
-    const weeks: string[] = [];
+    const periods: string[] = [];
     const avgSessionLengths: number[] = [];
-    const sessionsPerWeek: number[] = [];
+    const sessionsPerPeriod: number[] = [];
 
-    // Create array of last 4 weeks
-    for (let i = 3; i >= 0; i--) {
+    for (let i = periodCount - 1; i >= 0; i--) {
       const startDate = new Date();
-      startDate.setDate(now.getDate() - (i * 7 + 6));
+      const periodOffset = i * daysPerPeriod;
+      startDate.setDate(now.getDate() - (periodOffset + daysPerPeriod - 1));
+
       const endDate = new Date();
-      endDate.setDate(now.getDate() - i * 7);
+      endDate.setDate(now.getDate() - periodOffset);
 
-      const weekLabel = `Week ${4 - i}`;
-      weeks.push(weekLabel);
+      // Generate period label
+      let periodLabel: string;
 
-      // Filter sessions in this week
-      const weekSessions = focusSessions.filter((s) => {
+      if (periodName === 'Week') {
+        periodLabel = `${periodName} ${periodCount - i}`;
+      } else {
+        // For months, use month names
+        const monthNames = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
+        periodLabel = monthNames[endDate.getMonth()];
+      }
+
+      periods.push(periodLabel);
+
+      // Filter sessions in this period
+      const periodSessions = focusSessions.filter((s) => {
         const sessionDate = new Date(s.date);
         return sessionDate >= startDate && sessionDate <= endDate;
       });
 
       // Calculate average session length
-      const totalMinutes = weekSessions.reduce(
+      const totalMinutes = periodSessions.reduce(
         (total, session) => total + session.duration / 60,
         0
       );
-      const avgLength = weekSessions.length
-        ? Math.round(totalMinutes / weekSessions.length)
+      const avgLength = periodSessions.length
+        ? Math.round(totalMinutes / periodSessions.length)
         : 0;
 
       avgSessionLengths.push(avgLength);
-      sessionsPerWeek.push(weekSessions.length);
+      sessionsPerPeriod.push(periodSessions.length);
     }
 
     setChartData({
-      labels: weeks,
+      labels: periods,
       datasets: [
         {
           label: 'Average Session Length (min)',
@@ -95,13 +150,13 @@ export default function ProductivityTrends() {
         },
         {
           label: 'Number of Sessions',
-          data: sessionsPerWeek,
+          data: sessionsPerPeriod,
           borderColor: 'rgb(255, 99, 132)',
           backgroundColor: 'rgba(255, 99, 132, 0.5)',
         },
       ],
     });
-  }, []);
+  }, [timeframe]);
 
   const options = {
     responsive: true,
@@ -111,13 +166,64 @@ export default function ProductivityTrends() {
       },
       title: {
         display: true,
-        text: 'Productivity Trends',
+        text: getChartTitle(timeframe),
       },
     },
   };
 
+  function getChartTitle(timeframe: TimeFrame): string {
+    switch (timeframe) {
+      case '4w':
+        return 'Productivity Trends (4 Weeks)';
+      case '3m':
+        return 'Productivity Trends (3 Months)';
+      case '6m':
+        return 'Productivity Trends (6 Months)';
+      case '1y':
+        return 'Productivity Trends (1 Year)';
+      default:
+        return 'Productivity Trends';
+    }
+  }
+
   return (
     <div className={styles.chartContainer}>
+      <div className={styles.chartControls}>
+        <div className={styles.timeframeSelector}>
+          <button
+            className={`${styles.timeframeButton} ${
+              timeframe === '4w' ? styles.active : ''
+            }`}
+            onClick={() => setTimeframe('4w')}
+          >
+            4 Weeks
+          </button>
+          <button
+            className={`${styles.timeframeButton} ${
+              timeframe === '3m' ? styles.active : ''
+            }`}
+            onClick={() => setTimeframe('3m')}
+          >
+            3 Months
+          </button>
+          <button
+            className={`${styles.timeframeButton} ${
+              timeframe === '6m' ? styles.active : ''
+            }`}
+            onClick={() => setTimeframe('6m')}
+          >
+            6 Months
+          </button>
+          <button
+            className={`${styles.timeframeButton} ${
+              timeframe === '1y' ? styles.active : ''
+            }`}
+            onClick={() => setTimeframe('1y')}
+          >
+            1 Year
+          </button>
+        </div>
+      </div>
       <Line options={options} data={chartData} />
     </div>
   );
