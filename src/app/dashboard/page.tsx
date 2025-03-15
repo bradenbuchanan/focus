@@ -4,7 +4,13 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { TimerSession, getSessions, getLocalDateString } from '@/lib/timer';
+import {
+  TimerSession,
+  getSessions,
+  getLocalDateString,
+  getGoals,
+  calculateGoalProgress,
+} from '@/lib/timer';
 import styles from './dashboard.module.css';
 
 // Import a simple chart component for dashboard preview
@@ -19,6 +25,25 @@ import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
+// Define the Goal interface if it's not properly exported from timer.ts
+interface Goal {
+  id: string;
+  title: string;
+  description?: string;
+  type: 'time' | 'sessions';
+  target: number;
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  startDate: string;
+  endDate?: string;
+  createdAt: string;
+}
+
+// Define the progress interface
+interface GoalProgress {
+  current: number;
+  percentage: number;
+}
+
 export default function Dashboard() {
   const { data: session } = useSession();
   const [stats, setStats] = useState({
@@ -31,6 +56,13 @@ export default function Dashboard() {
     },
     topActivities: [] as { name: string; minutes: number }[],
   });
+
+  const [activeGoals, setActiveGoals] = useState<
+    Array<{
+      goal: Goal;
+      progress: GoalProgress;
+    }>
+  >([]);
 
   useEffect(() => {
     // Get all sessions from local storage
@@ -105,6 +137,20 @@ export default function Dashboard() {
       },
       topActivities,
     });
+
+    // Load active goals
+    try {
+      const goals = getGoals();
+      const goalsWithProgress = goals.slice(0, 3).map((goal) => ({
+        goal,
+        progress: calculateGoalProgress(goal),
+      }));
+      setActiveGoals(goalsWithProgress);
+    } catch (error) {
+      console.error('Error loading goals:', error);
+      // Set empty goals if there's an error
+      setActiveGoals([]);
+    }
   }, []);
 
   // Helper function to format time
@@ -245,6 +291,41 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {activeGoals.length > 0 && (
+        <div className={styles.goalsSection}>
+          <h2 className={styles.sectionTitle}>Active Goals</h2>
+          <div className={styles.goalCards}>
+            {activeGoals.map(({ goal, progress }) => (
+              <div key={goal.id} className={styles.goalOverviewCard}>
+                <h3>{goal.title}</h3>
+                <div className={styles.goalStats}>
+                  <div className={styles.goalType}>
+                    {goal.type === 'time' ? 'Focus Time' : 'Sessions'} •{' '}
+                    {goal.period}
+                  </div>
+                  <div className={styles.goalValue}>
+                    {progress.current} / {goal.target} ({progress.percentage}%)
+                  </div>
+                </div>
+                <div className={styles.goalProgressBar}>
+                  <div
+                    className={styles.goalProgress}
+                    style={{
+                      width: `${progress.percentage}%`,
+                      backgroundColor:
+                        progress.percentage >= 100 ? '#4CAF50' : '#3B82F6',
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+            <Link href="/goals" className={styles.viewAllGoals}>
+              View All Goals
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className={styles.actions}>
         <Link href="/timer" className={styles.actionButton}>
