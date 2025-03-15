@@ -1,47 +1,71 @@
 /* src/app/dashboard/dashboard.module.css */
 .dashboard {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 0 1rem;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.dashboard h1 {
+  margin-bottom: 0.5rem;
+}
+
+.dashboard > p {
+  color: var(--foreground);
+  opacity: 0.7;
+  margin-bottom: 2rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background-color: var(--gray-alpha-100);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+/* Add or update these styles in your dashboard.module.css */
+.chartsPreview {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.chartCard {
+  background-color: var(--gray-alpha-100);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+}
+
+.chartCard h3 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.miniChart {
+  width: 100%;
+  height: 250px; /* Give it a fixed height */
+  position: relative;
+}
+
+/* Make responsive adjustments */
+@media (max-width: 768px) {
+  .chartsPreview {
+    grid-template-columns: 1fr;
   }
   
-  .dashboard h1 {
-    margin-bottom: 1rem;
+  .miniChart {
+    height: 200px;
   }
-  
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin: 2rem 0;
-  }
-  
-  .statCard {
-    background-color: var(--gray-alpha-100);
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-  }
-  
-  .statValue {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-top: 0.5rem;
-  }
-  
-  .actions {
-    margin-top: 2rem;
-  }
-  
-  .actionButton {
-    display: inline-block;
-    background-color: var(--foreground);
-    color: var(--background);
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    text-decoration: none;
-  }
-  
-  .actionButton:hover {
-    opacity: 0.9;
-  }
+}

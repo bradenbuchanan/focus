@@ -1,0 +1,16 @@
+/* src/app/analytics/analytics.module.css */
+.analyticsPage {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  .analyticsPage h1 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .analyticsPage > p {
+    color: var(--foreground);
+    opacity: 0.7;
+    margin-bottom: 2rem;
+  }
