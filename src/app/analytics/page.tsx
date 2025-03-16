@@ -12,6 +12,7 @@ import WeeklyHeatmap from '@/app/components/analytics/WeeklyHeatmap';
 import DailyBarChart from '@/app/components/analytics/DailyBarChart';
 import ProductivityTrends from '@/app/components/analytics/ProductivityTrends';
 import ActivityHeatmap from '@/app/components/analytics/ActivityHeatmap';
+import MultiActivityHeatmap from '@/app/components/analytics/MultiActivityHeatmap';
 
 export default function AnalyticsPage() {
   const { data: session } = useSession();
@@ -220,7 +221,8 @@ export default function AnalyticsPage() {
             </svg>
             Activity Calendar
           </h3>
-          <ActivityHeatmap />
+          {/* <ActivityHeatmap /> */}
+          <MultiActivityHeatmap />
         </div>
 
         <div className={styles.chartSection}>
