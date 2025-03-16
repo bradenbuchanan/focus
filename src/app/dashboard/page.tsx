@@ -1,6 +1,7 @@
 // src/app/dashboard/page.tsx
 'use client';
 
+import ProtectedRoute from '../components/auth/ProtectedRoute';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -241,103 +242,106 @@ export default function Dashboard() {
   };
 
   return (
-    <div className={styles.dashboard}>
-      <h1>Dashboard</h1>
-      <p>
-        Welcome back, {session?.user?.name || 'User'}! Here's an overview of
-        your focus activity.
-      </p>
+    <ProtectedRoute>
+      <div className={styles.dashboard}>
+        <h1>Dashboard</h1>
+        <p>
+          Welcome back, {session?.user?.name || 'User'}! Here's an overview of
+          your focus activity.
+        </p>
 
-      <div className={styles.stats}>
-        <div className={styles.statCard}>
-          <h3>Today's Focus Time</h3>
-          <p className={styles.statValue}>
-            {formatTimeValue(stats.focusTimeToday)}
-          </p>
-        </div>
-        <div className={styles.statCard}>
-          <h3>Sessions Completed</h3>
-          <p className={styles.statValue}>{stats.sessionsCompleted}</p>
-        </div>
-        <div className={styles.statCard}>
-          <h3>Current Streak</h3>
-          <p className={styles.statValue}>{stats.currentStreak} days</p>
-        </div>
-      </div>
-
-      <div className={styles.chartsPreview}>
-        <div className={styles.chartCard}>
-          <h3>Weekly Focus Time</h3>
-          <div className={styles.miniChart}>
-            <Bar data={chartData} options={chartOptions} />
+        <div className={styles.stats}>
+          <div className={styles.statCard}>
+            <h3>Today's Focus Time</h3>
+            <p className={styles.statValue}>
+              {formatTimeValue(stats.focusTimeToday)}
+            </p>
+          </div>
+          <div className={styles.statCard}>
+            <h3>Sessions Completed</h3>
+            <p className={styles.statValue}>{stats.sessionsCompleted}</p>
+          </div>
+          <div className={styles.statCard}>
+            <h3>Current Streak</h3>
+            <p className={styles.statValue}>{stats.currentStreak} days</p>
           </div>
         </div>
 
-        <div className={styles.topActivitiesCard}>
-          <h3>Top Activities</h3>
-          {stats.topActivities.length > 0 ? (
-            <ul className={styles.topActivitiesList}>
-              {stats.topActivities.map((activity, index) => (
-                <li key={index} className={styles.topActivity}>
-                  <span className={styles.activityName}>{activity.name}</span>
-                  <span className={styles.activityTime}>
-                    {formatTimeValue(activity.minutes)}
-                  </span>
-                </li>
+        <div className={styles.chartsPreview}>
+          <div className={styles.chartCard}>
+            <h3>Weekly Focus Time</h3>
+            <div className={styles.miniChart}>
+              <Bar data={chartData} options={chartOptions} />
+            </div>
+          </div>
+
+          <div className={styles.topActivitiesCard}>
+            <h3>Top Activities</h3>
+            {stats.topActivities.length > 0 ? (
+              <ul className={styles.topActivitiesList}>
+                {stats.topActivities.map((activity, index) => (
+                  <li key={index} className={styles.topActivity}>
+                    <span className={styles.activityName}>{activity.name}</span>
+                    <span className={styles.activityTime}>
+                      {formatTimeValue(activity.minutes)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={styles.noData}>No activities recorded yet</p>
+            )}
+          </div>
+        </div>
+
+        {activeGoals.length > 0 && (
+          <div className={styles.goalsSection}>
+            <h2 className={styles.sectionTitle}>Active Goals</h2>
+            <div className={styles.goalCards}>
+              {activeGoals.map(({ goal, progress }) => (
+                <div key={goal.id} className={styles.goalOverviewCard}>
+                  <h3>{goal.title}</h3>
+                  <div className={styles.goalStats}>
+                    <div className={styles.goalType}>
+                      {goal.type === 'time' ? 'Focus Time' : 'Sessions'} •{' '}
+                      {goal.period}
+                    </div>
+                    <div className={styles.goalValue}>
+                      {progress.current} / {goal.target} ({progress.percentage}
+                      %)
+                    </div>
+                  </div>
+                  <div className={styles.goalProgressBar}>
+                    <div
+                      className={styles.goalProgress}
+                      style={{
+                        width: `${progress.percentage}%`,
+                        backgroundColor:
+                          progress.percentage >= 100 ? '#4CAF50' : '#3B82F6',
+                      }}
+                    />
+                  </div>
+                </div>
               ))}
-            </ul>
-          ) : (
-            <p className={styles.noData}>No activities recorded yet</p>
-          )}
-        </div>
-      </div>
-
-      {activeGoals.length > 0 && (
-        <div className={styles.goalsSection}>
-          <h2 className={styles.sectionTitle}>Active Goals</h2>
-          <div className={styles.goalCards}>
-            {activeGoals.map(({ goal, progress }) => (
-              <div key={goal.id} className={styles.goalOverviewCard}>
-                <h3>{goal.title}</h3>
-                <div className={styles.goalStats}>
-                  <div className={styles.goalType}>
-                    {goal.type === 'time' ? 'Focus Time' : 'Sessions'} •{' '}
-                    {goal.period}
-                  </div>
-                  <div className={styles.goalValue}>
-                    {progress.current} / {goal.target} ({progress.percentage}%)
-                  </div>
-                </div>
-                <div className={styles.goalProgressBar}>
-                  <div
-                    className={styles.goalProgress}
-                    style={{
-                      width: `${progress.percentage}%`,
-                      backgroundColor:
-                        progress.percentage >= 100 ? '#4CAF50' : '#3B82F6',
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-            <Link href="/goals" className={styles.viewAllGoals}>
-              View All Goals
-            </Link>
+              <Link href="/goals" className={styles.viewAllGoals}>
+                View All Goals
+              </Link>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className={styles.actions}>
-        <Link href="/timer" className={styles.actionButton}>
-          Start Focus Session
-        </Link>
-        <Link
-          href="/analytics"
-          className={`${styles.actionButton} ${styles.secondaryAction}`}
-        >
-          View Detailed Analytics
-        </Link>
+        <div className={styles.actions}>
+          <Link href="/timer" className={styles.actionButton}>
+            Start Focus Session
+          </Link>
+          <Link
+            href="/analytics"
+            className={`${styles.actionButton} ${styles.secondaryAction}`}
+          >
+            View Detailed Analytics
+          </Link>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
