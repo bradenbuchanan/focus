@@ -1,7 +1,7 @@
 // src/app/dashboard/components/TopActivities.tsx
 'use client';
 
-import styles from '../../dashboard/dashboard.module.css';
+import styles from './dashboardTopActivities.module.css';
 import { formatTimeValue } from '../../dashboard/utils/format';
 
 interface TopActivitiesProps {

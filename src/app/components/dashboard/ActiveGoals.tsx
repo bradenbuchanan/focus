@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import styles from '../../dashboard/dashboard.module.css';
+import styles from './dashboardActiveGoals.module.css';
 
 interface GoalsProps {
   goals: Array<{

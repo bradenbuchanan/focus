@@ -1,9 +1,9 @@
-// src/app/dashboard/components/DashboardHeatmap.tsx
+// src/app/components/dashboard/DashboardHeatmap.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { getSessions, getLocalDateString } from '@/lib/timer';
-import styles from '../../dashboard/dashboard.module.css';
+import styles from './dashboardHeatmap.module.css';
 
 type HeatmapDay = {
   date: string;
@@ -17,9 +17,6 @@ export default function DashboardHeatmap() {
   useEffect(() => {
     const sessions = getSessions();
     const focusSessions = sessions.filter((s) => s.type === 'focus');
-
-    console.log('Dashboard - All sessions:', sessions);
-    console.log('Dashboard - Focus sessions:', focusSessions);
 
     // Create a date map for recent days (last 30 days)
     const today = new Date();
@@ -92,23 +89,129 @@ export default function DashboardHeatmap() {
     }
   };
 
-  // Render a simplified heatmap for dashboard
-  const renderHeatmap = () => {
+  // Group data by weeks for the grid layout
+  const renderCalendarHeatmap = () => {
     // Sort data by date
     const sortedData = [...heatmapData].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
+    // Group by weeks
+    const weeks: HeatmapDay[][] = [];
+    let currentWeek: HeatmapDay[] = [];
+
+    sortedData.forEach((day) => {
+      const date = new Date(day.date);
+
+      // If this is the first day or a Sunday, start a new week
+      if (currentWeek.length === 0 || date.getDay() === 0) {
+        if (currentWeek.length > 0) {
+          // If we have a partial week, pad it with empty days
+          while (currentWeek.length < 7) {
+            currentWeek.push({
+              date: '',
+              count: 0,
+              intensity: 0,
+            });
+          }
+          weeks.push(currentWeek);
+        }
+        currentWeek = [];
+      }
+
+      // Add the day to the current week
+      currentWeek.push(day);
+    });
+
+    // Add the last week
+    if (currentWeek.length > 0) {
+      while (currentWeek.length < 7) {
+        currentWeek.push({
+          date: '',
+          count: 0,
+          intensity: 0,
+        });
+      }
+      weeks.push(currentWeek);
+    }
+
+    // Get the months for the header
+    const months: { name: string; startWeek: number }[] = [];
+    let currentMonth = -1;
+
+    weeks.forEach((week, weekIndex) => {
+      // Check the first valid day in the week
+      for (const day of week) {
+        if (day.date) {
+          const date = new Date(day.date);
+          const month = date.getMonth();
+
+          if (month !== currentMonth) {
+            months.push({
+              name: date.toLocaleDateString('default', { month: 'short' }),
+              startWeek: weekIndex,
+            });
+            currentMonth = month;
+          }
+          break;
+        }
+      }
+    });
+
+    // Days of the week labels
+    const dayLabels = ['Sun', 'Tue', 'Thu', 'Sat'];
+
     return (
-      <div className={styles.dashboardHeatmap}>
-        {sortedData.map((day) => (
-          <div
-            key={day.date}
-            className={styles.heatmapCell}
-            style={{ backgroundColor: getCellColor(day.intensity) }}
-            title={`${day.date}: ${day.count} minutes`}
-          />
-        ))}
+      <div className={styles.calendarHeatmapWrapper}>
+        {/* Month labels at the top */}
+        <div className={styles.monthLabelsRow}>
+          {months.map((month, index) => (
+            <div
+              key={index}
+              className={styles.monthLabel}
+              style={{
+                left: `${month.startWeek * 20 + 30}px`, // Adjust based on cell width
+              }}
+            >
+              {month.name}
+            </div>
+          ))}
+        </div>
+
+        <div className={styles.calendarGrid}>
+          {/* Day labels on the left */}
+          <div className={styles.dayLabelsColumn}>
+            {dayLabels.map((day) => (
+              <div key={day} className={styles.dayLabel}>
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* The grid of days */}
+          <div className={styles.weekRows}>
+            {Array.from({ length: 7 }).map((_, dayOfWeek) => (
+              <div key={dayOfWeek} className={styles.dayRow}>
+                {weeks.map((week, weekIndex) => (
+                  <div
+                    key={`${weekIndex}-${dayOfWeek}`}
+                    className={styles.dayCell}
+                    style={{
+                      backgroundColor: getCellColor(
+                        week[dayOfWeek]?.intensity || 0
+                      ),
+                    }}
+                    title={
+                      week[dayOfWeek]?.date
+                        ? `${week[dayOfWeek].date}: ${week[dayOfWeek].count} minutes`
+                        : 'No data'
+                    }
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   };
@@ -116,7 +219,7 @@ export default function DashboardHeatmap() {
   return (
     <div className={styles.heatmapCard}>
       <h3>Recent Activity</h3>
-      <div className={styles.heatmapWrapper}>{renderHeatmap()}</div>
+      <div className={styles.heatmapWrapper}>{renderCalendarHeatmap()}</div>
       <div className={styles.heatmapLegend}>
         <span>Less</span>
         {[0, 1, 2, 3, 4].map((level) => (
