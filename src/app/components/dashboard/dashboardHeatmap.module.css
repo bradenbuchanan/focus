@@ -9,6 +9,7 @@
     margin-bottom: 2rem;
   }
   
+  
   .heatmapCard:hover {
     transform: translateY(-5px);
   }
