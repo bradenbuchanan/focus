@@ -129,7 +129,9 @@
     font-weight: 600;
   }
 
-  /* Activity heatmap css */
+  .calendarCell, .dayCell {
+    border: 1px solid rgba(var(--gray-rgb), 0.08);
+  }
 
 /* Update these styles in your analytics.module.css */
 
@@ -253,6 +255,34 @@
   .timeframeButton.active {
     background-color: var(--foreground);
     color: var(--background);
+  }
+  
+
+  .activitySelector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .activityButton {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--gray-alpha-200);
+    background-color: var(--background);
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .activeActivity {
+    background-color: var(--foreground);
+    color: var(--background);
+    border-color: var(--foreground);
+  }
+  
+  .activityButton:hover:not(.activeActivity) {
+    background-color: var(--gray-alpha-100);
   }
   
   /* Mobile responsiveness */
