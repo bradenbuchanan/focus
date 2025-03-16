@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import styles from './dashboard.module.css';
 import DashboardStats from '../components/dashboard/DashboardStats';
 import WeeklyFocusChart from '../components/dashboard/WeeklyFocusChart';
+import DashboardHeatmap from '../components/dashboard/DashboardHeatmap';
 import TopActivities from '../components/dashboard/TopActivities';
 import ActiveGoals from '../components/dashboard/ActiveGoals';
 import DashboardActions from '../components/dashboard/DashboardActions';
@@ -25,6 +26,8 @@ export default function Dashboard() {
         </p>
 
         <DashboardStats stats={stats} />
+
+        <DashboardHeatmap />
 
         <div className={styles.chartsPreview}>
           <WeeklyFocusChart weeklyData={stats.weeklyData} />
