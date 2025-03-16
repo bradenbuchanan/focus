@@ -18,6 +18,15 @@ import {
 } from '@/lib/timer';
 import styles from './timer.module.css';
 
+// Define a type for the stored timer state
+interface StoredTimerState {
+  state: TimerState;
+  currentSession: number;
+  totalSessions: number;
+  activity: string;
+  sessionStartTime: number | null;
+}
+
 export default function TimerContainer() {
   const [timerData, setTimerData] = useState<TimerData>({
     state: TimerState.IDLE,
@@ -27,7 +36,6 @@ export default function TimerContainer() {
     settings: defaultSettings,
   });
 
-  // NEW: Add state for selected activity
   const [selectedActivity, setSelectedActivity] = useState(
     defaultActivityCategories[0]
   );
@@ -35,6 +43,159 @@ export default function TimerContainer() {
   const [showSettings, setShowSettings] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const sessionStartTimeRef = useRef<number | null>(null);
+
+  // Store timer state when needed
+  const storeTimerState = () => {
+    if (
+      timerData.state !== TimerState.RUNNING &&
+      timerData.state !== TimerState.BREAK
+    ) {
+      return;
+    }
+
+    const endTime = Date.now() + timerData.timeRemaining * 1000;
+
+    localStorage.setItem('focus_timer_end_time', endTime.toString());
+    localStorage.setItem(
+      'focus_timer_state',
+      JSON.stringify({
+        state: timerData.state,
+        currentSession: timerData.currentSession,
+        totalSessions: timerData.totalSessions,
+        activity: selectedActivity,
+        sessionStartTime: sessionStartTimeRef.current,
+      })
+    );
+  };
+
+  // Check and update timer when page becomes visible
+  const updateTimerFromStorage = () => {
+    const endTimeStr = localStorage.getItem('focus_timer_end_time');
+    const stateStr = localStorage.getItem('focus_timer_state');
+
+    if (!endTimeStr || !stateStr) return;
+
+    try {
+      const endTime = parseInt(endTimeStr, 10);
+      const state = JSON.parse(stateStr) as StoredTimerState;
+      const now = Date.now();
+      const timeRemaining = Math.max(0, Math.floor((endTime - now) / 1000));
+
+      if (timeRemaining <= 0) {
+        // Timer should have completed while we were away
+        handleBackgroundTimerCompletion(state);
+        return;
+      }
+
+      // Update timer with correct remaining time
+      setTimerData((prev) => ({
+        ...prev,
+        state: state.state,
+        timeRemaining,
+        currentSession: state.currentSession,
+        totalSessions: state.totalSessions,
+      }));
+
+      setSelectedActivity(state.activity || defaultActivityCategories[0]);
+
+      // Update session start time reference
+      sessionStartTimeRef.current = state.sessionStartTime || null;
+
+      // Make sure interval is running
+      if (!intervalRef.current) {
+        startIntervalTimer();
+      }
+    } catch (e) {
+      console.error('Error restoring timer state:', e);
+    }
+  };
+
+  // Handle timer completion that occurred in background
+  const handleBackgroundTimerCompletion = (state: StoredTimerState) => {
+    // Record completed session
+    if (state.sessionStartTime) {
+      const sessionDuration = Math.floor(
+        (Date.now() - state.sessionStartTime) / 1000
+      );
+
+      const sessionType = state.state === TimerState.BREAK ? 'break' : 'focus';
+
+      const session: TimerSession = {
+        date: new Date().toISOString(),
+        localDate: getLocalDateString(new Date()),
+        duration: sessionDuration,
+        type: sessionType as 'break' | 'focus', // Type assertion to satisfy TypeScript
+        completed: true,
+        activity: state.activity,
+      };
+
+      saveSession(session);
+    }
+
+    // Play notification
+    try {
+      const audio = new Audio('/notification.mp3');
+      audio.play().catch((e) => console.log('Audio play failed:', e));
+    } catch (e) {
+      console.log('Audio creation failed:', e);
+    }
+
+    // Clear localStorage
+    localStorage.removeItem('focus_timer_end_time');
+    localStorage.removeItem('focus_timer_state');
+
+    // Determine next state based on current state
+    if (state.state === TimerState.BREAK) {
+      // After break, go to next focus session
+      setTimerData((prev) => ({
+        ...prev,
+        state: TimerState.IDLE,
+        timeRemaining: prev.settings.focusDuration * 60,
+        currentSession: state.currentSession + 1,
+      }));
+    } else {
+      // After focus, go to break
+      const isLongBreak =
+        state.currentSession % timerData.settings.longBreakInterval === 0;
+      const breakDuration = isLongBreak
+        ? timerData.settings.longBreakDuration
+        : timerData.settings.breakDuration;
+
+      setTimerData((prev) => ({
+        ...prev,
+        state: TimerState.BREAK,
+        timeRemaining: breakDuration * 60,
+      }));
+    }
+
+    sessionStartTimeRef.current = null;
+  };
+
+  // Extract interval logic to separate function
+  const startIntervalTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
+      setTimerData((prev) => {
+        if (prev.timeRemaining <= 1) {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+
+          // Clear localStorage when timer completes
+          localStorage.removeItem('focus_timer_end_time');
+          localStorage.removeItem('focus_timer_state');
+
+          // The existing timer completion logic will run
+          return prev;
+        }
+
+        return { ...prev, timeRemaining: prev.timeRemaining - 1 };
+      });
+    }, 1000);
+  };
 
   // Load settings from local storage
   useEffect(() => {
@@ -55,6 +216,31 @@ export default function TimerContainer() {
     };
   }, []);
 
+  // Add this useEffect hook for background timer
+  useEffect(() => {
+    // Check if we need to restore timer state when component mounts
+    updateTimerFromStorage();
+
+    // Set up visibility change listener
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        updateTimerFromStorage();
+      } else {
+        storeTimerState();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  // Start timer function that includes background timer functionality
   const startTimer = () => {
     setTimerData((prev) => ({ ...prev, state: TimerState.RUNNING }));
 
@@ -63,123 +249,46 @@ export default function TimerContainer() {
       sessionStartTimeRef.current = Date.now();
     }
 
-    intervalRef.current = setInterval(() => {
-      setTimerData((prev) => {
-        // If timer reaches zero
-        if (prev.timeRemaining <= 1) {
-          clearInterval(intervalRef.current!);
+    // Store timer state for background operation
+    storeTimerState();
 
-          // Record completed session
-          if (sessionStartTimeRef.current) {
-            const sessionDuration = Math.floor(
-              (Date.now() - sessionStartTimeRef.current) / 1000
-            );
-            const sessionType =
-              prev.state === TimerState.BREAK ? 'break' : 'focus';
-
-            // UPDATED: Include activity in session data
-            const session: TimerSession = {
-              date: new Date().toISOString(),
-              localDate: getLocalDateString(new Date()),
-              duration: sessionDuration,
-              type: sessionType,
-              completed: true,
-              activity: selectedActivity,
-            };
-
-            saveSession(session);
-            sessionStartTimeRef.current = null;
-          }
-
-          // Play notification sound if available
-          try {
-            const audio = new Audio('/notification.mp3');
-            audio.play().catch((e) => console.log('Audio play failed:', e));
-          } catch (e) {
-            console.log('Audio creation failed:', e);
-          }
-
-          // Toggle between focus and break
-          const isBreak = prev.state === TimerState.BREAK;
-          const isLastSession = prev.currentSession >= prev.totalSessions;
-
-          if (isBreak) {
-            // After break, start new focus session
-            const nextSession = {
-              ...prev,
-              state: prev.settings.autoStartPomodoros
-                ? TimerState.RUNNING
-                : TimerState.IDLE,
-              timeRemaining: prev.settings.focusDuration * 60,
-              currentSession: prev.currentSession + 1,
-            };
-
-            // If auto-start enabled, set new session start time
-            if (prev.settings.autoStartPomodoros) {
-              sessionStartTimeRef.current = Date.now();
-            }
-
-            return nextSession;
-          } else {
-            // After focus, start break
-            const isLongBreak =
-              prev.currentSession % prev.settings.longBreakInterval === 0;
-            const breakDuration = isLongBreak
-              ? prev.settings.longBreakDuration
-              : prev.settings.breakDuration;
-
-            const nextSession = {
-              ...prev,
-              state: prev.settings.autoStartBreaks
-                ? TimerState.RUNNING
-                : TimerState.IDLE,
-              timeRemaining: breakDuration * 60,
-            };
-
-            if (nextSession.state === TimerState.RUNNING) {
-              sessionStartTimeRef.current = Date.now();
-            } else {
-              nextSession.state = TimerState.BREAK;
-            }
-
-            return nextSession;
-          }
-        }
-
-        // Otherwise, just decrement the time
-        return {
-          ...prev,
-          timeRemaining: prev.timeRemaining - 1,
-        };
-      });
-    }, 1000);
+    // Start the interval for UI updates
+    startIntervalTimer();
   };
 
+  // Pause timer with background timer cleanup
   const pauseTimer = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
+
     setTimerData((prev) => ({ ...prev, state: TimerState.PAUSED }));
+
+    // Clear stored state
+    localStorage.removeItem('focus_timer_end_time');
+    localStorage.removeItem('focus_timer_state');
   };
 
+  // Reset timer with background timer cleanup
   const resetTimer = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
     // Record incomplete session
-    if (sessionStartTimeRef.current && timerData.state === TimerState.RUNNING) {
+    if (
+      sessionStartTimeRef.current &&
+      (timerData.state === TimerState.RUNNING ||
+        timerData.state === TimerState.BREAK)
+    ) {
       const sessionDuration = Math.floor(
         (Date.now() - sessionStartTimeRef.current) / 1000
       );
 
-      // Use timerData directly here, not prev
+      // Now this check makes sense because we're handling both states
       const sessionType =
-        (timerData.state as TimerState) === TimerState.BREAK
-          ? 'break'
-          : 'focus';
+        timerData.state === TimerState.BREAK ? 'break' : 'focus';
 
-      // UPDATED: Include activity in session data
       const session: TimerSession = {
         date: new Date().toISOString(),
         localDate: getLocalDateString(new Date()),
@@ -191,6 +300,10 @@ export default function TimerContainer() {
 
       saveSession(session);
     }
+
+    // Clear stored state
+    localStorage.removeItem('focus_timer_end_time');
+    localStorage.removeItem('focus_timer_state');
 
     sessionStartTimeRef.current = null;
 
@@ -227,7 +340,6 @@ export default function TimerContainer() {
         />
       ) : (
         <>
-          {/* NEW: Add the ActivitySelector component */}
           <ActivitySelector
             selectedActivity={selectedActivity}
             onSelectActivity={setSelectedActivity}
