@@ -30,6 +30,9 @@ export default function AnalyticsPage() {
 
     // Calculate summary stats
     const focusSessions = sessions.filter((s) => s.type === 'focus');
+    // Only count completed sessions for consistency with dashboard
+    const completedFocusSessions = focusSessions.filter((s) => s.completed);
+
     const totalFocusTime = focusSessions.reduce(
       (total, s) => total + s.duration / 60,
       0
@@ -63,7 +66,8 @@ export default function AnalyticsPage() {
     const hourMap = new Map<number, number>();
 
     focusSessions.forEach((session) => {
-      const date = new Date(session.date);
+      const dateStr = session.localDate || session.date.split('T')[0];
+      const date = new Date(dateStr);
       const day = date.getDay();
       const hour = date.getHours();
 
@@ -110,14 +114,12 @@ export default function AnalyticsPage() {
 
     // Completion rate
     const completionRate = focusSessions.length
-      ? (focusSessions.filter((s) => s.completed).length /
-          focusSessions.length) *
-        100
+      ? (completedFocusSessions.length / focusSessions.length) * 100
       : 0;
 
     setSummary({
       totalFocusTime: Math.round(totalFocusTime),
-      totalSessions: focusSessions.length,
+      totalSessions: completedFocusSessions.length, // UPDATED: Only count completed sessions
       avgSessionLength: Math.round(avgSessionLength),
       favoriteActivity,
       mostProductiveDay,
@@ -150,7 +152,7 @@ export default function AnalyticsPage() {
               </span>
             </li>
             <li className={styles.summaryItem}>
-              <span className={styles.summaryLabel}>Sessions Completed</span>
+              <span className={styles.summaryLabel}>Completed Sessions</span>
               <span className={styles.summaryValue}>
                 {summary.totalSessions}
               </span>
