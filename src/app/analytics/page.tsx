@@ -66,8 +66,14 @@ export default function AnalyticsPage() {
     const hourMap = new Map<number, number>();
 
     focusSessions.forEach((session) => {
-      const dateStr = session.localDate || session.date.split('T')[0];
-      const date = new Date(dateStr);
+      let date;
+      if (session.localDate) {
+        // For localDate strings, force them to be interpreted in local time
+        const [year, month, day] = session.localDate.split('-').map(Number);
+        date = new Date(year, month - 1, day, 12, 0, 0); // Use noon to avoid any timezone issues
+      } else {
+        date = new Date(session.date); // Use the full ISO date string
+      }
       const day = date.getDay();
       const hour = date.getHours();
 
