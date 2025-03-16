@@ -32,6 +32,18 @@ export default function Navigation() {
               >
                 Dashboard
               </Link>
+              <Link
+                href="/analytics"
+                className={pathname === '/analytics' ? styles.active : ''}
+              >
+                Analytics
+              </Link>
+              <Link
+                href="/goals"
+                className={pathname === '/goals' ? styles.active : ''}
+              >
+                Goals
+              </Link>
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}
                 className={styles.signOut}
