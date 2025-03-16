@@ -34,7 +34,7 @@ export default function ActivityCalendar() {
 
     // Populate with actual data
     focusSessions.forEach((session) => {
-      const dateStr = session.date.split('T')[0];
+      const dateStr = session.localDate || session.date.split('T')[0];
       if (dateMap.has(dateStr)) {
         const minutes = Math.round(session.duration / 60);
         dateMap.set(dateStr, (dateMap.get(dateStr) || 0) + minutes);

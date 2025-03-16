@@ -18,6 +18,9 @@ export default function DashboardHeatmap() {
     const sessions = getSessions();
     const focusSessions = sessions.filter((s) => s.type === 'focus');
 
+    console.log('Dashboard - All sessions:', sessions);
+    console.log('Dashboard - Focus sessions:', focusSessions);
+
     // Create a date map for recent days (last 30 days)
     const today = new Date();
     const thirtyDaysAgo = new Date();
@@ -37,7 +40,7 @@ export default function DashboardHeatmap() {
 
     // Populate with actual data
     focusSessions.forEach((session) => {
-      const dateStr = session.date.split('T')[0];
+      const dateStr = session.localDate || session.date.split('T')[0];
       if (dateMap.has(dateStr)) {
         const minutes = Math.round(session.duration / 60);
         dateMap.set(dateStr, (dateMap.get(dateStr) || 0) + minutes);

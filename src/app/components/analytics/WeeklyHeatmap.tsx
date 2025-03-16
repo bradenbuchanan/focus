@@ -22,9 +22,11 @@ export default function WeeklyHeatmap() {
       .map(() => Array(24).fill(0));
 
     focusSessions.forEach((session) => {
-      const date = new Date(session.date);
-      const day = date.getDay(); // 0-6 (Sunday-Saturday)
-      const hour = date.getHours(); // 0-23
+      // Use localDate if available, otherwise fall back to ISO date
+      const dateStr = session.localDate || session.date.split('T')[0];
+      const date = new Date(dateStr);
+      const day = date.getDay();
+      const hour = date.getHours();
 
       // Add minutes to the appropriate cell
       heatmap[day][hour] += session.duration / 60;

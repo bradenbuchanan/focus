@@ -122,7 +122,9 @@ export default function ProductivityTrends() {
 
       // Filter sessions in this period
       const periodSessions = focusSessions.filter((s) => {
-        const sessionDate = new Date(s.date);
+        // Use localDate if available
+        const dateStr = s.localDate || s.date.split('T')[0];
+        const sessionDate = new Date(dateStr);
         return sessionDate >= startDate && sessionDate <= endDate;
       });
 
