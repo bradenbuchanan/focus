@@ -152,6 +152,172 @@
   max-height: 200px !important;
 }
 
+/* Multi heatmap styling - needs to be put in another css file */
+
+/* Enhanced styles for analytics.module.css */
+
+/* Overall container for multi-heatmaps */
+.multiCalendarContainer {
+  margin-bottom: 3rem;
+}
+
+/* Each activity section */
+.activityHeatmapSection {
+  background-color: var(--background);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px var(--gray-alpha-100);
+  border: 1px solid var(--gray-alpha-200);
+}
+
+/* Activity title */
+.activityTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--gray-alpha-100);
+}
+
+/* Max time label */
+.maxTimeLabel {
+  font-size: 0.85rem;
+  font-weight: normal;
+  opacity: 0.7;
+}
+
+/* Calendar container - more compact */
+.githubCalendar {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+}
+
+/* Month labels row improvements */
+.monthLabelsRow {
+  position: relative;
+  height: 18px;
+  margin-left: 25px;
+  margin-bottom: 3px;
+}
+
+.monthLabel {
+  position: absolute;
+  font-size: 0.7rem;
+  color: var(--foreground);
+  opacity: 0.7;
+  transform: translateX(-40%);
+}
+
+/* Calendar body layout */
+.calendarBody {
+  display: flex;
+  position: relative;
+}
+
+.dayLabels {
+  position: absolute;
+  left: -20px;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.dayLabel {
+  font-size: 0.7rem;
+  color: var(--foreground);
+  opacity: 0.7;
+  height: 12px;
+  line-height: 12px;
+}
+
+/* Calendar grid */
+.calendarGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-left: 25px;
+}
+
+.calendarRow {
+  display: flex;
+  gap: 1px;
+  height: 12px;
+}
+
+/* Calendar cells - more compact but visible */
+.calendarCell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  transition: transform 0.15s ease, opacity 0.1s;
+}
+
+.calendarCell:hover {
+  transform: scale(1.5);
+  opacity: 0.9;
+}
+
+/* Legend styling */
+.calendarLegend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  margin-top: 10px;
+  font-size: 0.7rem;
+}
+
+.legendCell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* Activity selector */
+.activitySelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem 0;
+}
+
+.activityButton {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--gray-alpha-200);
+  background-color: var(--background);
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.activeActivity, .activityButton.activeActivity {
+  background-color: var(--foreground);
+  color: var(--background);
+  border-color: var(--foreground);
+}
+
+/* Remove duplicate header in the multi view */
+.multiCalendarContainer h2.sectionTitle {
+  display: none;
+}
+
+/* Description text */
+.calendarDescription {
+  font-size: 0.85rem;
+  color: var(--foreground);
+  opacity: 0.7;
+  margin-bottom: 0.75rem;
+}
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .analyticsPage h1 {
