@@ -1,6 +1,8 @@
+// src/app/(auth)/login/page.tsx
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -14,31 +16,43 @@ export default function Login() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Get the callback URL from the search parameters
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-
+  // This is the login handler - replace your existing handleSubmit function with this one
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
+      console.log('Attempting to sign in with:', { email });
       const result = await signIn('credentials', {
         redirect: false,
         email,
         password,
       });
 
+      console.log('Sign in result:', result);
+
       if (result?.error) {
-        setError('Invalid email or password');
+        setError(`Authentication error: ${result.error}`);
         setIsLoading(false);
         return;
       }
 
-      // Redirect to the callback URL if login is successful
-      router.push(callbackUrl);
+      console.log('Sign in successful, redirecting to dashboard');
+      // Try this alternative approach
+      router.push('/dashboard');
+
+      // If that doesn't work, uncomment this:
+      // setTimeout(() => {
+      //   window.location.href = '/dashboard';
+      // }, 500);
     } catch (error) {
-      setError('Something went wrong. Please try again.');
+      console.error('Sign in error:', error);
+      setError(
+        `Exception during sign in: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       setIsLoading(false);
     }
   };
