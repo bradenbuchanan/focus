@@ -1,0 +1,153 @@
+/* Goals section on dashboard */
+.goalsSection {
+    margin-bottom: 3rem;
+  }
+  
+  .sectionTitle {
+    margin-bottom: 1.25rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+  
+  .goalCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .goalOverviewCard {
+    background-color: var(--background);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px var(--gray-alpha-100);
+    border: 1px solid var(--gray-alpha-200);
+    transition: transform 0.2s ease;
+  }
+  
+  .goalOverviewCard:hover {
+    transform: translateY(-3px);
+  }
+  
+  .goalOverviewCard h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .goalStats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .goalType {
+    opacity: 0.7;
+  }
+  
+  .goalValue {
+    font-weight: 600;
+  }
+  
+  .goalProgressBar {
+    height: 0.5rem;
+    background-color: var(--gray-alpha-100);
+    border-radius: 0.25rem;
+    overflow: hidden;
+  }
+  
+  .goalProgress {
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+  
+  .viewAllGoals {
+    background-color: var(--gray-alpha-100);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+  
+  .viewAllGoals:hover {
+    background-color: var(--gray-alpha-200);
+  }
+  
+  /* Media queries for responsive design */
+  @media (max-width: 992px) {
+    .goalCards {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    
+    .sectionTitle {
+      font-size: 1.3rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .goalsSection {
+      margin-bottom: 2.5rem;
+    }
+    
+    .sectionTitle {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .goalCards {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+    
+    .goalOverviewCard {
+      padding: 1.25rem;
+    }
+    
+    .goalOverviewCard h3 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .viewAllGoals {
+      padding: 1.25rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .goalCards {
+      grid-template-columns: 1fr;
+    }
+    
+    .goalOverviewCard {
+      padding: 1.1rem;
+    }
+    
+    .goalStats {
+      font-size: 0.85rem;
+    }
+    
+    .goalProgressBar {
+      height: 0.4rem;
+    }
+    
+    .viewAllGoals {
+      padding: 1.1rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 400px) {
+    .sectionTitle {
+      font-size: 1.1rem;
+    }
+    
+    .goalType {
+      max-width: 60%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
