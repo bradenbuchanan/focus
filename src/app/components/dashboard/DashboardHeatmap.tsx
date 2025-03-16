@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getSessions } from '@/lib/timer';
+import { getSessions, getLocalDateString } from '@/lib/timer';
 import styles from '../../dashboard/dashboard.module.css';
 
 type HeatmapDay = {
@@ -34,13 +34,14 @@ export default function DashboardHeatmap() {
       d <= today;
       d.setDate(d.getDate() + 1)
     ) {
-      const dateStr = d.toISOString().split('T')[0];
+      const dateStr = getLocalDateString(d);
       dateMap.set(dateStr, 0);
     }
 
     // Populate with actual data
     focusSessions.forEach((session) => {
-      const dateStr = session.localDate || session.date.split('T')[0];
+      const dateStr =
+        session.localDate || getLocalDateString(new Date(session.date));
       if (dateMap.has(dateStr)) {
         const minutes = Math.round(session.duration / 60);
         dateMap.set(dateStr, (dateMap.get(dateStr) || 0) + minutes);

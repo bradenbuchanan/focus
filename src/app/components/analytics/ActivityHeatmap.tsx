@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TimerSession, getSessions } from '@/lib/timer';
+import { TimerSession, getSessions, getLocalDateString } from '@/lib/timer';
 import styles from './analytics.module.css';
 
 type CalendarDay = {
@@ -28,13 +28,15 @@ export default function ActivityCalendar() {
 
     // Initialize all dates in the past year with 0
     for (let d = new Date(oneYearAgo); d <= today; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
+      const dateStr = getLocalDateString(d);
       dateMap.set(dateStr, 0);
     }
 
     // Populate with actual data
+    // Populate with actual data
     focusSessions.forEach((session) => {
-      const dateStr = session.localDate || session.date.split('T')[0];
+      const dateStr =
+        session.localDate || getLocalDateString(new Date(session.date));
       if (dateMap.has(dateStr)) {
         const minutes = Math.round(session.duration / 60);
         dateMap.set(dateStr, (dateMap.get(dateStr) || 0) + minutes);
