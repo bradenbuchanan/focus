@@ -75,7 +75,7 @@ export default function DashboardHeatmap() {
   const getCellColor = (intensity: number) => {
     switch (intensity) {
       case 0:
-        return 'var(--gray-alpha-100)';
+        return 'rgba(255, 255, 255, 0.1)';
       case 1:
         return 'rgba(54, 162, 235, 0.25)';
       case 2:
