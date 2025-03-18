@@ -17,16 +17,16 @@ export default function MultiActivityHeatmap() {
     <div className={styles.multiCalendarContainer}>
       {activityDataSets.map((activityData) => (
         <div key={activityData.name} className={styles.activityHeatmapSection}>
-          <h3 className={styles.activityTitle}>
-            <span style={{ color: activityData.colorScheme.base }}>
+          <div className={styles.activityTitle}>
+            <h3 style={{ color: activityData.colorScheme.base }}>
               {activityData.name}
-            </span>
+            </h3>
             {activityData.maxCount > 0 && (
               <span className={styles.maxTimeLabel}>
                 Max: {activityData.maxCount} min in a day
               </span>
             )}
-          </h3>
+          </div>
 
           <div className={styles.calendarContainer}>
             <CalendarGrid
