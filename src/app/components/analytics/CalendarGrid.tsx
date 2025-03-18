@@ -1,7 +1,7 @@
 // src/components/analytics/CalendarGrid.tsx
 import React from 'react';
 import styles from './analytics.module.css';
-import { CalendarDay, getCellColor } from '@/hooks/useActivityCalendarData';
+import { CalendarDay } from '@/hooks/useActivityCalendarData';
 
 interface CalendarGridProps {
   calendarData: CalendarDay[];
@@ -138,9 +138,8 @@ export function CalendarGrid({ calendarData, colorScheme }: CalendarGridProps) {
                   key={`${weekIndex}-${dayIndex}`}
                   className={styles.calendarCell}
                   style={{
-                    backgroundColor: getCellColor(
-                      week[dayIndex]?.intensity || 0
-                    ),
+                    backgroundColor:
+                      colorScheme.levels[week[dayIndex]?.intensity || 0],
                   }}
                   title={
                     week[dayIndex]
@@ -152,18 +151,6 @@ export function CalendarGrid({ calendarData, colorScheme }: CalendarGridProps) {
             </div>
           ))}
         </div>
-      </div>
-
-      <div className={styles.calendarLegend}>
-        <span>Less</span>
-        {[0, 1, 2, 3, 4].map((level) => (
-          <div
-            key={level}
-            className={styles.legendCell}
-            style={{ backgroundColor: getCellColor(level) }}
-          />
-        ))}
-        <span>More</span>
       </div>
     </div>
   );
