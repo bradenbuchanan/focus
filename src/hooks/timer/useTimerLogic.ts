@@ -1,6 +1,6 @@
 // src/hooks/useTimerLogic.ts
 import { useEffect } from 'react';
-import { TimerState, getSettings, TimerSettings, TimerData } from '@/lib/timer';
+import { TimerState, getSettings, TimerSettings, TimerData, getLocalDateString, saveSession } from '@/lib/timer';
 import { useTimerState } from '../timer/useTimerState'
 import { useSessionTracking } from '../timer/useSessionTracking';
 import { useBackgroundTimer, StoredTimerState } from '../timer/useBackgroundTimer';
@@ -127,26 +127,31 @@ export function useTimerLogic(selectedActivity: string) {
     decrementTimer();
   };
 
-  // Handle timer completion
-  const handleInterval = () => {
-    // Record completed session
-    const sessionType = timerData.state === TimerState.BREAK ? 'break' : 'focus';
-    recordSession(sessionType, selectedActivity);
+// Modify the handleInterval function
+const handleInterval = () => {
+  // Record completed session
+  const sessionType = timerData.state === TimerState.BREAK ? 'break' : 'focus';
+  recordSession(sessionType, selectedActivity);
+  
+  // Only prompt for accomplishment if it was a focus session
+  if (sessionType === 'focus') {
+    // Call promptForAccomplishment
+    promptForAccomplishment();
     
-    // Only prompt for accomplishment if it was a focus session
-    if (sessionType === 'focus') {
-      promptForAccomplishment();
-    }
-    
-    // Play notification
-    playNotificationSound();
-    
-    // Clear stored state
-    clearStoredTimer();
-    
-    // Complete timer and move to next state
-    completeTimer();
-  };
+    // Instead of using setTimerData which doesn't exist, modify your existing pattern
+    // For example, if your component that consumes this data checks for a flag:
+    timerData.showAccomplishmentRecorder = true;
+  }
+  
+  // Play notification
+  playNotificationSound();
+  
+  // Clear stored state
+  clearStoredTimer();
+  
+  // Complete timer and move to next state
+  completeTimer();
+};
 
   // Instantiate timer interval hook
   const {
@@ -199,6 +204,31 @@ export function useTimerLogic(selectedActivity: string) {
     updateSettings(newSettings);
   };
 
+  const recordFreeSession = (duration: number, activity: string): number => {
+    // Create the session object
+    const session = {
+      date: new Date().toISOString(),
+      localDate: getLocalDateString(new Date()),
+      duration: duration,
+      type: 'focus' as const,
+      completed: true,
+      activity: activity,
+    };
+    
+    // Save the session directly
+    saveSession(session);
+    
+    // Explicitly trigger the accomplishment prompt
+    promptForAccomplishment();
+    
+    // Instead of using setTimerData which doesn't exist, use the pattern in your code
+    // For example, use the completeTimer function or set a flag in timerData
+    timerData.showAccomplishmentRecorder = true;
+    
+    // Return the duration for any further processing
+    return duration;
+  };
+
   return {
     timerData,
     startTimer: startTimerHandler,
@@ -208,5 +238,6 @@ export function useTimerLogic(selectedActivity: string) {
     showAccomplishmentPrompt,
     saveAccomplishment,
     skipAccomplishment,
+    recordFreeSession,
   };
 }
