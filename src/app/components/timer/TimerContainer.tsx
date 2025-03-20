@@ -5,8 +5,9 @@ import { useState, useEffect } from 'react';
 import TimerDisplay from './TimerDisplay';
 import TimerSettings from './TimerSetting';
 import ActivitySelector from './ActivitySelector';
+import AccomplishmentRecorder from './AccomplishmentRecorder';
 import { useTimerLogic } from '@/hooks/useTimerLogic';
-import { defaultActivityCategories } from '@/lib/timer';
+import { defaultActivityCategories, TimerState } from '@/lib/timer';
 import styles from './timer.module.css';
 
 export default function TimerContainer() {
@@ -14,9 +15,27 @@ export default function TimerContainer() {
   const [selectedActivity, setSelectedActivity] = useState(
     defaultActivityCategories[0]
   );
+  const [showAccomplishmentRecorder, setShowAccomplishmentRecorder] =
+    useState(false);
 
-  const { timerData, startTimer, pauseTimer, resetTimer, updateSettings } =
-    useTimerLogic(selectedActivity);
+  const {
+    timerData,
+    startTimer,
+    pauseTimer,
+    resetTimer,
+    updateSettings,
+    saveAccomplishment,
+    skipAccomplishment,
+  } = useTimerLogic(selectedActivity);
+
+  // Check if we should show the accomplishment recorder
+  useEffect(() => {
+    // Show the recorder when a focus session just ended and we're in a break
+    setShowAccomplishmentRecorder(
+      timerData.state === TimerState.BREAK &&
+        !!timerData.showAccomplishmentRecorder // Use !! to convert to a definite boolean
+    );
+  }, [timerData.state, timerData.showAccomplishmentRecorder]);
 
   return (
     <div className={styles.timerContainer}>
@@ -25,6 +44,12 @@ export default function TimerContainer() {
           settings={timerData.settings}
           onSave={updateSettings}
           onCancel={() => setShowSettings(false)}
+        />
+      ) : showAccomplishmentRecorder ? (
+        <AccomplishmentRecorder
+          activity={selectedActivity}
+          onSave={saveAccomplishment}
+          onSkip={skipAccomplishment}
         />
       ) : (
         <>

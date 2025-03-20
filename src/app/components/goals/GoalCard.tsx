@@ -4,13 +4,16 @@
 import { useState } from 'react';
 import { Goal, calculateGoalProgress, deleteGoal } from '@/lib/timer';
 import styles from '../../../app/goals/goals.module.css';
+import GoalEditForm from './GoalEditForm';
 
 interface GoalCardProps {
   goal: Goal;
   onDelete: () => void;
+  onEdit: () => void; // Add this to trigger a refresh when a goal is edited
 }
 
-export default function GoalCard({ goal, onDelete }: GoalCardProps) {
+export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const { current, percentage } = calculateGoalProgress(goal);
 
   const formatPeriod = (period: string) => {
@@ -35,17 +38,41 @@ export default function GoalCard({ goal, onDelete }: GoalCardProps) {
     }
   };
 
+  const handleEditComplete = () => {
+    setIsEditing(false);
+    onEdit();
+  };
+
+  if (isEditing) {
+    return (
+      <GoalEditForm
+        goal={goal}
+        onCancel={() => setIsEditing(false)}
+        onSave={handleEditComplete}
+      />
+    );
+  }
+
   return (
     <div className={styles.goalCard}>
       <div className={styles.goalHeader}>
         <h3>{goal.title}</h3>
-        <button
-          className={styles.deleteButton}
-          onClick={handleDelete}
-          title="Delete goal"
-        >
-          ×
-        </button>
+        <div className={styles.goalActions}>
+          <button
+            className={styles.editButton}
+            onClick={() => setIsEditing(true)}
+            title="Edit goal"
+          >
+            ✎
+          </button>
+          <button
+            className={styles.deleteButton}
+            onClick={handleDelete}
+            title="Delete goal"
+          >
+            ×
+          </button>
+        </div>
       </div>
 
       {goal.description && (

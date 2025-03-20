@@ -27,6 +27,7 @@ export function useTimerLogic(selectedActivity: string) {
     currentSession: 1,
     totalSessions: 4,
     settings: defaultSettings,
+    showAccomplishmentRecorder: false,
   });
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -175,6 +176,7 @@ export function useTimerLogic(selectedActivity: string) {
         state: TimerState.IDLE,
         timeRemaining: prev.settings.focusDuration * 60,
         currentSession: state.currentSession + 1,
+        showAccomplishmentRecorder: false,
       }));
     } else {
       // After focus, go to break
@@ -188,6 +190,7 @@ export function useTimerLogic(selectedActivity: string) {
         ...prev,
         state: TimerState.BREAK,
         timeRemaining: breakDuration * 60,
+        showAccomplishmentRecorder: true,
       }));
     }
 
@@ -249,6 +252,7 @@ export function useTimerLogic(selectedActivity: string) {
               state: TimerState.IDLE,
               timeRemaining: prev.settings.focusDuration * 60,
               currentSession: prev.currentSession + 1,
+              showAccomplishmentRecorder: false,
             };
           } else {
             // After focus, go to break
@@ -262,6 +266,7 @@ export function useTimerLogic(selectedActivity: string) {
               ...prev,
               state: TimerState.BREAK,
               timeRemaining: breakDuration * 60,
+              showAccomplishmentRecorder: true,
             };
           }
         }
@@ -270,6 +275,41 @@ export function useTimerLogic(selectedActivity: string) {
         return { ...prev, timeRemaining: prev.timeRemaining - 1 };
       });
     }, 1000);
+  };
+
+  // Save accomplishment after focus session
+  const saveAccomplishment = (accomplishment: string) => {
+    // Store the accomplishment with the most recent session
+    if (sessionStartTimeRef.current) {
+      const sessionDuration = Math.floor(
+        (Date.now() - sessionStartTimeRef.current) / 1000
+      );
+
+      const session: TimerSession = {
+        date: new Date().toISOString(),
+        localDate: getLocalDateString(new Date()),
+        duration: sessionDuration,
+        type: 'focus',
+        completed: true,
+        activity: selectedActivity,
+        accomplishment
+      };
+
+      saveSession(session);
+    }
+
+    // Hide the recorder
+    setTimerData(prev => ({
+      ...prev,
+      showAccomplishmentRecorder: false
+    }));
+  };
+
+  const skipAccomplishment = () => {
+    setTimerData(prev => ({
+      ...prev,
+      showAccomplishmentRecorder: false
+    }));
   };
 
   // Public methods exposed by the hook
@@ -342,6 +382,7 @@ export function useTimerLogic(selectedActivity: string) {
       currentSession: 1,
       totalSessions: 4,
       settings: timerData.settings,
+      showAccomplishmentRecorder: false,
     });
   };
 
@@ -363,6 +404,8 @@ export function useTimerLogic(selectedActivity: string) {
     startTimer,
     pauseTimer,
     resetTimer,
-    updateSettings
+    updateSettings,
+    saveAccomplishment,
+    skipAccomplishment
   };
 }

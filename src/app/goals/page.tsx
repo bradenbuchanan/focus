@@ -49,7 +49,12 @@ export default function GoalsPage() {
           {goals.length > 0 ? (
             <div className={styles.goalsList}>
               {goals.map((goal) => (
-                <GoalCard key={goal.id} goal={goal} onDelete={loadGoals} />
+                <GoalCard
+                  key={goal.id}
+                  goal={goal}
+                  onDelete={loadGoals}
+                  onEdit={loadGoals}
+                />
               ))}
             </div>
           ) : (

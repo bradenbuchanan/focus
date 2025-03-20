@@ -54,6 +54,7 @@ export interface TimerSession {
   type: 'focus' | 'break';
   completed: boolean;
   activity?: string; // Activity category
+  accomplishment?: string; // Add this line
 }
 
 export interface TimerData {
@@ -62,6 +63,7 @@ export interface TimerData {
   currentSession: number;
   totalSessions: number;
   settings: TimerSettings;
+  showAccomplishmentRecorder?: boolean; // Add this line
 }
 
 // Helper function to format time as MM:SS

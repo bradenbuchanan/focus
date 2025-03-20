@@ -61,11 +61,6 @@ export default function TimerDisplay({
           </div>
         </div>
       </div>
-
-      <div className={styles.sessionTracker}>
-        Session {timerData.currentSession}/{timerData.totalSessions}
-      </div>
-
       <div className={styles.controls}>
         {isRunning ? (
           <button onClick={onPause} className={styles.primaryButton}>

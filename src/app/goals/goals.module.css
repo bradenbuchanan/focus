@@ -204,6 +204,28 @@
     text-align: center;
     margin-top: 2rem;
   }
+
+  /* Goal Edit styles */
+.goalActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editButton {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.editButton:hover {
+  opacity: 1;
+}
+
+  /* Media queries */
   
   @media (max-width: 768px) {
     .formRow {
