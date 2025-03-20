@@ -6,7 +6,7 @@ import TimerDisplay from './TimerDisplay';
 import TimerSettings from './TimerSetting';
 import ActivitySelector from './ActivitySelector';
 import AccomplishmentRecorder from './AccomplishmentRecorder';
-import { useTimerLogic } from '@/hooks/useTimerLogic';
+import { useTimerLogic } from '@/hooks/timer/useTimerLogic';
 import { defaultActivityCategories, TimerState } from '@/lib/timer';
 import styles from './timer.module.css';
 
