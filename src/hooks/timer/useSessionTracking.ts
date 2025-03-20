@@ -12,10 +12,18 @@ export function useSessionTracking() {
   };
 
   // Record completed session
-  const recordSession = (sessionType: 'focus' | 'break', activity: string, completed: boolean = true) => {
-    if (!sessionStartTimeRef.current) return;
+const recordSession = (
+    sessionType: 'focus' | 'break', 
+    activity: string, 
+    completed: boolean = true,
+    customDuration?: number // Add this parameter
+  ) => {
+    if (!sessionStartTimeRef.current && customDuration === undefined) return;
     
-    const sessionDuration = Math.floor((Date.now() - sessionStartTimeRef.current) / 1000);
+    // Use custom duration if provided, otherwise calculate from start time
+    const sessionDuration = customDuration !== undefined 
+      ? customDuration 
+      : Math.floor((Date.now() - (sessionStartTimeRef.current || Date.now())) / 1000);
     
     const session: TimerSession = {
       date: new Date().toISOString(),
@@ -25,9 +33,12 @@ export function useSessionTracking() {
       completed,
       activity: activity,
     };
-
+  
     saveSession(session);
-    sessionStartTimeRef.current = null;
+    
+    if (customDuration === undefined) {
+      sessionStartTimeRef.current = null;
+    }
     
     return sessionDuration;
   };
