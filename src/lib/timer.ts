@@ -44,7 +44,8 @@ export enum TimerState {
   IDLE = 'idle',
   RUNNING = 'running',
   PAUSED = 'paused',
-  BREAK = 'break'
+  BREAK = 'break',
+  FREE = 'free'
 }
 
 export interface TimerSession {
