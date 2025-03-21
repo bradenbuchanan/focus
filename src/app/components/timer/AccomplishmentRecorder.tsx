@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import styles from './timer.module.css';
 
-// Common accomplishment types that users can quickly select
+// Common accomplishment types and categories
 const quickOptions = [
   'Completed task',
   'Read content',
@@ -14,9 +14,18 @@ const quickOptions = [
   'Learning',
 ];
 
+const categories = [
+  'Productivity',
+  'Learning',
+  'Creativity',
+  'Problem Solving',
+  'Communication',
+  'Other',
+];
+
 interface AccomplishmentRecorderProps {
   activity: string;
-  onSave: (accomplishment: string) => void;
+  onSave: (accomplishment: string, category?: string) => void;
   onSkip: () => void;
 }
 
@@ -26,6 +35,7 @@ export default function AccomplishmentRecorder({
   onSkip,
 }: AccomplishmentRecorderProps) {
   const [accomplishment, setAccomplishment] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const handleQuickOption = (option: string) => {
     setAccomplishment((prev) =>
@@ -36,7 +46,7 @@ export default function AccomplishmentRecorder({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (accomplishment.trim()) {
-      onSave(accomplishment.trim());
+      onSave(accomplishment.trim(), selectedCategory);
     } else {
       onSkip();
     }
@@ -67,6 +77,24 @@ export default function AccomplishmentRecorder({
           placeholder="Describe what you accomplished (optional)"
           className={styles.accomplishmentInput}
         />
+
+        <div className={styles.categorySelector}>
+          <label>Category (optional):</label>
+          <div className={styles.categoryOptions}>
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                className={`${styles.categoryButton} ${
+                  selectedCategory === category ? styles.selected : ''
+                }`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className={styles.recorderActions}>
           <button type="submit" className={styles.primaryButton}>
