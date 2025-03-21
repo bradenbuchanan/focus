@@ -1,12 +1,13 @@
 // src/hooks/timer/useTimerLogic.ts
 import { useState, useEffect } from 'react';
-import { TimerState, getSettings, TimerSettings, TimerData, getLocalDateString, saveSession } from '@/lib/timer';
+import { TimerState, getSettings, TimerSettings, TimerData, getLocalDateString, saveSession, TimerSession } from '@/lib/timer';
 import { useTimerState } from '../timer/useTimerState';
 import { useSessionTracking } from '../timer/useSessionTracking';
 import { useBackgroundTimer, StoredTimerState } from '../timer/useBackgroundTimer';
 import { useTimerInterval } from '../timer/useTimerInterval';
 import { useAccomplishments } from '../timer/useAccomplishments';
 import { getTimerEndTime, calculateTimeRemaining, playNotificationSound } from '../timer/utils';
+import { useSessionDB } from '@/hooks/useSessionDB'; // Add this import
 
 export function useTimerLogic(selectedActivity: string) {
   // Declare state variables at the top - only once
@@ -35,12 +36,15 @@ export function useTimerLogic(selectedActivity: string) {
 
   const {
     showAccomplishmentPrompt,
-    saveAccomplishment: _saveAccomplishment, // Rename it to avoid naming conflict
+    saveAccomplishment: _saveAccomplishment,
     skipAccomplishment,
     promptForAccomplishment,
     getAccomplishments,
     setSessionForAccomplishment,
   } = useAccomplishments();
+
+  // Add the DB hook if it exists
+  const { saveSession: saveSessionToDB, saveAccomplishment: saveAccomplishmentToDB } = useSessionDB?.() || { saveSession: null, saveAccomplishment: null };
 
   // Initial settings loading
   useEffect(() => {
@@ -48,21 +52,33 @@ export function useTimerLogic(selectedActivity: string) {
     initializeSettings(settings);
   }, []);
 
-  const saveAccomplishment = (text: string, sessionId?: string) => {
-    // Use provided sessionId or the lastSessionId
-    const effectiveSessionId = sessionId || lastSessionId;
-    
-    if (text.trim() && effectiveSessionId) {
-      // Call the hook's saveAccomplishment with the proper ID
-      const success = _saveAccomplishment(text, effectiveSessionId);
-      
-      // Reset lastSessionId
+
+// In your useTimerLogic.ts file, modify the saveAccomplishment function:
+// In useTimerLogic.ts
+const saveAccomplishment = (text: string, sessionId?: string, category?: string) => {
+  const effectiveSessionId = sessionId || lastSessionId;
+  
+  if (text.trim() && effectiveSessionId) {
+    if (typeof saveAccomplishmentToDB === 'function') {
+      return saveAccomplishmentToDB(text.trim(), effectiveSessionId, category)
+        .then(success => {
+          if (success) {
+            setLastSessionId('');
+            return true;
+          }
+          return _saveAccomplishment(text, effectiveSessionId, category);
+        })
+        .catch(() => {
+          return _saveAccomplishment(text, effectiveSessionId, category);
+        });
+    } else {
+      const success = _saveAccomplishment(text, effectiveSessionId, category);
       setLastSessionId('');
-      
       return success;
     }
-    return false;
-  };
+  }
+  return typeof saveAccomplishmentToDB === 'function' ? Promise.resolve(false) : false;
+};
   
   // Update the recordFreeSession function
   const recordFreeSession = (duration: number, activity: string): string => {
@@ -237,7 +253,6 @@ export function useTimerLogic(selectedActivity: string) {
   const updateSettingsHandler = (newSettings: TimerSettings) => {
     updateSettings(newSettings);
   };
-
 
   return {
     timerData,

@@ -57,6 +57,7 @@ export interface TimerSession {
   completed: boolean;
   activity?: string; // Activity category
   accomplishment?: string; // Add this line
+  accomplishmentCategory?: string; // Add this line for the category
 }
 
 export interface TimerData {
