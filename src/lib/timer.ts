@@ -49,6 +49,7 @@ export enum TimerState {
 }
 
 export interface TimerSession {
+  id: string;
   date: string;  // ISO string format (YYYY-MM-DDTHH:mm:ss.sssZ)
   localDate?: string; // Local YYYY-MM-DD format
   duration: number;  // in seconds
@@ -74,8 +75,13 @@ export const getLocalDateString = (date: Date | string): string => {
 };
 
 // When saving a session, use local date format
-export const saveSession = (session: TimerSession): void => {
-  if (typeof window === 'undefined') return;
+export const saveSession = (session: TimerSession): string => {
+  if (typeof window === 'undefined') return '';
+  
+  // Make sure an ID is assigned
+  if (!session.id) {
+    session.id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
+  }
   
   // Ensure the date is stored in the user's local timezone
   if (!session.localDate) {
@@ -85,6 +91,8 @@ export const saveSession = (session: TimerSession): void => {
   const sessions = getSessions();
   sessions.push(session);
   localStorage.setItem('timerSessions', JSON.stringify(sessions));
+  
+  return session.id; // Return the ID for reference
 };
 
 export const formatTime = (seconds: number): string => {
