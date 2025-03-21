@@ -189,83 +189,82 @@ type ColorScheme = {
     "All Activities": {
       base: "rgb(54, 162, 235)", // Blue
       levels: [
-        'var(--gray-alpha-100)',
+        'rgba(54, 162, 235, 0.05)', // Change this from var(--gray-alpha-100)
         'rgba(54, 162, 235, 0.25)',
         'rgba(54, 162, 235, 0.5)',
         'rgba(54, 162, 235, 0.75)',
         'rgba(54, 162, 235, 1)',
       ]
-    },
-    "Programming": {
-      base: "rgb(75, 192, 192)", // Teal
-      levels: [
-        'var(--gray-alpha-100)',
-        'rgba(75, 192, 192, 0.25)',
-        'rgba(75, 192, 192, 0.5)',
-        'rgba(75, 192, 192, 0.75)',
-        'rgba(75, 192, 192, 1)',
-      ]
-    },
-    "Reading": {
-      base: "rgb(255, 159, 64)", // Orange
-      levels: [
-        'var(--gray-alpha-100)',
-        'rgba(255, 159, 64, 0.25)',
-        'rgba(255, 159, 64, 0.5)',
-        'rgba(255, 159, 64, 0.75)',
-        'rgba(255, 159, 64, 1)',
-      ]
-    },
-    "Writing": {
-      base: "rgb(153, 102, 255)", // Purple
-      levels: [
-        'var(--gray-alpha-100)',
-        'rgba(153, 102, 255, 0.25)',
-        'rgba(153, 102, 255, 0.5)',
-        'rgba(153, 102, 255, 0.75)',
-        'rgba(153, 102, 255, 1)',
-      ]
-    },
-    "Studying": {
-      base: "rgb(255, 99, 132)", // Pink/Red
-      levels: [
-        'var(--gray-alpha-100)',
-        'rgba(255, 99, 132, 0.25)',
-        'rgba(255, 99, 132, 0.5)',
-        'rgba(255, 99, 132, 0.75)',
-        'rgba(255, 99, 132, 1)',
-      ]
-    },
-    "Working": {
-      base: "rgb(255, 205, 86)", // Yellow
-      levels: [
-        'var(--gray-alpha-100)',
-        'rgba(255, 205, 86, 0.25)',
-        'rgba(255, 205, 86, 0.5)',
-        'rgba(255, 205, 86, 0.75)',
-        'rgba(255, 205, 86, 1)',
-      ]
-    },
-    "Meditating": {
-      base: "rgb(143, 206, 125)", // Green
-      levels: [
-        'var(--gray-alpha-100)',
-        'rgba(143, 206, 125, 0.25)',
-        'rgba(143, 206, 125, 0.5)',
-        'rgba(143, 206, 125, 0.75)',
-        'rgba(143, 206, 125, 1)',
-      ]
-    },
-    "Other": {
-      base: "rgb(201, 203, 207)", // Gray
-      levels: [
-        'var(--gray-alpha-100)',
-        'rgba(201, 203, 207, 0.25)',
-        'rgba(201, 203, 207, 0.5)',
-        'rgba(201, 203, 207, 0.75)',
-        'rgba(201, 203, 207, 1)',
-      ]
-    }
+    },"Programming": {
+  base: "rgb(75, 192, 192)", // Teal
+  levels: [
+    'rgba(75, 192, 192, 0.05)',
+    'rgba(75, 192, 192, 0.25)',
+    'rgba(75, 192, 192, 0.5)',
+    'rgba(75, 192, 192, 0.75)',
+    'rgba(75, 192, 192, 1)',
+  ]
+},
+"Reading": {
+  base: "rgb(255, 159, 64)", // Orange
+  levels: [
+    'rgba(255, 159, 64, 0.05)',
+    'rgba(255, 159, 64, 0.25)',
+    'rgba(255, 159, 64, 0.5)',
+    'rgba(255, 159, 64, 0.75)',
+    'rgba(255, 159, 64, 1)',
+  ]
+},
+"Writing": {
+  base: "rgb(153, 102, 255)", // Purple
+  levels: [
+    'rgba(153, 102, 255, 0.05)',
+    'rgba(153, 102, 255, 0.25)',
+    'rgba(153, 102, 255, 0.5)',
+    'rgba(153, 102, 255, 0.75)',
+    'rgba(153, 102, 255, 1)',
+  ]
+},
+"Studying": {
+  base: "rgb(255, 99, 132)", // Pink/Red
+  levels: [
+    'rgba(255, 99, 132, 0.05)',
+    'rgba(255, 99, 132, 0.25)',
+    'rgba(255, 99, 132, 0.5)',
+    'rgba(255, 99, 132, 0.75)',
+    'rgba(255, 99, 132, 1)',
+  ]
+},
+"Working": {
+  base: "rgb(255, 205, 86)", // Yellow
+  levels: [
+    'rgba(255, 205, 86, 0.05)',
+    'rgba(255, 205, 86, 0.25)',
+    'rgba(255, 205, 86, 0.5)',
+    'rgba(255, 205, 86, 0.75)',
+    'rgba(255, 205, 86, 1)',
+  ]
+},
+"Meditating": {
+  base: "rgb(143, 206, 125)", // Green
+  levels: [
+    'rgba(143, 206, 125, 0.05)',
+    'rgba(143, 206, 125, 0.25)',
+    'rgba(143, 206, 125, 0.5)',
+    'rgba(143, 206, 125, 0.75)',
+    'rgba(143, 206, 125, 1)',
+  ]
+},
+"Other": {
+  base: "rgb(201, 203, 207)", // Gray
+  levels: [
+    'rgba(201, 203, 207, 0.05)',
+    'rgba(201, 203, 207, 0.25)',
+    'rgba(201, 203, 207, 0.5)',
+    'rgba(201, 203, 207, 0.75)',
+    'rgba(201, 203, 207, 1)',
+    ]
+  }
   };
   
   // Create a function that doesn't rely on direct indexing
@@ -293,7 +292,7 @@ type ColorScheme = {
     return {
       base: baseColor,
       levels: [
-        'var(--gray-alpha-100)',
+        `hsla(${h}, ${s}%, ${l}%, 0.05)`, // Change this from var(--gray-alpha-100)
         `hsla(${h}, ${s}%, ${l}%, 0.25)`,
         `hsla(${h}, ${s}%, ${l}%, 0.5)`,
         `hsla(${h}, ${s}%, ${l}%, 0.75)`,
