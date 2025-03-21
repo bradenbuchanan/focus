@@ -55,15 +55,17 @@ export default function TimerContainer() {
     setShowAccomplishmentRecorder(true);
   };
 
-  // Handle saving an accomplishment
-  const handleSaveAccomplishment = (accomplishment: string) => {
+  // Handle saving an accomplishment with category support
+  const handleSaveAccomplishment = (text: string, category?: string) => {
     console.log(
       'Saving accomplishment:',
-      accomplishment,
+      text,
+      'with category:',
+      category,
       'for session:',
       currentSessionId
     );
-    saveAccomplishment(accomplishment, currentSessionId);
+    saveAccomplishment(text, currentSessionId, category);
     setShowAccomplishmentRecorder(false);
     setCurrentSessionId('');
     setTimerMode('pomodoro'); // Reset to pomodoro mode after free session
