@@ -5,7 +5,7 @@ import TimerDisplay from './TimerDisplay';
 import TimerSettings from './TimerSetting';
 import ActivitySelector from './ActivitySelector';
 import AccomplishmentRecorder from './AccomplishmentRecorder';
-import FreeTimer from './FreeTimer'; // Import the new component
+import FreeTimer from './FreeTimer';
 import { useTimerLogic } from '@/hooks/timer/useTimerLogic';
 import { defaultActivityCategories, TimerState } from '@/lib/timer';
 import styles from './timer.module.css';
@@ -15,11 +15,11 @@ export default function TimerContainer() {
   const [selectedActivity, setSelectedActivity] = useState(
     defaultActivityCategories[0]
   );
+  // Create our own direct state for accomplishment recorder
   const [showAccomplishmentRecorder, setShowAccomplishmentRecorder] =
     useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState('');
   const [timerMode, setTimerMode] = useState<'pomodoro' | 'free'>('pomodoro');
-  // Add this missing state declaration
-  const [freeSessionCompleted, setFreeSessionCompleted] = useState(false);
 
   const {
     timerData,
@@ -32,31 +32,58 @@ export default function TimerContainer() {
     recordFreeSession,
   } = useTimerLogic(selectedActivity);
 
-  // Check if we should show the accomplishment recorder
+  // Check if we should show the accomplishment recorder based on timer state
   useEffect(() => {
-    // Show the recorder when a focus session just ended and we're in a break
-    setShowAccomplishmentRecorder(
+    if (
       timerData.state === TimerState.BREAK &&
-        !!timerData.showAccomplishmentRecorder
-    );
+      timerData.showAccomplishmentRecorder
+    ) {
+      setShowAccomplishmentRecorder(true);
+    }
   }, [timerData.state, timerData.showAccomplishmentRecorder]);
 
+  // Handle free session completion directly
   const handleFreeSessionComplete = (duration: number) => {
-    // Record the free session
-    recordFreeSession(duration, selectedActivity);
+    // Get the session ID from recording the session
+    const sessionId = recordFreeSession(duration, selectedActivity);
 
-    // Set a flag that we just completed a free session
-    setFreeSessionCompleted(true);
+    // Store the session ID for the accomplishment
+    setCurrentSessionId(sessionId);
 
-    // Show accomplishment recorder
+    // Explicitly show the accomplishment recorder
+    console.log('Free session completed, showing accomplishment recorder');
     setShowAccomplishmentRecorder(true);
   };
 
-  console.log(
-    'Component render - showAccomplishmentRecorder:',
-    showAccomplishmentRecorder
-  );
-  console.log('Timer data:', timerData);
+  // Handle saving an accomplishment
+  const handleSaveAccomplishment = (accomplishment: string) => {
+    console.log(
+      'Saving accomplishment:',
+      accomplishment,
+      'for session:',
+      currentSessionId
+    );
+    saveAccomplishment(accomplishment, currentSessionId);
+    setShowAccomplishmentRecorder(false);
+    setCurrentSessionId('');
+    setTimerMode('pomodoro'); // Reset to pomodoro mode after free session
+  };
+
+  // Handle skipping the accomplishment
+  const handleSkipAccomplishment = () => {
+    console.log('Skipping accomplishment for session:', currentSessionId);
+    skipAccomplishment();
+    setShowAccomplishmentRecorder(false);
+    setCurrentSessionId('');
+    setTimerMode('pomodoro'); // Reset to pomodoro mode after free session
+  };
+
+  console.log('Component render state:', {
+    showAccomplishmentRecorder,
+    currentSessionId,
+    timerState: timerData.state,
+    showAccomplishmentFlag: timerData.showAccomplishmentRecorder,
+  });
 
   return (
     <div className={styles.timerContainer}>
@@ -72,24 +99,8 @@ export default function TimerContainer() {
       ) : showAccomplishmentRecorder ? (
         <AccomplishmentRecorder
           activity={selectedActivity}
-          onSave={(accomplishment) => {
-            console.log('Saving accomplishment:', accomplishment);
-            saveAccomplishment(accomplishment);
-            setShowAccomplishmentRecorder(false);
-            if (freeSessionCompleted) {
-              setFreeSessionCompleted(false);
-              setTimerMode('pomodoro'); // Reset to pomodoro mode after free session
-            }
-          }}
-          onSkip={() => {
-            console.log('Skipping accomplishment');
-            skipAccomplishment();
-            setShowAccomplishmentRecorder(false);
-            if (freeSessionCompleted) {
-              setFreeSessionCompleted(false);
-              setTimerMode('pomodoro'); // Reset to pomodoro mode after free session
-            }
-          }}
+          onSave={handleSaveAccomplishment}
+          onSkip={handleSkipAccomplishment}
         />
       ) : (
         <>
