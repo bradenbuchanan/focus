@@ -13,35 +13,37 @@ export function useSessionTracking() {
 
   // Record completed session
 const recordSession = (
-    sessionType: 'focus' | 'break', 
-    activity: string, 
-    completed: boolean = true,
-    customDuration?: number // Add this parameter
-  ) => {
-    if (!sessionStartTimeRef.current && customDuration === undefined) return;
-    
-    // Use custom duration if provided, otherwise calculate from start time
-    const sessionDuration = customDuration !== undefined 
-      ? customDuration 
-      : Math.floor((Date.now() - (sessionStartTimeRef.current || Date.now())) / 1000);
-    
-    const session: TimerSession = {
-      date: new Date().toISOString(),
-      localDate: getLocalDateString(new Date()),
-      duration: sessionDuration,
-      type: sessionType,
-      completed,
-      activity: activity,
-    };
+  sessionType: 'focus' | 'break', 
+  activity: string, 
+  completed: boolean = true,
+  customDuration?: number
+) => {
+  if (!sessionStartTimeRef.current && customDuration === undefined) return '';
   
-    saveSession(session);
-    
-    if (customDuration === undefined) {
-      sessionStartTimeRef.current = null;
-    }
-    
-    return sessionDuration;
+  // Use custom duration if provided, otherwise calculate from start time
+  const sessionDuration = customDuration !== undefined 
+    ? customDuration 
+    : Math.floor((Date.now() - (sessionStartTimeRef.current || Date.now())) / 1000);
+  
+  const session: TimerSession = {
+    id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(), // Generate ID here
+    date: new Date().toISOString(),
+    localDate: getLocalDateString(new Date()),
+    duration: sessionDuration,
+    type: sessionType,
+    completed,
+    activity: activity,
   };
+
+  // Save session and get the session ID
+  const sessionId = saveSession(session);
+  
+  if (customDuration === undefined) {
+    sessionStartTimeRef.current = null;
+  }
+  
+  return sessionId; // Return the session ID
+};
   
   // Check if a session is currently being tracked
   const isSessionActive = () => {
