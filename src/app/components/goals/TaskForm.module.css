@@ -99,6 +99,81 @@
   .taskAddButton:hover {
     opacity: 0.9;
   }
+
+
+  /* Add to TaskForm.module.css */
+.prioritySelector {
+  display: flex;
+  gap: 0.3rem;
+  margin-left: 0.5rem;
+}
+
+.priorityButton {
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: all 0.2s;
+  color: white;
+}
+
+.priorityButton:hover {
+  opacity: 1;
+}
+
+.priorityButton.selected {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.highPriority {
+  background-color: #e53935;
+}
+
+.mediumPriority {
+  background-color: #fb8c00;
+}
+
+.lowPriority {
+  background-color: #43a047;
+}
+
+/* Add to TaskItem.module.css */
+.taskMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.priorityTag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: white;
+}
+
+.priorityHigh {
+  background-color: #e53935;
+}
+
+.priorityMedium {
+  background-color: #fb8c00;
+}
+
+.priorityLow {
+  background-color: #43a047;
+}
+
+.taskActivity {
+  color: var(--foreground);
+  opacity: 0.7;
+}
   
   @media (max-width: 600px) {
     .taskForm {
