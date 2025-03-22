@@ -1,0 +1,179 @@
+/* src/app/components/goals/TaskItem.module.css */
+
+.taskItem {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: var(--gray-alpha-100);
+    transition: background-color 0.2s ease;
+    margin-bottom: 0.5rem;
+  }
+  
+  .taskItem:hover {
+    background-color: var(--gray-alpha-200);
+  }
+  
+  .taskCompleted .taskText {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+  
+  .taskCheckbox {
+    margin-right: 0.75rem;
+  }
+  
+  .taskCheckbox input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  
+  .taskTextContainer {
+    flex: 1;
+    padding-right: 0.5rem;
+  }
+  
+  .taskText {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  
+  .taskActivity {
+    font-size: 0.8rem;
+    color: var(--foreground);
+    opacity: 0.7;
+    margin-top: 0.25rem;
+  }
+  
+  .taskActions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .taskEditButton,
+  .taskDeleteButton {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    font-size: 1rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    color: var(--foreground);
+  }
+  
+  .taskEditButton:hover,
+  .taskDeleteButton:hover {
+    opacity: 1;
+  }
+  
+  /* Edit form */
+  .taskEditForm {
+    background-color: var(--background);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--gray-alpha-200);
+    margin-bottom: 0.5rem;
+  }
+  
+  .taskEditInput {
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--gray-alpha-200);
+    background-color: var(--background);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .taskActivitySelector {
+    margin-bottom: 0.75rem;
+    position: relative;
+  }
+  
+  .activitySelectorButton {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--gray-alpha-200);
+    background-color: var(--gray-alpha-100);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    color: var(--foreground);
+  }
+  
+  .activitySelectorDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    padding: 0.75rem;
+    background-color: var(--background);
+    border: 1px solid var(--gray-alpha-200);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(var(--gray-rgb), 0.1);
+  }
+  
+  .activityOption {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 1rem;
+    background-color: var(--gray-alpha-100);
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--foreground);
+  }
+  
+  .activityOption.selected {
+    background-color: var(--foreground);
+    color: var(--background);
+  }
+  
+  .taskEditActions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+  
+  .taskSaveButton,
+  .taskCancelButton {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  
+  .taskSaveButton {
+    background-color: var(--foreground);
+    color: var(--background);
+    border: none;
+  }
+  
+  .taskCancelButton {
+    background-color: var(--gray-alpha-200);
+    color: var(--foreground);
+    border: none;
+  }
+  
+  @media (max-width: 600px) {
+    .taskItem {
+      padding: 0.6rem;
+    }
+    
+    .taskEditActions {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .taskSaveButton, 
+    .taskCancelButton {
+      width: 100%;
+    }
+  }

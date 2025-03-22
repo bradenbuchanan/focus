@@ -1,0 +1,116 @@
+/* src/app/components/goals/TaskForm.module.css */
+
+.taskForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--gray-alpha-100);
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  .taskInputContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .taskInput {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--gray-alpha-200);
+    background-color: var(--background);
+    font-size: 1rem;
+  }
+  
+  .taskMeta {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .selectedActivity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.3rem 0.8rem;
+    background-color: var(--gray-alpha-200);
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  
+  .editIcon {
+    opacity: 0.6;
+    font-size: 0.8rem;
+  }
+  
+  .selectActivityButton {
+    padding: 0.3rem 0.8rem;
+    border: none;
+    border-radius: 1rem;
+    background-color: var(--gray-alpha-200);
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--foreground);
+  }
+  
+  .activitySelectorDropdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background-color: var(--background);
+    border: 1px solid var(--gray-alpha-200);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(var(--gray-rgb), 0.1);
+  }
+  
+  .activityOption {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 1rem;
+    background-color: var(--gray-alpha-100);
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--foreground);
+  }
+  
+  .activityOption.selected {
+    background-color: var(--foreground);
+    color: var(--background);
+  }
+  
+  .taskAddButton {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background-color: var(--foreground);
+    color: var(--background);
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    align-self: flex-end;
+  }
+  
+  .taskAddButton:hover {
+    opacity: 0.9;
+  }
+  
+  @media (max-width: 600px) {
+    .taskForm {
+      padding: 0.75rem;
+    }
+    
+    .taskInput {
+      padding: 0.6rem;
+    }
+    
+    .activityOption {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+    }
+  }
