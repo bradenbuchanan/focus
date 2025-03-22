@@ -1,20 +1,45 @@
 // src/app/components/goals/GoalCard.tsx
 'use client';
 
-import { useState } from 'react';
-import { Goal, calculateGoalProgress, deleteGoal } from '@/lib/timer';
+import { useState, useEffect } from 'react';
+import {
+  Goal,
+  calculateGoalProgress,
+  deleteGoal,
+  getTasksForGoal,
+} from '@/lib/timer';
 import styles from '../../../app/goals/goals.module.css';
 import GoalEditForm from './GoalEditForm';
+import TaskForm from './TaskForm';
+import TaskItem from './TaskItem';
 
 interface GoalCardProps {
   goal: Goal;
   onDelete: () => void;
-  onEdit: () => void; // Add this to trigger a refresh when a goal is edited
+  onEdit: () => void;
 }
 
 export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [tasks, setTasks] = useState<any[]>([]);
   const { current, percentage } = calculateGoalProgress(goal);
+
+  // Load tasks associated with this goal
+  const loadTasks = () => {
+    const goalTasks = getTasksForGoal(goal.id);
+    // Sort by completion status (incomplete first)
+    goalTasks.sort((a, b) => {
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    setTasks(goalTasks);
+  };
+
+  useEffect(() => {
+    loadTasks();
+  }, [goal.id]);
 
   const formatPeriod = (period: string) => {
     switch (period) {
@@ -41,6 +66,11 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
   const handleEditComplete = () => {
     setIsEditing(false);
     onEdit();
+  };
+
+  const handleTaskUpdate = () => {
+    loadTasks();
+    onEdit(); // Notify parent component in case goal progress is affected
   };
 
   if (isEditing) {
@@ -101,6 +131,25 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
               }}
             />
           </div>
+        </div>
+      </div>
+
+      {/* Tasks section */}
+      <div className={styles.tasksContainer}>
+        <h4 className={styles.tasksHeader}>Tasks for this Goal</h4>
+
+        <TaskForm goalId={goal.id} onAdd={handleTaskUpdate} />
+
+        <div className={styles.tasksList}>
+          {tasks.length > 0 ? (
+            tasks.map((task) => (
+              <TaskItem key={task.id} task={task} onUpdate={handleTaskUpdate} />
+            ))
+          ) : (
+            <div className={styles.noTasks}>
+              No tasks yet. Break down your goal into manageable steps!
+            </div>
+          )}
         </div>
       </div>
     </div>
