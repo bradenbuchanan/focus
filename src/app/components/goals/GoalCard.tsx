@@ -8,7 +8,7 @@ import {
   deleteGoal,
   getTasksForGoal,
 } from '@/lib/timer';
-import styles from '../../../app/goals/goals.module.css';
+import styles from './GoalCard.module.css';
 import GoalEditForm from './GoalEditForm';
 import TaskForm from './TaskForm';
 import TaskItem from './TaskItem';
