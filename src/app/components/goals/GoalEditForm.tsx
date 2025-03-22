@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Goal, updateGoal, defaultActivityCategories } from '@/lib/timer';
-import styles from '../../../app/goals/goals.module.css';
+import styles from './GoalEditForm.module.css';
 
 interface GoalEditFormProps {
   goal: Goal;
