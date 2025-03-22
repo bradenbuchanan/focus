@@ -17,6 +17,18 @@ export const defaultSettings: TimerSettings = {
   autoStartPomodoros: false
 };
 
+export interface Task {
+  id: string;
+  goalId?: string;  // Optional reference to a goal
+  text: string;     // The task description
+  completed: boolean;
+  createdAt: string; // ISO date string
+  dueDate?: string;  // Optional due date
+  activity?: string; // Activity category
+  priority?: 'low' | 'medium' | 'high';
+  completedAt?: string; // When the task was completed
+}
+
 export const defaultActivityCategories = [
   'Reading',
   'Studying',
@@ -222,4 +234,57 @@ export const calculateGoalProgress = (goal: Goal): {
   const percentage = Math.min(100, Math.round((current / goal.target) * 100));
   
   return { current, percentage };
+};
+
+
+// Functions to manage tasks
+export const getTasks = (): Task[] => {
+  if (typeof window === 'undefined') return [];
+  
+  const tasksData = localStorage.getItem('focusTasks');
+  return tasksData ? JSON.parse(tasksData) : [];
+};
+
+export const saveTask = (task: Task): void => {
+  if (typeof window === 'undefined') return;
+  
+  const tasks = getTasks();
+  tasks.push(task);
+  localStorage.setItem('focusTasks', JSON.stringify(tasks));
+};
+
+export const updateTask = (updatedTask: Task): void => {
+  if (typeof window === 'undefined') return;
+  
+  // Add completedAt date if task is being marked as completed
+  const tasks = getTasks();
+  const existingTask = tasks.find(t => t.id === updatedTask.id);
+  
+  if (existingTask && !existingTask.completed && updatedTask.completed) {
+    // Task is being marked as completed
+    updatedTask.completedAt = new Date().toISOString();
+  } else if (existingTask && existingTask.completed && !updatedTask.completed) {
+    // Task is being uncompleted
+    delete updatedTask.completedAt;
+  }
+  
+  const index = tasks.findIndex(t => t.id === updatedTask.id);
+  if (index !== -1) {
+    tasks[index] = updatedTask;
+    localStorage.setItem('focusTasks', JSON.stringify(tasks));
+  }
+};
+
+export const deleteTask = (taskId: string): void => {
+  if (typeof window === 'undefined') return;
+  
+  const tasks = getTasks();
+  const updatedTasks = tasks.filter(t => t.id !== taskId);
+  localStorage.setItem('focusTasks', JSON.stringify(updatedTasks));
+};
+
+// Get tasks for a specific goal
+export const getTasksForGoal = (goalId: string): Task[] => {
+  const tasks = getTasks();
+  return tasks.filter(task => task.goalId === goalId);
 };
