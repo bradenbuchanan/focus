@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Goal, saveGoal, defaultActivityCategories } from '@/lib/timer';
-import styles from '../../../app/goals/goals.module.css';
+import styles from './GoalForm.module.css';
 import { v4 as uuidv4 } from 'uuid';
 
 interface GoalFormProps {
