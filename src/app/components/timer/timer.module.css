@@ -305,6 +305,43 @@
 }
 
 
+.categorySelector {
+  margin: 1rem 0;
+}
+
+.categorySelector label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.categoryOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.categoryButton {
+  padding: 0.5rem 0.75rem;
+  background-color: var(--gray-alpha-100);
+  border: none;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.categoryButton:hover {
+  background-color: var(--gray-alpha-200);
+}
+
+.categoryButton.selected {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
+
 @media (max-width: 600px) {
   .accomplishmentRecorder h3 {
     font-size: 1.1rem;
