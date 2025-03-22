@@ -1,6 +1,4 @@
-// src/app/components/goals/TaskForm.tsx
-'use client';
-
+// In src/app/components/goals/TaskForm.tsx
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, saveTask, defaultActivityCategories } from '@/lib/timer';
@@ -19,11 +17,11 @@ export default function TaskForm({
 }: TaskFormProps) {
   const [text, setText] = useState('');
   const [activity, setActivity] = useState(defaultActivity || '');
+  const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium'); // Default to medium
   const [showActivitySelector, setShowActivitySelector] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted', { text, activity });
 
     if (text.trim()) {
       try {
@@ -34,11 +32,13 @@ export default function TaskForm({
           activity: activity || undefined,
           completed: false,
           createdAt: new Date().toISOString(),
+          priority: priority, // Add priority
         };
 
         saveTask(newTask);
         setText('');
         setActivity(defaultActivity || '');
+        setPriority('medium'); // Reset to default
         setShowActivitySelector(false);
         onAdd();
       } catch (error) {
@@ -59,6 +59,7 @@ export default function TaskForm({
         />
 
         <div className={styles.taskMeta}>
+          {/* Activity selector (existing code) */}
           {activity ? (
             <div
               className={styles.selectedActivity}
@@ -75,9 +76,44 @@ export default function TaskForm({
               Select Activity
             </button>
           )}
+
+          {/* Priority selector */}
+          <div className={styles.prioritySelector}>
+            <button
+              type="button"
+              className={`${styles.priorityButton} ${styles.highPriority} ${
+                priority === 'high' ? styles.selected : ''
+              }`}
+              onClick={() => setPriority('high')}
+              title="High Priority"
+            >
+              High
+            </button>
+            <button
+              type="button"
+              className={`${styles.priorityButton} ${styles.mediumPriority} ${
+                priority === 'medium' ? styles.selected : ''
+              }`}
+              onClick={() => setPriority('medium')}
+              title="Medium Priority"
+            >
+              Medium
+            </button>
+            <button
+              type="button"
+              className={`${styles.priorityButton} ${styles.lowPriority} ${
+                priority === 'low' ? styles.selected : ''
+              }`}
+              onClick={() => setPriority('low')}
+              title="Low Priority"
+            >
+              Low
+            </button>
+          </div>
         </div>
       </div>
 
+      {/* Activity dropdown (existing code) */}
       {showActivitySelector && (
         <div className={styles.activitySelectorDropdown}>
           {defaultActivityCategories.map((activityOption) => (
