@@ -10,6 +10,7 @@ import DashboardHeatmap from '../components/dashboard/DashboardHeatmap';
 import TopActivities from '../components/dashboard/TopActivities';
 import ActiveGoals from '../components/dashboard/ActiveGoals';
 import DashboardActions from '../components/dashboard/DashboardActions';
+import WeeklySummaryCard from '../components/analytics/WeeklySummaryCard';
 import { useDashboardData } from './hooks/useDashboardData';
 
 export default function Dashboard() {
@@ -33,12 +34,14 @@ export default function Dashboard() {
           </p>
         </div>
         <h1>Dashboard</h1>
-        {/* Rest of your code... */}
 
         <p>
           Welcome back, {session?.user?.name || 'User'}! Here's an overview of
           your focus activity.
         </p>
+
+        {/* Add Weekly Summary Card */}
+        {session?.user?.id && <WeeklySummaryCard userId={session.user.id} />}
 
         <DashboardStats stats={stats} />
 
