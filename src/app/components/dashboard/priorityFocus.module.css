@@ -1,0 +1,111 @@
+/* src/app/components/dashboard/priorityFocus.module.css */
+.priorityContainer {
+    background-color: var(--background);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px var(--gray-alpha-100);
+    border: 1px solid var(--gray-alpha-200);
+    transition: transform 0.2s ease;
+  }
+  
+  .priorityTitle {
+    font-size: 1.3rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .priorityTitle::before {
+    content: "⚡"; /* Lightning bolt icon to represent priority */
+    font-size: 1.1rem;
+  }
+  
+  .section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .section:last-child {
+    margin-bottom: 0;
+  }
+  
+  .sectionTitle {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    color: var(--foreground);
+    opacity: 0.8;
+  }
+  
+  .priorityList {
+    list-style: none;
+  }
+  
+  .priorityItem {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--gray-alpha-100);
+    gap: 0.75rem;
+  }
+  
+  .priorityItem:last-child {
+    border-bottom: none;
+  }
+  
+  .priorityBadge {
+    background-color: #e53935;
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .priorityText {
+    flex: 1;
+    font-weight: 500;
+  }
+  
+  .progressText {
+    font-size: 0.85rem;
+    opacity: 0.7;
+  }
+  
+  .goalProgress {
+    width: 3rem;
+    height: 0.5rem;
+    background-color: var(--gray-alpha-100);
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+  
+  .progressBar {
+    height: 100%;
+    background-color: #3B82F6;
+    border-radius: 1rem;
+  }
+  
+  .viewAllLink {
+    display: block;
+    text-align: right;
+    font-size: 0.85rem;
+    color: #3B82F6;
+    margin-top: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .viewAllLink:hover {
+    text-decoration: underline;
+  }
+  
+  @media (max-width: 768px) {
+    .priorityContainer {
+      padding: 1.25rem;
+    }
+  
+    .priorityTitle {
+      font-size: 1.2rem;
+    }
+  }
