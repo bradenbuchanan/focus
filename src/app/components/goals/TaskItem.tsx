@@ -19,16 +19,50 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(task.text);
   const [activity, setActivity] = useState(task.activity || '');
+  const [priority, setPriority] = useState<'high' | 'medium' | 'low'>(
+    task.priority || 'medium'
+  );
   const [showActivitySelector, setShowActivitySelector] = useState(false);
+  const [isFading, setIsFading] = useState(false);
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'Urgent';
+      case 'medium':
+        return 'Medium';
+      case 'low':
+        return 'Low';
+      default:
+        return 'Medium';
+    }
+  };
 
   const handleToggleComplete = () => {
-    const updatedTask = {
-      ...task,
-      completed: !task.completed,
-      completedAt: !task.completed ? new Date().toISOString() : undefined,
-    };
-    updateTask(updatedTask);
-    onUpdate();
+    // If task is being marked as complete, trigger fade
+    if (!task.completed) {
+      setIsFading(true);
+
+      // After animation completes, update the task
+      setTimeout(() => {
+        const updatedTask = {
+          ...task,
+          completed: true,
+          completedAt: new Date().toISOString(),
+        };
+        updateTask(updatedTask);
+        onUpdate();
+      }, 1100); // Animation duration (800ms) + delay (300ms)
+    } else {
+      // If unchecking, update immediately
+      const updatedTask = {
+        ...task,
+        completed: false,
+        completedAt: undefined,
+      };
+      updateTask(updatedTask);
+      onUpdate();
+    }
   };
 
   const handleDelete = () => {
@@ -45,6 +79,7 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
         ...task,
         text: text.trim(),
         activity: activity || undefined,
+        priority: priority,
       };
       updateTask(updatedTask);
       setIsEditing(false);
@@ -97,6 +132,39 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
           )}
         </div>
 
+        <div className={styles.taskPrioritySelector}>
+          <label>Priority:</label>
+          <div className={styles.priorityButtons}>
+            <button
+              type="button"
+              className={`${styles.priorityButton} ${styles.highPriority} ${
+                priority === 'high' ? styles.selected : ''
+              }`}
+              onClick={() => setPriority('high')}
+            >
+              Urgent
+            </button>
+            <button
+              type="button"
+              className={`${styles.priorityButton} ${styles.mediumPriority} ${
+                priority === 'medium' ? styles.selected : ''
+              }`}
+              onClick={() => setPriority('medium')}
+            >
+              Medium
+            </button>
+            <button
+              type="button"
+              className={`${styles.priorityButton} ${styles.lowPriority} ${
+                priority === 'low' ? styles.selected : ''
+              }`}
+              onClick={() => setPriority('low')}
+            >
+              Low
+            </button>
+          </div>
+        </div>
+
         <div className={styles.taskEditActions}>
           <button type="submit" className={styles.taskSaveButton}>
             Save
@@ -117,7 +185,7 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
     <div
       className={`${styles.taskItem} ${
         task.completed ? styles.taskCompleted : ''
-      }`}
+      } ${isFading ? styles.completedTaskFade : ''}`}
     >
       <div className={styles.taskCheckbox}>
         <input
@@ -128,9 +196,25 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
       </div>
       <div className={styles.taskTextContainer}>
         <div className={styles.taskText}>{task.text}</div>
-        {task.activity && (
-          <div className={styles.taskActivity}>{task.activity}</div>
-        )}
+        <div className={styles.taskMeta}>
+          {task.priority && (
+            <span
+              className={`${styles.priorityTag} ${
+                styles[
+                  `priority${
+                    task.priority.charAt(0).toUpperCase() +
+                    task.priority.slice(1)
+                  }`
+                ]
+              }`}
+            >
+              {getPriorityLabel(task.priority)}
+            </span>
+          )}
+          {task.activity && (
+            <span className={styles.taskActivity}>{task.activity}</span>
+          )}
+        </div>
       </div>
       <div className={styles.taskActions}>
         <button
