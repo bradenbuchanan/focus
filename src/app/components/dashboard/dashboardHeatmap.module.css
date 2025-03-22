@@ -1,146 +1,123 @@
-/* src/app/components/dashboard/dashboardHeatmap.module.css */
-.heatmapCard {
-    background-color: var(--background);
-    padding: 1.75rem;
-    border-radius: 1rem;
-    border: 1px solid var(--gray-alpha-200);
-    box-shadow: 0 4px 12px rgba(var(--gray-rgb), 0.05);
-    transition: transform 0.3s ease;
-    margin-bottom: 2rem;
+/* Add these styles to src/app/components/dashboard/dashboardHeatmap.module.css */
+
+.heatmapHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.controlsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.activitySelector {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--gray-alpha-200);
+  background-color: var(--background);
+  cursor: pointer;
+  font-size: 0.9rem;
+  min-width: 150px;
+}
+
+.activityHeatmapSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.maxCountInfo {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.refreshButton {
+  background: none;
+  border: 1px solid var(--gray-alpha-200);
+  color: var(--foreground);
+  opacity: 0.7;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.refreshButton:hover {
+  opacity: 1;
+  background-color: var(--gray-alpha-100);
+}
+
+.loadingIndicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+
+.heatmapLegend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background-color: var(--gray-alpha-100);
+  border-radius: 0.5rem;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.heatmapLegend span {
+  font-size: 0.75rem;
+  color: var(--foreground);
+  font-weight: 500;
+  padding: 0 0.25rem;
+}
+
+.heatmapLegend span:first-child {
+  margin-right: 0.25rem;
+}
+
+.heatmapLegend span:last-child {
+  margin-left: 0.25rem;
+}
+
+.legendCell {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid rgba(var(--gray-rgb), 0.1);
+  transition: transform 0.15s ease;
+}
+
+.legendCell:hover {
+  transform: scale(1.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .heatmapHeader {
+    flex-direction: column;
+    align-items: flex-start;
   }
   
-  
-  .heatmapCard:hover {
-    transform: translateY(-5px);
-  }
-  
-  .heatmapCard h3 {
-    margin-bottom: 1.25rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    position: relative;
-    padding-bottom: 0.75rem;
-  }
-  
-  .heatmapCard h3::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 40px;
-    height: 3px;
-    background-color: var(--gray-alpha-200);
-    border-radius: 3px;
-  }
-  
-  .heatmapWrapper {
+  .controlsRow {
     width: 100%;
-    overflow-x: auto;
-    margin-bottom: 1rem;
   }
   
-  .calendarHeatmapWrapper {
-    margin-top: 20px;
-    position: relative;
-    padding-left: 30px;
-    padding-top: 20px;
-    overflow-x: auto;
+  .activitySelector {
+    flex-grow: 1;
   }
-  
-  .monthLabelsRow {
-    position: relative;
-    height: 20px;
-    margin-bottom: 10px;
-  }
-  
-  .monthLabel {
-    position: absolute;
-    font-size: 0.75rem;
-    color: var(--foreground);
-    opacity: 0.7;
-    transform: translateX(-50%);
-  }
-  
-  .dayLabelsColumn {
-    position: absolute;
-    left: -30px;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-  }
-  
-  .dayLabel {
-    font-size: 0.75rem;
-    color: var(--foreground);
-    opacity: 0.7;
-    height: 20px;
-    line-height: 20px;
-  }
-  
-  .calendarGrid {
-    position: relative;
-    display: flex;
-  }
-  
-  .weekRows {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  
-  .dayRow {
-    display: flex;
-    gap: 2px;
-    height: 18px;
-  }
-  
-  .dayCell {
-    width: 18px;
-    height: 18px;
-    border-radius: 3px;
-    transition: transform 0.15s ease, opacity 0.1s;
-  }
-  
-  .dayCell:hover {
-    transform: scale(1.2);
-    opacity: 0.9;
-  }
-  
-  .heatmapLegend {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 4px;
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
-    color: var(--foreground);
-    opacity: 0.7;
-  }
-  
-  .legendCell {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-  }
-  
-  /* Mobile responsiveness */
-  @media (max-width: 768px) {
-    .calendarHeatmapWrapper {
-      padding-left: 25px;
-    }
-    
-    .dayLabel {
-      font-size: 0.7rem;
-    }
-    
-    .monthLabel {
-      font-size: 0.7rem;
-    }
-    
-    .dayCell {
-      width: 16px;
-      height: 16px;
-    }
-  }
+}
