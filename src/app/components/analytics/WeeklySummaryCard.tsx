@@ -219,13 +219,12 @@ ${dailySummariesText ? `DAILY BREAKDOWN:\n${dailySummariesText}\n\n` : ''}
 
 ${accomplishmentsList ? `ACCOMPLISHMENTS:\n${accomplishmentsList}\n\n` : ''}
 
-Based on this data, please:
-1. Provide a concise summary of the user's productive period (2-3 sentences)
-2. Highlight 2-3 specific achievements or positive patterns
-3. Suggest 1-2 actionable tips to improve focus or productivity
-4. Offer encouragement for the upcoming week
-
-Make your response personal, specific to the data, and limited to 4-5 paragraphs total.
+  Write:
+  1. ONE sentence summary
+  2. ONE sentence highlighting user's recorded accomplishments
+  3. TWO specific, actionable recommendations
+  4. ONE brief encouragement
+Make your response personal, specific to the data, and limited to 2-3 paragraphs total.
 `;
   }
 
