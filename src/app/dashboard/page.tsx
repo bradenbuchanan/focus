@@ -20,19 +20,6 @@ export default function Dashboard() {
   return (
     <ProtectedRoute>
       <div className={styles.dashboard}>
-        <div
-          style={{
-            background: '#f0f0f0',
-            padding: '10px',
-            marginBottom: '20px',
-            fontSize: '12px',
-          }}
-        >
-          <p>
-            Debug: Today is {new Date().toLocaleDateString()} (
-            {new Date().toLocaleString()})
-          </p>
-        </div>
         <h1>Dashboard</h1>
 
         <p>
