@@ -6,6 +6,7 @@ import { formatTime } from '@/lib/timer';
 import styles from './FreeTimer.module.css';
 
 interface FreeTimerProps {
+  activity: string;
   onComplete: (duration: number) => void;
   onCancel: () => void;
 }
