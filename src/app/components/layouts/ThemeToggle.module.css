@@ -1,0 +1,62 @@
+.themeToggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: var(--gray-alpha-100);
+    border: 1px solid var(--gray-alpha-200);
+    border-radius: 20px;
+    color: var(--foreground);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .themeToggle:hover {
+    background-color: var(--gray-alpha-200);
+    transform: translateY(-2px);
+  }
+  
+  .themeToggle:active {
+    transform: translateY(0);
+  }
+  
+  .label {
+    margin-left: 4px;
+  }
+  
+  /* Styling for different themes */
+  [data-theme="light"] .themeToggle {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  [data-theme="dark"] .themeToggle {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  [data-theme="darker"] .themeToggle {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .themeToggle {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+  }
+  
+  /* For very small screens, just show the icon */
+  @media (max-width: 480px) {
+    .label {
+      display: none;
+    }
+    
+    .themeToggle {
+      padding: 8px;
+      border-radius: 50%;
+      aspect-ratio: 1;
+    }
+  }
