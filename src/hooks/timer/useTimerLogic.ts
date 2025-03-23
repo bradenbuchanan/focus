@@ -7,7 +7,9 @@ import { useBackgroundTimer, StoredTimerState } from '../timer/useBackgroundTime
 import { useTimerInterval } from '../timer/useTimerInterval';
 import { useAccomplishments } from '../timer/useAccomplishments';
 import { getTimerEndTime, calculateTimeRemaining, playNotificationSound } from '../timer/utils';
-import { useSessionDB } from '@/hooks/useSessionDB'; // Add this import
+import { useSessionDB } from '@/hooks/useSessionDB';
+import { getTasks, updateTask, Task } from '@/lib/timer';
+
 
 export function useTimerLogic(selectedActivity: string) {
   // Declare state variables at the top - only once
@@ -254,6 +256,27 @@ const saveAccomplishment = (text: string, sessionId?: string, category?: string)
     updateSettings(newSettings);
   };
 
+  const completeTask = (taskId: string) => {
+    const tasks = getTasks();
+    const task = tasks.find(t => t.id === taskId);
+    
+    if (task) {
+      // Mark task as completed
+      const updatedTask = {
+        ...task,
+        completed: true,
+        completedAt: new Date().toISOString()
+      };
+      
+      updateTask(updatedTask);
+      return true;
+    }
+    
+    return false;
+  };
+
+
+
   return {
     timerData,
     startTimer: startTimerHandler,
@@ -264,5 +287,6 @@ const saveAccomplishment = (text: string, sessionId?: string, category?: string)
     saveAccomplishment,
     skipAccomplishment,
     recordFreeSession,
+    completeTask
   };
 }
