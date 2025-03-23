@@ -9,9 +9,14 @@ import { v4 as uuidv4 } from 'uuid';
 interface GoalFormProps {
   onSave: () => void;
   onCancel: () => void;
+  activity?: string;
 }
 
-export default function GoalForm({ onSave, onCancel }: GoalFormProps) {
+export default function GoalForm({
+  onSave,
+  onCancel,
+  activity,
+}: GoalFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<'time' | 'sessions'>('time');
@@ -19,7 +24,9 @@ export default function GoalForm({ onSave, onCancel }: GoalFormProps) {
   const [period, setPeriod] = useState<
     'daily' | 'weekly' | 'monthly' | 'yearly'
   >('weekly');
-  const [activity, setActivity] = useState<string>(''); // Empty string means "All activities"
+  const [selectedActivity, setSelectedActivity] = useState<string>(
+    activity || ''
+  ); // Use the activity prop if provided
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +40,7 @@ export default function GoalForm({ onSave, onCancel }: GoalFormProps) {
       period,
       startDate: new Date().toISOString(),
       createdAt: new Date().toISOString(),
-      activity: activity || undefined, // Only include if an activity is selected
+      activity: selectedActivity || undefined, // Only include if an activity is selected
     };
 
     saveGoal(newGoal);
@@ -117,8 +124,8 @@ export default function GoalForm({ onSave, onCancel }: GoalFormProps) {
             <label htmlFor="activity">Activity (Optional)</label>
             <select
               id="activity"
-              value={activity}
-              onChange={(e) => setActivity(e.target.value)}
+              value={selectedActivity}
+              onChange={(e) => setSelectedActivity(e.target.value)}
             >
               <option value="">All Activities</option>
               {defaultActivityCategories.map((category) => (

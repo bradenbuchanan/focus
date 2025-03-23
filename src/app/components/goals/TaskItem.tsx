@@ -22,6 +22,7 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
   const [priority, setPriority] = useState<'high' | 'medium' | 'low'>(
     task.priority || 'medium'
   );
+  const [dueDate, setDueDate] = useState<string>(task.dueDate || ''); // Add due date state
   const [showActivitySelector, setShowActivitySelector] = useState(false);
   const [isFading, setIsFading] = useState(false);
 
@@ -38,6 +39,56 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
     }
   };
 
+  // Helper to determine due date status
+  const getDueDateStatus = () => {
+    if (!task.dueDate) return 'none';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDateObj = new Date(task.dueDate);
+    dueDateObj.setHours(0, 0, 0, 0);
+
+    const timeDiff = dueDateObj.getTime() - today.getTime();
+    const daysDiff = timeDiff / (1000 * 3600 * 24);
+
+    if (daysDiff < 0) return 'overdue';
+    if (daysDiff <= 2) return 'soon';
+    return 'future';
+  };
+
+  // Format the due date for display
+  const formatDueDate = (dateString: string) => {
+    if (!dateString) return '';
+
+    const dueDateObj = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const dueDateOnly = new Date(dueDateObj);
+    dueDateOnly.setHours(0, 0, 0, 0);
+
+    if (dueDateOnly.getTime() === today.getTime()) {
+      return 'Today';
+    } else if (dueDateOnly.getTime() === tomorrow.getTime()) {
+      return 'Tomorrow';
+    } else {
+      return dueDateObj.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year:
+          dueDateObj.getFullYear() !== today.getFullYear()
+            ? 'numeric'
+            : undefined,
+      });
+    }
+  };
+
+  const dueDateStatus = getDueDateStatus();
+
   const handleToggleComplete = () => {
     // If task is being marked as complete, trigger fade
     if (!task.completed) {
@@ -51,7 +102,7 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
           completedAt: new Date().toISOString(),
         };
         updateTask(updatedTask);
-        onUpdate();
+        onUpdate(); // This will trigger the parent to refresh the task lists
       }, 1100); // Animation duration (800ms) + delay (300ms)
     } else {
       // If unchecking, update immediately
@@ -80,6 +131,7 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
         text: text.trim(),
         activity: activity || undefined,
         priority: priority,
+        dueDate: dueDate || undefined, // Add due date to updated task
       };
       updateTask(updatedTask);
       setIsEditing(false);
@@ -98,38 +150,53 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
           className={styles.taskEditInput}
         />
 
-        <div className={styles.taskActivitySelector}>
-          <button
-            type="button"
-            className={styles.activitySelectorButton}
-            onClick={() => setShowActivitySelector(!showActivitySelector)}
-          >
-            {activity || 'Select Activity'} ▼
-          </button>
+        <div className={styles.editFormRow}>
+          {/* Due date input */}
+          <div className={styles.formGroup}>
+            <label htmlFor={`due-date-${task.id}`}>Due Date:</label>
+            <input
+              id={`due-date-${task.id}`}
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className={styles.dueDateInput}
+              min={new Date().toISOString().split('T')[0]}
+            />
+          </div>
 
-          {showActivitySelector && (
-            <div className={styles.activitySelectorDropdown}>
-              {defaultActivityCategories.map((activityOption) => (
+          <div className={styles.taskActivitySelector}>
+            <button
+              type="button"
+              className={styles.activitySelectorButton}
+              onClick={() => setShowActivitySelector(!showActivitySelector)}
+            >
+              {activity || 'Select Activity'} ▼
+            </button>
+
+            {showActivitySelector && (
+              <div className={styles.activitySelectorDropdown}>
+                {defaultActivityCategories.map((activityOption) => (
+                  <button
+                    key={activityOption}
+                    type="button"
+                    className={`${styles.activityOption} ${
+                      activity === activityOption ? styles.selected : ''
+                    }`}
+                    onClick={() => setActivity(activityOption)}
+                  >
+                    {activityOption}
+                  </button>
+                ))}
                 <button
-                  key={activityOption}
                   type="button"
-                  className={`${styles.activityOption} ${
-                    activity === activityOption ? styles.selected : ''
-                  }`}
-                  onClick={() => setActivity(activityOption)}
+                  className={styles.activityOption}
+                  onClick={() => setActivity('')}
                 >
-                  {activityOption}
+                  None
                 </button>
-              ))}
-              <button
-                type="button"
-                className={styles.activityOption}
-                onClick={() => setActivity('')}
-              >
-                None
-              </button>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className={styles.taskPrioritySelector}>
@@ -213,6 +280,21 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
           )}
           {task.activity && (
             <span className={styles.taskActivity}>{task.activity}</span>
+          )}
+          {task.dueDate && (
+            <span
+              className={`${styles.dueDate} ${
+                styles[
+                  `dueDate${
+                    dueDateStatus.charAt(0).toUpperCase() +
+                    dueDateStatus.slice(1)
+                  }`
+                ]
+              }`}
+            >
+              {dueDateStatus === 'overdue' ? 'Overdue: ' : 'Due: '}
+              {formatDueDate(task.dueDate)}
+            </span>
           )}
         </div>
       </div>

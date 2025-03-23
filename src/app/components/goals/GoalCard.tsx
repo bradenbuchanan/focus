@@ -7,6 +7,7 @@ import {
   calculateGoalProgress,
   deleteGoal,
   getTasksForGoal,
+  Task,
 } from '@/lib/timer';
 import styles from './GoalCard.module.css';
 import GoalEditForm from './GoalEditForm';
@@ -21,20 +22,47 @@ interface GoalCardProps {
 
 export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [activeTasks, setActiveTasks] = useState<Task[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
+  const [showCompleted, setShowCompleted] = useState(false);
   const { current, percentage } = calculateGoalProgress(goal);
 
   // Load tasks associated with this goal
   const loadTasks = () => {
     const goalTasks = getTasksForGoal(goal.id);
-    // Sort by completion status (incomplete first)
-    goalTasks.sort((a, b) => {
-      if (a.completed !== b.completed) {
-        return a.completed ? 1 : -1;
+
+    // Separate active and completed tasks
+    const active = goalTasks.filter((task) => !task.completed);
+    const completed = goalTasks.filter((task) => task.completed);
+
+    // Sort active tasks by due date then by creation date
+    active.sort((a, b) => {
+      // First sort by due date (if available)
+      if (a.dueDate && b.dueDate) {
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      } else if (a.dueDate) {
+        return -1; // a has due date, b doesn't, a comes first
+      } else if (b.dueDate) {
+        return 1; // b has due date, a doesn't, b comes first
       }
+
+      // Then by creation date (newest first)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-    setTasks(goalTasks);
+
+    // Sort completed tasks by completion date
+    completed.sort((a, b) => {
+      const dateA = a.completedAt
+        ? new Date(a.completedAt)
+        : new Date(a.createdAt);
+      const dateB = b.completedAt
+        ? new Date(b.completedAt)
+        : new Date(b.createdAt);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    setActiveTasks(active);
+    setCompletedTasks(completed);
   };
 
   useEffect(() => {
@@ -141,16 +169,44 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
         <TaskForm goalId={goal.id} onAdd={handleTaskUpdate} />
 
         <div className={styles.tasksList}>
-          {tasks.length > 0 ? (
-            tasks.map((task) => (
+          {activeTasks.length > 0 ? (
+            activeTasks.map((task) => (
               <TaskItem key={task.id} task={task} onUpdate={handleTaskUpdate} />
             ))
           ) : (
             <div className={styles.noTasks}>
-              No tasks yet. Break down your goal into manageable steps!
+              No active tasks yet. Break down your goal into manageable steps!
             </div>
           )}
         </div>
+
+        {/* Toggle for completed tasks */}
+        {completedTasks.length > 0 && (
+          <div className={styles.completedTasksSection}>
+            <button
+              className={styles.toggleCompletedButton}
+              onClick={() => setShowCompleted(!showCompleted)}
+            >
+              {showCompleted ? 'Hide' : 'Show'} completed tasks (
+              {completedTasks.length})
+              <span className={styles.toggleIcon}>
+                {showCompleted ? '▲' : '▼'}
+              </span>
+            </button>
+
+            {showCompleted && (
+              <div className={styles.completedTasksList}>
+                {completedTasks.map((task) => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    onUpdate={handleTaskUpdate}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

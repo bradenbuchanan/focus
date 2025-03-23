@@ -1,4 +1,4 @@
-// In src/app/components/goals/TaskForm.tsx
+// src/app/components/goals/TaskForm.tsx
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, saveTask, defaultActivityCategories } from '@/lib/timer';
@@ -17,7 +17,8 @@ export default function TaskForm({
 }: TaskFormProps) {
   const [text, setText] = useState('');
   const [activity, setActivity] = useState(defaultActivity || '');
-  const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium'); // Default to medium
+  const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
+  const [dueDate, setDueDate] = useState<string>(''); // Add due date state
   const [showActivitySelector, setShowActivitySelector] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,13 +33,15 @@ export default function TaskForm({
           activity: activity || undefined,
           completed: false,
           createdAt: new Date().toISOString(),
-          priority: priority, // Add priority
+          priority: priority,
+          dueDate: dueDate || undefined, // Add due date to task
         };
 
         saveTask(newTask);
         setText('');
         setActivity(defaultActivity || '');
-        setPriority('medium'); // Reset to default
+        setPriority('medium');
+        setDueDate(''); // Reset due date
         setShowActivitySelector(false);
         onAdd();
       } catch (error) {
@@ -76,6 +79,18 @@ export default function TaskForm({
               Select Activity
             </button>
           )}
+
+          {/* Due date selector */}
+          <div className={styles.dueDateSelector}>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className={styles.dueDateInput}
+              min={new Date().toISOString().split('T')[0]} // Set min to today
+              title="Due date (optional)"
+            />
+          </div>
 
           {/* Priority selector */}
           <div className={styles.prioritySelector}>
