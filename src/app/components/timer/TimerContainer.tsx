@@ -1,3 +1,4 @@
+// src/app/components/timer/TimerContainer.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -69,59 +70,6 @@ export default function TimerContainer() {
     setActiveTab('timer'); // Return to timer tab after skipping
   };
 
-  // Content for the timer tab
-  const renderTimerContent = () => (
-    <>
-      <ActivitySelector
-        selectedActivity={selectedActivity}
-        onSelectActivity={setSelectedActivity}
-      />
-
-      <div className={styles.modeSwitcher}>
-        <button
-          className={`${styles.modeButton} ${
-            timerMode === 'pomodoro' ? styles.modeButtonActive : ''
-          }`}
-          onClick={() => setTimerMode('pomodoro')}
-        >
-          Pomodoro Timer
-        </button>
-        <button
-          className={`${styles.modeButton} ${
-            timerMode === 'free' ? styles.modeButtonActive : ''
-          }`}
-          onClick={() => setTimerMode('free')}
-        >
-          Free Timer
-        </button>
-      </div>
-
-      {timerMode === 'pomodoro' ? (
-        <TimerDisplay
-          timerData={timerData}
-          onStart={startTimer}
-          onPause={pauseTimer}
-          onReset={resetTimer}
-          onOpenSettings={() => setShowSettings(true)}
-        />
-      ) : (
-        <FreeTimer
-          activity={selectedActivity}
-          onComplete={handleFreeSessionComplete}
-          onCancel={() => setTimerMode('pomodoro')}
-        />
-      )}
-    </>
-  );
-
-  // Content for the goals tab
-  const renderGoalsContent = () => (
-    <TimerGoalsTasksPanel
-      activity={selectedActivity}
-      onTaskComplete={completeTask}
-    />
-  );
-
   return (
     <div className={styles.timerPageContainer}>
       <div className={styles.timerContainer}>
@@ -142,6 +90,7 @@ export default function TimerContainer() {
           />
         ) : (
           <>
+            {/* Tabs */}
             <div className={styles.tabsContainer}>
               <button
                 className={`${styles.tabButton} ${
@@ -161,10 +110,67 @@ export default function TimerContainer() {
               </button>
             </div>
 
-            <div className={styles.tabContent}>
-              {activeTab === 'timer'
-                ? renderTimerContent()
-                : renderGoalsContent()}
+            {/* Activity selector is always visible */}
+            <ActivitySelector
+              selectedActivity={selectedActivity}
+              onSelectActivity={setSelectedActivity}
+            />
+
+            {/* Timer content - hidden when not active */}
+            <div
+              className={styles.tabContent}
+              style={{ display: activeTab === 'timer' ? 'block' : 'none' }}
+            >
+              <div className={styles.modeSwitcher}>
+                <button
+                  className={`${styles.modeButton} ${
+                    timerMode === 'pomodoro' ? styles.modeButtonActive : ''
+                  }`}
+                  onClick={() => setTimerMode('pomodoro')}
+                >
+                  Pomodoro Timer
+                </button>
+                <button
+                  className={`${styles.modeButton} ${
+                    timerMode === 'free' ? styles.modeButtonActive : ''
+                  }`}
+                  onClick={() => setTimerMode('free')}
+                >
+                  Free Timer
+                </button>
+              </div>
+
+              {/* Keep both timer components mounted but only show the active one */}
+              <div
+                style={{ display: timerMode === 'pomodoro' ? 'block' : 'none' }}
+              >
+                <TimerDisplay
+                  timerData={timerData}
+                  onStart={startTimer}
+                  onPause={pauseTimer}
+                  onReset={resetTimer}
+                  onOpenSettings={() => setShowSettings(true)}
+                />
+              </div>
+
+              <div style={{ display: timerMode === 'free' ? 'block' : 'none' }}>
+                <FreeTimer
+                  activity={selectedActivity}
+                  onComplete={handleFreeSessionComplete}
+                  onCancel={() => setTimerMode('pomodoro')}
+                />
+              </div>
+            </div>
+
+            {/* Goals & Tasks content - hidden when not active */}
+            <div
+              className={styles.tabContent}
+              style={{ display: activeTab === 'goals' ? 'block' : 'none' }}
+            >
+              <TimerGoalsTasksPanel
+                activity={selectedActivity}
+                onTaskComplete={completeTask}
+              />
             </div>
           </>
         )}
