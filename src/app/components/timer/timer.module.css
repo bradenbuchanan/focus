@@ -21,7 +21,39 @@
     border-radius: 1rem;
     padding: 2rem;
     margin: 0 auto;
-    max-width: 500px;
+  }
+
+  .tabsContainer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+  }
+
+  .tabButton {
+    padding: 0.75rem 2rem;
+    border-radius: 0.75rem;
+    border: none;
+    background-color: var(--gray-alpha-200);
+    color: var(--foreground);
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+  }
+  
+  .tabButton:hover:not(.activeTab) {
+    background-color: var(--gray-alpha-300);
+  }
+  
+  .activeTab {
+    background-color: var(--foreground);
+    color: var(--background);
+  }
+  
+  .tabContent {
+    min-height: 400px; /* Ensure consistent height between tabs */
   }
   
   .timerDisplay {
@@ -339,6 +371,27 @@
 .categoryButton.selected {
   background-color: var(--foreground);
   color: var(--background);
+}
+.timerPageContainer {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.goalsTasksToggle {
+  background-color: var(--gray-alpha-200);
+  color: var(--foreground);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: auto; /* Push to the right */
+}
+
+.goalsTasksToggle:hover {
+  background-color: var(--gray-alpha-100);
 }
 
 
