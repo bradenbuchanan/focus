@@ -1,9 +1,9 @@
+// src/app/components/timer/TimerDisplay.tsx
 'use client';
 
-// src/components/timer/TimerDisplay.tsx
 import React from 'react';
 import { TimerData, TimerState, formatTime } from '@/lib/timer';
-import styles from './timer.module.css';
+import styles from './TimerDisplay.module.css';
 
 interface TimerDisplayProps {
   timerData: TimerData;

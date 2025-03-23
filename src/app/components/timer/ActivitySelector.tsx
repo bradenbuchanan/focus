@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import styles from './timer.module.css';
+import styles from './ActivitySelector.module.css';
 import { defaultActivityCategories } from '@/lib/timer';
 
 interface ActivitySelectorProps {

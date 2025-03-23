@@ -1,8 +1,9 @@
+// src/app/components/timer/FreeTimer.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { formatTime } from '@/lib/timer';
-import styles from './timer.module.css';
+import styles from './FreeTimer.module.css';
 
 interface FreeTimerProps {
   activity: string;
@@ -43,14 +44,14 @@ export default function FreeTimer({
 
   return (
     <div className={styles.freeTimerContainer}>
-      <h2>Free Time: {activity}</h2>
-
       <div className={styles.freeTimerDisplay}>
-        <div className={styles.time}>{formatTime(timeElapsed)}</div>
-        <p className={styles.freeTimerInfo}>
-          Time tracked: {Math.floor(timeElapsed / 60)} min {timeElapsed % 60}{' '}
-          sec
-        </p>
+        <div className={styles.timeContent}>
+          <div className={styles.time}>{formatTime(timeElapsed)}</div>
+          <p className={styles.freeTimerInfo}>
+            Time tracked: {Math.floor(timeElapsed / 60)} min {timeElapsed % 60}{' '}
+            sec
+          </p>
+        </div>
       </div>
 
       <div className={styles.controls}>
