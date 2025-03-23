@@ -8,6 +8,10 @@ import {
   LinearScale,
   BarElement,
   Tooltip,
+  TooltipItem,
+  Scale,
+  ScaleOptionsByType,
+  CoreScaleOptions,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
@@ -42,11 +46,11 @@ export default function WeeklyFocusChart({
           size: 13,
         },
         callbacks: {
-          title: function (context: any) {
-            return `${context[0].label}`;
+          title: function (tooltipItems: TooltipItem<'bar'>[]) {
+            return `${tooltipItems[0].label}`;
           },
-          label: function (context: any) {
-            return `${context.raw} minutes`;
+          label: function (tooltipItem: TooltipItem<'bar'>) {
+            return `${tooltipItem.raw} minutes`;
           },
         },
       },
@@ -64,10 +68,13 @@ export default function WeeklyFocusChart({
           },
           color: 'rgba(var(--gray-rgb), 0.7)',
           padding: 10,
-          callback: function (value: any) {
-            if (value % 1 === 0) {
-              return value;
+          // Update the callback signature to match what Chart.js expects
+          callback: function (tickValue: string | number) {
+            const numValue = Number(tickValue);
+            if (numValue % 1 === 0) {
+              return numValue;
             }
+            return '';
           },
         },
       },
