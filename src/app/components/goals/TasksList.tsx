@@ -1,7 +1,7 @@
 // src/app/components/goals/TasksList.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Task, getTasksForGoal } from '@/lib/timer';
 import TaskItem from './TaskItem';
 import TaskForm from './TaskForm';
@@ -18,7 +18,8 @@ export default function TasksList({ goalId }: TasksListProps) {
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
   const [showCompleted, setShowCompleted] = useState(false);
 
-  const loadTasks = () => {
+  // Use useCallback to memoize the loadTasks function
+  const loadTasks = useCallback(() => {
     const goalTasks = getTasksForGoal(goalId);
 
     // Separate active and completed
@@ -63,11 +64,11 @@ export default function TasksList({ goalId }: TasksListProps) {
     });
 
     setAvailableActivities(Array.from(activities));
-  };
+  }, [goalId]); // Only re-create this function if goalId changes
 
   useEffect(() => {
     loadTasks();
-  }, [goalId]);
+  }, [loadTasks]); // Now we include loadTasks in the dependency array
 
   // Filter tasks by activity
   const getFilteredTasks = (tasks: Task[]) => {

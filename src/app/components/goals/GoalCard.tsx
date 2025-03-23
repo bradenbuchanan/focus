@@ -1,7 +1,7 @@
 // src/app/components/goals/GoalCard.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Goal,
   calculateGoalProgress,
@@ -28,7 +28,7 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
   const { current, percentage } = calculateGoalProgress(goal);
 
   // Load tasks associated with this goal
-  const loadTasks = () => {
+  const loadTasks = useCallback(() => {
     const goalTasks = getTasksForGoal(goal.id);
 
     // Separate active and completed tasks
@@ -63,11 +63,11 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
 
     setActiveTasks(active);
     setCompletedTasks(completed);
-  };
+  }, [goal.id]); // Now goal.id is the only dependency
 
   useEffect(() => {
     loadTasks();
-  }, [goal.id]);
+  }, [loadTasks]);
 
   const formatPeriod = (period: string) => {
     switch (period) {
