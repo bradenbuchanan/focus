@@ -6,6 +6,7 @@ import TimerSettings from './TimerSetting';
 import ActivitySelector from './ActivitySelector';
 import AccomplishmentRecorder from './AccomplishmentRecorder';
 import FreeTimer from './FreeTimer';
+import TimerGoalsTasksPanel from './TimerGoalsTasksPanel';
 import { useTimerLogic } from '@/hooks/timer/useTimerLogic';
 import { defaultActivityCategories, TimerState } from '@/lib/timer';
 import styles from './timer.module.css';
@@ -15,11 +16,11 @@ export default function TimerContainer() {
   const [selectedActivity, setSelectedActivity] = useState(
     defaultActivityCategories[0]
   );
-  // Create our own direct state for accomplishment recorder
   const [showAccomplishmentRecorder, setShowAccomplishmentRecorder] =
     useState(false);
   const [currentSessionId, setCurrentSessionId] = useState('');
   const [timerMode, setTimerMode] = useState<'pomodoro' | 'free'>('pomodoro');
+  const [activeTab, setActiveTab] = useState<'timer' | 'goals'>('timer');
 
   const {
     timerData,
@@ -30,6 +31,7 @@ export default function TimerContainer() {
     saveAccomplishment,
     skipAccomplishment,
     recordFreeSession,
+    completeTask,
   } = useTimerLogic(selectedActivity);
 
   // Check if we should show the accomplishment recorder based on timer state
@@ -44,109 +46,129 @@ export default function TimerContainer() {
 
   // Handle free session completion directly
   const handleFreeSessionComplete = (duration: number) => {
-    // Get the session ID from recording the session
     const sessionId = recordFreeSession(duration, selectedActivity);
-
-    // Store the session ID for the accomplishment
     setCurrentSessionId(sessionId);
-
-    // Explicitly show the accomplishment recorder
-    console.log('Free session completed, showing accomplishment recorder');
     setShowAccomplishmentRecorder(true);
   };
 
   // Handle saving an accomplishment with category support
   const handleSaveAccomplishment = (text: string, category?: string) => {
-    console.log(
-      'Saving accomplishment:',
-      text,
-      'with category:',
-      category,
-      'for session:',
-      currentSessionId
-    );
     saveAccomplishment(text, currentSessionId, category);
     setShowAccomplishmentRecorder(false);
     setCurrentSessionId('');
-    setTimerMode('pomodoro'); // Reset to pomodoro mode after free session
+    setTimerMode('pomodoro');
+    setActiveTab('timer'); // Return to timer tab after saving
   };
 
   // Handle skipping the accomplishment
   const handleSkipAccomplishment = () => {
-    console.log('Skipping accomplishment for session:', currentSessionId);
     skipAccomplishment();
     setShowAccomplishmentRecorder(false);
     setCurrentSessionId('');
-    setTimerMode('pomodoro'); // Reset to pomodoro mode after free session
+    setTimerMode('pomodoro');
+    setActiveTab('timer'); // Return to timer tab after skipping
   };
 
-  console.log('Component render state:', {
-    showAccomplishmentRecorder,
-    currentSessionId,
-    timerState: timerData.state,
-    showAccomplishmentFlag: timerData.showAccomplishmentRecorder,
-  });
+  // Content for the timer tab
+  const renderTimerContent = () => (
+    <>
+      <ActivitySelector
+        selectedActivity={selectedActivity}
+        onSelectActivity={setSelectedActivity}
+      />
 
-  return (
-    <div className={styles.timerContainer}>
-      {showSettings ? (
-        <TimerSettings
-          settings={timerData.settings}
-          onSave={(settings) => {
-            updateSettings(settings);
-            setShowSettings(false);
-          }}
-          onCancel={() => setShowSettings(false)}
-        />
-      ) : showAccomplishmentRecorder ? (
-        <AccomplishmentRecorder
-          activity={selectedActivity}
-          onSave={handleSaveAccomplishment}
-          onSkip={handleSkipAccomplishment}
+      <div className={styles.modeSwitcher}>
+        <button
+          className={`${styles.modeButton} ${
+            timerMode === 'pomodoro' ? styles.modeButtonActive : ''
+          }`}
+          onClick={() => setTimerMode('pomodoro')}
+        >
+          Pomodoro Timer
+        </button>
+        <button
+          className={`${styles.modeButton} ${
+            timerMode === 'free' ? styles.modeButtonActive : ''
+          }`}
+          onClick={() => setTimerMode('free')}
+        >
+          Free Timer
+        </button>
+      </div>
+
+      {timerMode === 'pomodoro' ? (
+        <TimerDisplay
+          timerData={timerData}
+          onStart={startTimer}
+          onPause={pauseTimer}
+          onReset={resetTimer}
+          onOpenSettings={() => setShowSettings(true)}
         />
       ) : (
-        <>
-          <ActivitySelector
-            selectedActivity={selectedActivity}
-            onSelectActivity={setSelectedActivity}
-          />
-
-          <div className={styles.modeSwitcher}>
-            <button
-              className={`${styles.modeButton} ${
-                timerMode === 'pomodoro' ? styles.modeButtonActive : ''
-              }`}
-              onClick={() => setTimerMode('pomodoro')}
-            >
-              Pomodoro Timer
-            </button>
-            <button
-              className={`${styles.modeButton} ${
-                timerMode === 'free' ? styles.modeButtonActive : ''
-              }`}
-              onClick={() => setTimerMode('free')}
-            >
-              Free Timer
-            </button>
-          </div>
-
-          {timerMode === 'pomodoro' ? (
-            <TimerDisplay
-              timerData={timerData}
-              onStart={startTimer}
-              onPause={pauseTimer}
-              onReset={resetTimer}
-              onOpenSettings={() => setShowSettings(true)}
-            />
-          ) : (
-            <FreeTimer
-              activity={selectedActivity}
-              onComplete={handleFreeSessionComplete}
-              onCancel={() => setTimerMode('pomodoro')}
-            />
-          )}
-        </>
+        <FreeTimer
+          activity={selectedActivity}
+          onComplete={handleFreeSessionComplete}
+          onCancel={() => setTimerMode('pomodoro')}
+        />
       )}
+    </>
+  );
+
+  // Content for the goals tab
+  const renderGoalsContent = () => (
+    <TimerGoalsTasksPanel
+      activity={selectedActivity}
+      onTaskComplete={completeTask}
+    />
+  );
+
+  return (
+    <div className={styles.timerPageContainer}>
+      <div className={styles.timerContainer}>
+        {showSettings ? (
+          <TimerSettings
+            settings={timerData.settings}
+            onSave={(settings) => {
+              updateSettings(settings);
+              setShowSettings(false);
+            }}
+            onCancel={() => setShowSettings(false)}
+          />
+        ) : showAccomplishmentRecorder ? (
+          <AccomplishmentRecorder
+            activity={selectedActivity}
+            onSave={handleSaveAccomplishment}
+            onSkip={handleSkipAccomplishment}
+          />
+        ) : (
+          <>
+            <div className={styles.tabsContainer}>
+              <button
+                className={`${styles.tabButton} ${
+                  activeTab === 'timer' ? styles.activeTab : ''
+                }`}
+                onClick={() => setActiveTab('timer')}
+              >
+                Timer
+              </button>
+              <button
+                className={`${styles.tabButton} ${
+                  activeTab === 'goals' ? styles.activeTab : ''
+                }`}
+                onClick={() => setActiveTab('goals')}
+              >
+                Goals & Tasks
+              </button>
+            </div>
+
+            <div className={styles.tabContent}>
+              {activeTab === 'timer'
+                ? renderTimerContent()
+                : renderGoalsContent()}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
