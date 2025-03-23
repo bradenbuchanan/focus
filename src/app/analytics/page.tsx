@@ -24,7 +24,7 @@ export default function AnalyticsPage() {
       <h1>Analytics & Insights</h1>
       <p>Detailed breakdown of your focus habits and productivity patterns.</p>
 
-      {session?.user?.id && <WeeklySummaryCard userId={session.user.id} />}
+      {session?.user?.id && <WeeklySummaryCard />}
 
       <div className={styles.statsSection}>
         <SummaryCard summary={summary} />

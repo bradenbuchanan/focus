@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import { prisma } from '@/lib/ds'; // Make sure this points to the correct path for your DB file
+import { prisma } from '@/lib/ds'; 
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,18 +29,18 @@ export async function POST(req: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user - provide proper type or import User type
     const user = await prisma.user.create({
-        data: {
-          name,
-          email,
-          hashedPassword
-        }
-      }) as any; // This bypasses the TypeScript error
+      data: {
+        name,
+        email,
+        hashedPassword
+      }
+    });
       
-
-    // Remove password from response
-    const { hashedPassword: _, ...userWithoutPassword } = user;
+    // Use object rest spread without assigning to a variable
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { hashedPassword: removed, ...userWithoutPassword } = user;
 
     return NextResponse.json(
       { message: 'User created successfully', user: userWithoutPassword },

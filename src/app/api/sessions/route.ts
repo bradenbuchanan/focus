@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/ds';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,8 +19,8 @@ export async function GET(req: NextRequest) {
     const endDate = searchParams.get('endDate');
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     
-    // Build query filters
-    const dateFilter: any = {};
+    // Build query filters with proper typing
+    const dateFilter: Prisma.DateTimeFilter = {};
     if (startDate) {
       dateFilter.gte = new Date(startDate);
     }

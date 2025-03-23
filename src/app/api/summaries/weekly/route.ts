@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { generateUserWeeklySummary } from '@/lib/aggregation-service';
 import { generateInsightsFromData } from '@/lib/llm-service';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Authenticate user
     const session = await getServerSession(authOptions);

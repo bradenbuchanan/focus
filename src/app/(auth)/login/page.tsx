@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../auth.module.css';
 
@@ -14,7 +14,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
 
   // This is the login handler - replace your existing handleSubmit function with this one
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,7 +99,7 @@ export default function Login() {
 
         <div className={styles.authLinks}>
           <p>
-            Don't have an account? <Link href="/register">Sign up</Link>
+            Don&apos;t have an account? <Link href="/register">Sign up</Link>
           </p>
         </div>
       </div>

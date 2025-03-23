@@ -4,7 +4,7 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import { useState, useEffect, useRef } from 'react';
-import { TimerSession, getSessions } from '@/lib/timer';
+import { getSessions } from '@/lib/timer';
 import styles from './analytics.module.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
