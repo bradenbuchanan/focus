@@ -1,6 +1,6 @@
 // src/hooks/timer/useTimerLogic.ts
 import { useState, useEffect } from 'react';
-import { TimerState, getSettings, TimerSettings, TimerData, getLocalDateString, saveSession, TimerSession } from '@/lib/timer';
+import { TimerState, getSettings, TimerSettings } from '@/lib/timer';
 import { useTimerState } from '../timer/useTimerState';
 import { useSessionTracking } from '../timer/useSessionTracking';
 import { useBackgroundTimer, StoredTimerState } from '../timer/useBackgroundTimer';
@@ -113,7 +113,7 @@ const saveAccomplishment = (text: string, sessionId?: string, category?: string)
     
     storeTimer(endTime, stateToStore);
   };
-  
+
   const handleRestoreTimerState = () => {
     const { endTime, timerState } = retrieveStoredTimer();
     

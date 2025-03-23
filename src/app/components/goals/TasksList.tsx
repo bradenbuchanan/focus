@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Task, getTasksForGoal, defaultActivityCategories } from '@/lib/timer';
+import { Task, getTasksForGoal } from '@/lib/timer';
 import TaskItem from './TaskItem';
 import TaskForm from './TaskForm';
 import styles from './TaskList.module.css';

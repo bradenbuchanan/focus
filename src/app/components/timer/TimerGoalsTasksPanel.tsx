@@ -8,7 +8,6 @@ import {
   getGoals,
   getTasks,
   calculateGoalProgress,
-  updateTask,
 } from '@/lib/timer';
 import styles from './timerGoalsTasks.module.css';
 

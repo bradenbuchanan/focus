@@ -9,9 +9,10 @@ import {
   BarElement,
   Tooltip,
   TooltipItem,
-  Scale,
-  ScaleOptionsByType,
-  CoreScaleOptions,
+  // Removing unused imports:
+  // Scale,
+  // ScaleOptionsByType,
+  // CoreScaleOptions,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 

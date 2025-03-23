@@ -6,16 +6,11 @@ import { formatTime } from '@/lib/timer';
 import styles from './FreeTimer.module.css';
 
 interface FreeTimerProps {
-  activity: string;
   onComplete: (duration: number) => void;
   onCancel: () => void;
 }
 
-export default function FreeTimer({
-  activity,
-  onComplete,
-  onCancel,
-}: FreeTimerProps) {
+export default function FreeTimer({ onComplete, onCancel }: FreeTimerProps) {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
 

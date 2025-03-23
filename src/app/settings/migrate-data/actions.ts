@@ -5,18 +5,9 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from '@/lib/auth';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { Prisma } from '@prisma/client';
+// Removed the Prisma import since it's not being used
 
-// Interface for the Accomplishment model
-interface Accomplishment {
-  id: string;
-  text: string;
-  userId: string;
-  sessionId: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  categories?: string | null;
-}
+// Removed the unused Accomplishment interface
 
 // Validation schema for migration data
 const sessionSchema = z.array(z.object({

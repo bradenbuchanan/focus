@@ -1,6 +1,5 @@
 // src/hooks/timer/useTimerInterval.ts
 import { useRef, useEffect } from 'react';
-import { TimerState } from '@/lib/timer';
 
 export function useTimerInterval(
   isRunning: boolean,
