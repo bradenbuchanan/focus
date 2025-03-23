@@ -8,7 +8,7 @@ import { useTimerInterval } from '../timer/useTimerInterval';
 import { useAccomplishments } from '../timer/useAccomplishments';
 import { getTimerEndTime, calculateTimeRemaining, playNotificationSound } from '../timer/utils';
 import { useSessionDB } from '@/hooks/useSessionDB';
-import { getTasks, updateTask, Task } from '@/lib/timer';
+import { getTasks, updateTask } from '@/lib/timer';
 
 
 export function useTimerLogic(selectedActivity: string) {
@@ -41,18 +41,18 @@ export function useTimerLogic(selectedActivity: string) {
     saveAccomplishment: _saveAccomplishment,
     skipAccomplishment,
     promptForAccomplishment,
-    getAccomplishments,
     setSessionForAccomplishment,
   } = useAccomplishments();
 
   // Add the DB hook if it exists
-  const { saveSession: saveSessionToDB, saveAccomplishment: saveAccomplishmentToDB } = useSessionDB?.() || { saveSession: null, saveAccomplishment: null };
+  const { saveAccomplishment: saveAccomplishmentToDB } = useSessionDB?.() || 
+  { saveSession: null, saveAccomplishment: null };
 
   // Initial settings loading
-  useEffect(() => {
-    const settings = getSettings();
-    initializeSettings(settings);
-  }, []);
+ useEffect(() => {
+  const settings = getSettings();
+  initializeSettings(settings);
+}, [initializeSettings]);
 
 
 // In your useTimerLogic.ts file, modify the saveAccomplishment function:
@@ -113,13 +113,13 @@ const saveAccomplishment = (text: string, sessionId?: string, category?: string)
     
     storeTimer(endTime, stateToStore);
   };
-
+  
   const handleRestoreTimerState = () => {
     const { endTime, timerState } = retrieveStoredTimer();
     
     if (!endTime || !timerState) return;
     
-    const now = Date.now();
+    // Remove the unused 'now' variable
     const timeRemaining = calculateTimeRemaining(endTime);
     
     if (timeRemaining <= 0) {

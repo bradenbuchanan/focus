@@ -23,6 +23,17 @@ interface GoalProgress {
   percentage: number;
 }
 
+// Define session interface to replace 'any'
+interface Session {
+  id: string;
+  date: string;
+  localDate?: string;
+  duration: number;
+  type: 'focus' | 'break';
+  completed: boolean;
+  activity?: string;
+}
+
 export function useDashboardData() {
   const [stats, setStats] = useState({
     focusTimeToday: 0,
@@ -48,7 +59,7 @@ export function useDashboardData() {
   };
 
   // Helper function to get a consistent date string from a session
-  const getSessionDateString = (session: any): string => {
+  const getSessionDateString = (session: Session): string => {
     return session.localDate || session.date.split('T')[0];
   };
 
@@ -70,96 +81,91 @@ export function useDashboardData() {
     const sessionsCompleted = focusSessions.filter((s) => s.completed).length;
 
     // Calculate streak with proper timezone handling
-    const uniqueDaysWithSessions = new Set(
-      focusSessions
-        .filter((s) => s.completed)
-        .map((s) => getSessionDateString(s))
-    );
-    
+    // Note: uniqueDaysWithSessions is removed as it's not used
 
-// Replace the entire calculateStreak function with this implementation:
-const calculateStreak = () => {
-  console.log("======= STREAK DEBUGGING =======");
-  
-  // Get today's date at midnight in local time to avoid time issues
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  console.log("Today (local midnight):", today.toISOString());
-  
-  // Format to YYYY-MM-DD consistently
-  const formatToDateString = (date: Date): string => {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  };
-  
-  const todayString = formatToDateString(today);
-  console.log("Today formatted:", todayString);
-  
-  // Get all completed focus sessions
-  const completedSessions = focusSessions.filter(s => s.completed);
-  if (completedSessions.length === 0) return 0;
-  
-  // Extract all unique session dates and normalize them to YYYY-MM-DD format
-  const sessionDates = completedSessions.map(session => {
-    // Use localDate if available, otherwise parse from ISO date
-    if (session.localDate) return session.localDate;
-    const sessionDate = new Date(session.date);
-    return formatToDateString(sessionDate);
-  });
-  
-  // Get unique dates and sort in descending order (newest first)
-  const uniqueDates = [...new Set(sessionDates)].sort().reverse();
-  console.log("All session dates (newest first):", uniqueDates);
-  
-  // Check if there's activity today
-  const hasActivityToday = uniqueDates.includes(todayString);
-  console.log("Has activity today:", hasActivityToday);
-  
-  // If no activity today, check yesterday
-  if (!hasActivityToday) {
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayString = formatToDateString(yesterday);
-    console.log("Yesterday formatted:", yesterdayString);
-    
-    const hasActivityYesterday = uniqueDates.includes(yesterdayString);
-    console.log("Has activity yesterday:", hasActivityYesterday);
-    
-    if (!hasActivityYesterday) {
-      console.log("No recent activity. Streak is 0.");
-      return 0;
-    }
-  }
-  
-  // Start counting the streak
-  let currentStreak = 0;
-  let currentDate = new Date(today);
-  
-  // If we don't have activity today, start from yesterday
-  if (!hasActivityToday) {
-    currentDate.setDate(currentDate.getDate() - 1);
-  }
-  
-  // Check each day backwards until we find a gap
-  while (true) {
-    const dateString = formatToDateString(currentDate);
-    console.log("Checking date:", dateString);
-    
-    if (uniqueDates.includes(dateString)) {
-      currentStreak++;
-      console.log("Found activity, streak now:", currentStreak);
-    } else {
-      console.log("No activity on", dateString, "- breaking streak");
-      break; // Break the streak when we find a day with no activity
-    }
-    
-    // Move to the previous day
-    currentDate.setDate(currentDate.getDate() - 1);
-  }
-  
-  console.log("Final streak count:", currentStreak);
-  console.log("======= END STREAK DEBUG =======");
-  return currentStreak;
-};
+    // Replace the entire calculateStreak function with this implementation:
+    const calculateStreak = () => {
+      console.log("======= STREAK DEBUGGING =======");
+      
+      // Get today's date at midnight in local time to avoid time issues
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      console.log("Today (local midnight):", today.toISOString());
+      
+      // Format to YYYY-MM-DD consistently
+      const formatToDateString = (date: Date): string => {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      };
+      
+      const todayString = formatToDateString(today);
+      console.log("Today formatted:", todayString);
+      
+      // Get all completed focus sessions
+      const completedSessions = focusSessions.filter(s => s.completed);
+      if (completedSessions.length === 0) return 0;
+      
+      // Extract all unique session dates and normalize them to YYYY-MM-DD format
+      const sessionDates = completedSessions.map(session => {
+        // Use localDate if available, otherwise parse from ISO date
+        if (session.localDate) return session.localDate;
+        const sessionDate = new Date(session.date);
+        return formatToDateString(sessionDate);
+      });
+      
+      // Get unique dates and sort in descending order (newest first)
+      const uniqueDates = [...new Set(sessionDates)].sort().reverse();
+      console.log("All session dates (newest first):", uniqueDates);
+      
+      // Check if there's activity today
+      const hasActivityToday = uniqueDates.includes(todayString);
+      console.log("Has activity today:", hasActivityToday);
+      
+      // If no activity today, check yesterday
+      if (!hasActivityToday) {
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayString = formatToDateString(yesterday);
+        console.log("Yesterday formatted:", yesterdayString);
+        
+        const hasActivityYesterday = uniqueDates.includes(yesterdayString);
+        console.log("Has activity yesterday:", hasActivityYesterday);
+        
+        if (!hasActivityYesterday) {
+          console.log("No recent activity. Streak is 0.");
+          return 0;
+        }
+      }
+      
+      // Start counting the streak
+      let currentStreak = 0;
+      const currentDate = new Date(today);
+      
+      // If we don't have activity today, start from yesterday
+      if (!hasActivityToday) {
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+      
+      // Check each day backwards until we find a gap
+      while (true) {
+        const dateString = formatToDateString(currentDate);
+        console.log("Checking date:", dateString);
+        
+        if (uniqueDates.includes(dateString)) {
+          currentStreak++;
+          console.log("Found activity, streak now:", currentStreak);
+        } else {
+          console.log("No activity on", dateString, "- breaking streak");
+          break; // Break the streak when we find a day with no activity
+        }
+        
+        // Move to the previous day
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+      
+      console.log("Final streak count:", currentStreak);
+      console.log("======= END STREAK DEBUG =======");
+      return currentStreak;
+    };
     
     const currentStreak = calculateStreak();
 

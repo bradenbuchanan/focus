@@ -9,13 +9,12 @@ import WeeklyFocusChart from '../components/dashboard/WeeklyFocusChart';
 import DashboardHeatmap from '../components/dashboard/DashboardHeatmap';
 import TopActivities from '../components/dashboard/TopActivities';
 import DashboardActions from '../components/dashboard/DashboardActions';
-
 import PriorityFocus from '../components/dashboard/PriorityFocus';
 import { useDashboardData } from './hooks/useDashboardData';
 
 export default function Dashboard() {
   const { data: session } = useSession();
-  const { stats, activeGoals } = useDashboardData();
+  const { stats } = useDashboardData();
 
   return (
     <ProtectedRoute>
@@ -23,12 +22,13 @@ export default function Dashboard() {
         <h1>Dashboard</h1>
 
         <p>
-          Welcome back, {session?.user?.name || 'User'}! Here's an overview of
-          your focus activity.
+          Welcome back, {session?.user?.name || 'User'}! Here&apos;s an overview
+          of your focus activity.
         </p>
 
         {/* Add the Priority Focus component here */}
         <PriorityFocus />
+
         <DashboardStats stats={stats} />
 
         <DashboardHeatmap />

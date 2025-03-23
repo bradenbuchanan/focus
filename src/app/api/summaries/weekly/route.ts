@@ -1,5 +1,5 @@
 // src/app/api/summaries/weekly/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from '@/lib/auth';
 import { generateUserWeeklySummary } from '@/lib/aggregation-service';

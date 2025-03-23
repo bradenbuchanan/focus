@@ -27,9 +27,7 @@ export default function GoalsPage() {
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('goals');
-  const [taskFilter, setTaskFilter] = useState<'all' | 'active' | 'completed'>(
-    'all'
-  );
+  // Removed the unused taskFilter state variable
   const [activityFilter, setActivityFilter] = useState<string>('all');
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
 

@@ -54,7 +54,7 @@ export function useMultiActivityData() {
     // Process each activity
     const activityResults: ActivityData[] = [];
 
-    for (const [activityName, _] of activityMap) {
+    for (const [activityName] of activityMap) {
       const dateMap = new Map<string, number>();
       
       // Initialize all dates with 0

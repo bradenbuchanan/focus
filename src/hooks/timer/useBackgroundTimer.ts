@@ -1,7 +1,6 @@
 // src/hooks/timer/useBackgroundTimer.ts
 import { useEffect } from 'react';
 import { TimerState } from '@/lib/timer';
-import { getTimerEndTime, calculateTimeRemaining } from './utils';
 
 // Define interface for storing timer state
 export interface StoredTimerState {
