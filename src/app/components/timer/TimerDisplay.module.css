@@ -1,0 +1,101 @@
+/* src/app/components/timer/TimerDisplay.module.css */
+
+.timerDisplay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+  .progressRing {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .progressInner {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background-color: var(--background);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .focusProgress {
+    color: var(--foreground);
+  }
+  
+  .breakProgress {
+    color: #4caf50;
+  }
+  
+  .time {
+    font-size: 3.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  .sessionInfo {
+    font-size: 1.3rem;
+    margin-top: 0.5rem;
+  }
+  
+  .controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .primaryButton {
+    background-color: var(--foreground);
+    color: var(--background);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 100px;
+  }
+  
+  .secondaryButton {
+    background-color: var(--gray-alpha-200);
+    color: var(--foreground);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .primaryButton:hover,
+  .secondaryButton:hover {
+    opacity: 0.9;
+  }
+  
+  /* For responsive design */
+  @media (max-width: 600px) {
+    .progressRing {
+      width: 250px;
+      height: 250px;
+    }
+    
+    .progressInner {
+      width: 220px;
+      height: 220px;
+    }
+    
+    .time {
+      font-size: 3rem;
+    }
+    
+    .sessionInfo {
+      font-size: 1.1rem;
+    }
+  }
