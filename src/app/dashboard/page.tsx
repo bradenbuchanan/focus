@@ -9,7 +9,8 @@ import WeeklyFocusChart from '../components/dashboard/WeeklyFocusChart';
 import DashboardHeatmap from '../components/dashboard/DashboardHeatmap';
 import TopActivities from '../components/dashboard/TopActivities';
 import DashboardActions from '../components/dashboard/DashboardActions';
-import WeeklySummaryCard from '../components/analytics/WeeklySummaryCard';
+// Remove this import:
+// import WeeklySummaryCard from '../components/analytics/WeeklySummaryCard';
 import PriorityFocus from '../components/dashboard/PriorityFocus';
 import { useDashboardData } from './hooks/useDashboardData';
 
@@ -29,10 +30,6 @@ export default function Dashboard() {
 
         {/* Add the Priority Focus component here */}
         <PriorityFocus />
-
-        {/* Weekly Summary Card */}
-        {session?.user?.id && <WeeklySummaryCard userId={session.user.id} />}
-
         <DashboardStats stats={stats} />
 
         <DashboardHeatmap />
