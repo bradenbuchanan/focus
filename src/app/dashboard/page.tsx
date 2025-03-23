@@ -9,8 +9,7 @@ import WeeklyFocusChart from '../components/dashboard/WeeklyFocusChart';
 import DashboardHeatmap from '../components/dashboard/DashboardHeatmap';
 import TopActivities from '../components/dashboard/TopActivities';
 import DashboardActions from '../components/dashboard/DashboardActions';
-// Remove this import:
-// import WeeklySummaryCard from '../components/analytics/WeeklySummaryCard';
+
 import PriorityFocus from '../components/dashboard/PriorityFocus';
 import { useDashboardData } from './hooks/useDashboardData';
 
