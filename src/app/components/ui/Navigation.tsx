@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import styles from './navigation.module.css';
+import ThemeToggle from '../layouts/ThemeToggle';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -44,13 +45,18 @@ export default function Navigation() {
               >
                 Goals
               </Link>
-              <button
-                onClick={() => signOut({ callbackUrl: '/' })}
-                className={styles.signOut}
-              >
-                Sign Out
-              </button>
             </>
+          ) : null}
+        </nav>
+
+        <div className={styles.actions}>
+          {session ? (
+            <button
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className={styles.signOut}
+            >
+              Sign Out
+            </button>
           ) : (
             <>
               <Link
@@ -69,7 +75,8 @@ export default function Navigation() {
               </Link>
             </>
           )}
-        </nav>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );
