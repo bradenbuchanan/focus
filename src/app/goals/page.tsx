@@ -35,8 +35,14 @@ export default function GoalsPage() {
 
   // Load goals and tasks
   const loadData = () => {
+    console.log('Loading goals data');
+
     // Get all goals
     const allGoals = getGoals();
+    console.log('All goals:', allGoals);
+
+    // Initially, don't filter by completion
+    setGoals(allGoals);
 
     // Separate active and completed goals (consider a goal completed if progress ≥ 100%)
     const active: Goal[] = [];
@@ -62,11 +68,20 @@ export default function GoalsPage() {
     const activeTasks = allTasks.filter((task) => !task.completed);
     const doneTasks = allTasks.filter((task) => task.completed);
 
-    // Sort by creation/completion date
-    activeTasks.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    // Sort active tasks by due date and creation date
+    activeTasks.sort((a, b) => {
+      // First sort by due date (if available)
+      if (a.dueDate && b.dueDate) {
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      } else if (a.dueDate) {
+        return -1; // a has due date, b doesn't, a comes first
+      } else if (b.dueDate) {
+        return 1; // b has due date, a doesn't, b comes first
+      }
+
+      // Then by creation date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
     doneTasks.sort((a, b) => {
       // Sort by completion date if available, otherwise creation date
@@ -82,11 +97,20 @@ export default function GoalsPage() {
     setTasks(activeTasks);
     setCompletedTasks(doneTasks);
 
-    // Extract unique activities from all tasks
+    // Extract unique activities from all tasks AND goals
     const activities = new Set<string>();
+
+    // Add activities from tasks
     allTasks.forEach((task) => {
       if (task.activity) {
         activities.add(task.activity);
+      }
+    });
+
+    // Also add activities from goals
+    allGoals.forEach((goal) => {
+      if (goal.activity) {
+        activities.add(goal.activity);
       }
     });
 
@@ -106,13 +130,22 @@ export default function GoalsPage() {
       if (activityFilter !== 'all' && task.activity !== activityFilter) {
         return false;
       }
-
       return true;
     });
   };
 
+  // Filter goals based on activity
+  const getFilteredGoals = (goalsList: Goal[]) => {
+    if (activityFilter === 'all') return goalsList;
+
+    // Only return goals where the activity matches the filter
+    return goalsList.filter((goal) => goal.activity === activityFilter);
+  };
+
   const filteredActiveTasks = getFilteredTasks(tasks);
   const filteredCompletedTasks = getFilteredTasks(completedTasks);
+  const filteredGoals = getFilteredGoals(goals);
+  const filteredCompletedGoals = getFilteredGoals(completedGoals);
 
   return (
     <div className={styles.goalsPage}>
@@ -157,6 +190,36 @@ export default function GoalsPage() {
         ) : null}
       </div>
 
+      {/* Activity filter section - show for all tabs */}
+      {availableActivities.length > 0 && (
+        <div className={styles.filterBar}>
+          <div className={styles.activityFilters}>
+            <span className={styles.filterLabel}>Filter by Activity:</span>
+            <div className={styles.activityButtons}>
+              <button
+                className={`${styles.activityButton} ${
+                  activityFilter === 'all' ? styles.active : ''
+                }`}
+                onClick={() => setActivityFilter('all')}
+              >
+                All Activities
+              </button>
+              {availableActivities.map((activity) => (
+                <button
+                  key={activity}
+                  className={`${styles.activityButton} ${
+                    activityFilter === activity ? styles.active : ''
+                  }`}
+                  onClick={() => setActivityFilter(activity)}
+                >
+                  {activity}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {activeTab === 'goals' ? (
         // Goals tab content
         <>
@@ -167,12 +230,13 @@ export default function GoalsPage() {
                 setShowForm(false);
               }}
               onCancel={() => setShowForm(false)}
+              activity={activityFilter !== 'all' ? activityFilter : undefined}
             />
           ) : (
             <>
-              {goals.length > 0 ? (
+              {filteredGoals.length > 0 ? (
                 <div className={styles.goalsList}>
-                  {goals.map((goal) => (
+                  {filteredGoals.map((goal) => (
                     <GoalCard
                       key={goal.id}
                       goal={goal}
@@ -183,7 +247,10 @@ export default function GoalsPage() {
                 </div>
               ) : (
                 <div className={styles.emptyState}>
-                  <h3>No active goals</h3>
+                  <h3>
+                    No active goals{' '}
+                    {activityFilter !== 'all' ? `for ${activityFilter}` : ''}
+                  </h3>
                   <p>
                     Create your first productivity goal to start tracking your
                     progress
@@ -202,33 +269,6 @@ export default function GoalsPage() {
       ) : activeTab === 'tasks' ? (
         // Tasks tab content
         <div className={styles.tasksSection}>
-          <div className={tasksStyles.filterBar}>
-            <div className={tasksStyles.activityFilters}>
-              <span className={tasksStyles.filterLabel}>Activity:</span>
-              <div className={tasksStyles.activityButtons}>
-                <button
-                  className={`${tasksStyles.activityButton} ${
-                    activityFilter === 'all' ? tasksStyles.active : ''
-                  }`}
-                  onClick={() => setActivityFilter('all')}
-                >
-                  All Activities
-                </button>
-                {availableActivities.map((activity) => (
-                  <button
-                    key={activity}
-                    className={`${tasksStyles.activityButton} ${
-                      activityFilter === activity ? tasksStyles.active : ''
-                    }`}
-                    onClick={() => setActivityFilter(activity)}
-                  >
-                    {activity}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
           <TaskForm
             onAdd={loadData}
             activity={activityFilter !== 'all' ? activityFilter : undefined}
@@ -251,39 +291,12 @@ export default function GoalsPage() {
       ) : (
         // Completed tab content
         <div className={styles.completedSection}>
-          <div className={tasksStyles.filterBar}>
-            <div className={tasksStyles.activityFilters}>
-              <span className={tasksStyles.filterLabel}>Activity:</span>
-              <div className={tasksStyles.activityButtons}>
-                <button
-                  className={`${tasksStyles.activityButton} ${
-                    activityFilter === 'all' ? tasksStyles.active : ''
-                  }`}
-                  onClick={() => setActivityFilter('all')}
-                >
-                  All Activities
-                </button>
-                {availableActivities.map((activity) => (
-                  <button
-                    key={activity}
-                    className={`${tasksStyles.activityButton} ${
-                      activityFilter === activity ? tasksStyles.active : ''
-                    }`}
-                    onClick={() => setActivityFilter(activity)}
-                  >
-                    {activity}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
           {/* Completed goals section */}
           <div className={styles.completedGoals}>
             <h3 className={styles.sectionTitle}>Completed Goals</h3>
-            {completedGoals.length > 0 ? (
+            {filteredCompletedGoals.length > 0 ? (
               <div className={styles.goalsList}>
-                {completedGoals.map((goal) => (
+                {filteredCompletedGoals.map((goal) => (
                   <GoalCard
                     key={goal.id}
                     goal={goal}
@@ -294,7 +307,9 @@ export default function GoalsPage() {
               </div>
             ) : (
               <div className={styles.noItems}>
-                No completed goals yet. Keep working toward your objectives!
+                {activityFilter === 'all'
+                  ? 'No completed goals yet. Keep working toward your objectives!'
+                  : `No completed goals for ${activityFilter} yet.`}
               </div>
             )}
           </div>

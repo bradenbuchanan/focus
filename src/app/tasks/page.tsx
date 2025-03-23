@@ -9,30 +9,65 @@ import TaskForm from '@/app/components/goals/TaskForm';
 import styles from './tasks.module.css';
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [activeTasks, setActiveTasks] = useState<Task[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
 
   const loadTasks = () => {
     const allTasks = getTasks();
-    // Sort by completed status and creation date
-    allTasks.sort((a, b) => {
-      if (a.completed !== b.completed) {
-        return a.completed ? 1 : -1;
+
+    // Separate active and completed tasks
+    const active = allTasks.filter((task) => !task.completed);
+    const completed = allTasks.filter((task) => task.completed);
+
+    // Sort active tasks by dueDate (if available) and then by creation date
+    active.sort((a, b) => {
+      // First sort by due date (if available)
+      if (a.dueDate && b.dueDate) {
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      } else if (a.dueDate) {
+        return -1; // a has due date, b doesn't, a comes first
+      } else if (b.dueDate) {
+        return 1; // b has due date, a doesn't, b comes first
       }
+
+      // Then by creation date (newest first)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-    setTasks(allTasks);
+
+    // Sort completed tasks by completion date (newest first)
+    completed.sort((a, b) => {
+      const dateA = a.completedAt
+        ? new Date(a.completedAt)
+        : new Date(a.createdAt);
+      const dateB = b.completedAt
+        ? new Date(b.completedAt)
+        : new Date(b.createdAt);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    setActiveTasks(active);
+    setCompletedTasks(completed);
   };
 
   useEffect(() => {
     loadTasks();
   }, []);
 
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === 'active') return !task.completed;
-    if (filter === 'completed') return task.completed;
-    return true;
-  });
+  // Get filtered tasks based on the selected filter
+  const getFilteredTasks = () => {
+    switch (filter) {
+      case 'active':
+        return activeTasks;
+      case 'completed':
+        return completedTasks;
+      case 'all':
+      default:
+        return [...activeTasks, ...completedTasks];
+    }
+  };
+
+  const filteredTasks = getFilteredTasks();
 
   return (
     <div className={styles.tasksPage}>
