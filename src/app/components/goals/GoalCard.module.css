@@ -123,3 +123,40 @@
     background-color: var(--gray-alpha-100);
     border-radius: 0.5rem;
   }
+
+  .completedTasksSection {
+    margin-top: 2rem;
+    border-top: 1px solid var(--gray-alpha-200);
+    padding-top: 1rem;
+  }
+  
+  .toggleCompletedButton {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--foreground);
+    opacity: 0.7;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+    margin: 0 auto;
+    font-size: 0.9rem;
+  }
+  
+  .toggleCompletedButton:hover {
+    background-color: var(--gray-alpha-100);
+    opacity: 0.9;
+  }
+  
+  .toggleIcon {
+    font-size: 0.7rem;
+  }
+  
+  .completedTasksList {
+    margin-top: 1rem;
+    opacity: 0.8;
+  }

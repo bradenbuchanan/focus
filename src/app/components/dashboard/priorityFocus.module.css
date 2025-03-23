@@ -6,7 +6,6 @@
     margin-bottom: 2rem;
     box-shadow: 0 2px 8px var(--gray-alpha-100);
     border: 1px solid var(--gray-alpha-200);
-    transition: transform 0.2s ease;
   }
   
   .priorityTitle {
@@ -45,13 +44,11 @@
   .priorityItem {
     display: flex;
     align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--gray-alpha-100);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: var(--gray-alpha-100);
+    margin-bottom: 0.75rem;
     gap: 0.75rem;
-  }
-  
-  .priorityItem:last-child {
-    border-bottom: none;
   }
   
   .priorityBadge {
@@ -61,6 +58,7 @@
     padding: 0.2rem 0.5rem;
     border-radius: 0.75rem;
     font-weight: 500;
+    flex-shrink: 0;
   }
   
   .priorityText {
@@ -71,20 +69,93 @@
   .progressText {
     font-size: 0.85rem;
     opacity: 0.7;
+    flex-shrink: 0;
+  }
+  
+  .activityTag {
+    background-color: var(--gray-alpha-200);
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.75rem;
+    opacity: 0.8;
+    flex-shrink: 0;
+  }
+  
+  /* Goal item styling with clear visual hierarchy */
+  .goalItem {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: var(--gray-alpha-100);
+    margin-bottom: 0.75rem;
+  }
+  
+  .goalHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(var(--gray-rgb), 0.1);
+    margin-bottom: 0.5rem;
   }
   
   .goalProgress {
     width: 3rem;
     height: 0.5rem;
-    background-color: var(--gray-alpha-100);
+    background-color: rgba(var(--gray-rgb), 0.2);
     border-radius: 1rem;
     overflow: hidden;
+    flex-shrink: 0;
   }
   
   .progressBar {
     height: 100%;
     background-color: #3B82F6;
     border-radius: 1rem;
+  }
+  
+  /* Goal tasks styling - more distinctive and noticeable */
+  .goalTasks {
+    list-style: none;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background-color: rgba(var(--gray-rgb), 0.05);
+    border-radius: 0.5rem;
+  }
+  
+  .goalTask {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    margin-bottom: 0.25rem;
+    border-radius: 0.25rem;
+    background-color: var(--background);
+  }
+  
+  .goalTask:last-child {
+    margin-bottom: 0;
+  }
+  
+  .taskPriority {
+    background-color: #e53935;
+    color: white;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  
+  .taskText {
+    font-size: 0.9rem;
+  }
+  
+  .noTasks {
+    font-size: 0.85rem;
+    font-style: italic;
+    opacity: 0.7;
+    text-align: center;
+    padding: 0.5rem;
   }
   
   .viewAllLink {
@@ -107,5 +178,13 @@
   
     .priorityTitle {
       font-size: 1.2rem;
+    }
+    
+    .goalHeader {
+      flex-wrap: wrap;
+    }
+    
+    .goalProgress {
+      width: 2.5rem;
     }
   }

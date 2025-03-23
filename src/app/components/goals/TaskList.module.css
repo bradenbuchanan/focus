@@ -64,6 +64,42 @@
     color: var(--background);
     border-color: var(--foreground);
   }
+
+
+
+.completedTasksSection {
+  margin-top: 2rem;
+  border-top: 1px solid var(--gray-alpha-200);
+  padding-top: 1rem;
+}
+
+.toggleCompletedButton {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--foreground);
+  opacity: 0.8;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+  margin: 0 auto;
+}
+
+.toggleCompletedButton:hover {
+  background-color: var(--gray-alpha-100);
+}
+
+.toggleIcon {
+  font-size: 0.7rem;
+}
+
+.completedTasksList {
+  margin-top: 1rem;
+  opacity: 0.8;
+}
   
   @media (max-width: 768px) {
     .activityFilters {
