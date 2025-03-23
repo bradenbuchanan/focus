@@ -3,6 +3,7 @@
 
 import { useSession } from 'next-auth/react';
 import styles from './analytics.module.css';
+import WeeklySummaryCard from '@/app/components/analytics/WeeklySummaryCard';
 
 // Import custom hook
 import { useAnalyticsSummary } from '@/hooks/useAnalyticsSummary';
@@ -22,6 +23,8 @@ export default function AnalyticsPage() {
     <div className={styles.analyticsPage}>
       <h1>Analytics & Insights</h1>
       <p>Detailed breakdown of your focus habits and productivity patterns.</p>
+
+      {session?.user?.id && <WeeklySummaryCard userId={session.user.id} />}
 
       <div className={styles.statsSection}>
         <SummaryCard summary={summary} />
