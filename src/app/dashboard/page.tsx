@@ -2,7 +2,7 @@
 'use client';
 
 import ProtectedRoute from '../components/auth/ProtectedRoute';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/context/AuthContext';
 import styles from './dashboard.module.css';
 import DashboardStats from '../components/dashboard/DashboardStats';
 import WeeklyFocusChart from '../components/dashboard/WeeklyFocusChart';
@@ -13,7 +13,7 @@ import PriorityFocus from '../components/dashboard/PriorityFocus';
 import { useDashboardData } from './hooks/useDashboardData';
 
 export default function Dashboard() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const { stats } = useDashboardData();
 
   return (
@@ -22,8 +22,8 @@ export default function Dashboard() {
         <h1>Dashboard</h1>
 
         <p>
-          Welcome back, {session?.user?.name || 'User'}! Here&apos;s an overview
-          of your focus activity.
+          Welcome back, {user?.user_metadata?.name || 'User'}! Here&apos;s an
+          overview of your focus activity.
         </p>
 
         {/* Add the Priority Focus component here */}
