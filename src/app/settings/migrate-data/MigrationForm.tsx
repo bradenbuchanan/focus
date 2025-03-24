@@ -2,41 +2,28 @@
 'use client';
 
 import { useState } from 'react';
-import { migrateLocalData } from './actions';
+import { migrateLocalDataToSupabase } from '@/utils/dataMigration';
 import styles from './migration.module.css';
-
-// Define a proper interface for the migration result
-interface MigrationResult {
-  success: boolean;
-  sessionsCount?: number;
-  accomplishmentsCount?: number;
-  error?: string;
-}
+import { useAuth } from '@/context/AuthContext';
 
 export default function MigrationForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<MigrationResult | null>(null);
+  const [result, setResult] = useState<any | null>(null);
+  const { user } = useAuth();
 
   const handleMigrate = async () => {
-    if (typeof window === 'undefined') return;
+    if (!user) {
+      setResult({
+        success: false,
+        error: 'You must be logged in to migrate data',
+      });
+      return;
+    }
 
     setIsLoading(true);
 
     try {
-      // Get data from localStorage
-      const sessionsData = localStorage.getItem('timerSessions') || '[]';
-      const accomplishmentsData =
-        localStorage.getItem('focusAccomplishments') || '[]';
-
-      // Prepare form data
-      const formData = new FormData();
-      formData.append('sessions', sessionsData);
-      formData.append('accomplishments', accomplishmentsData);
-
-      // Call the server action
-      const migrationResult = (await migrateLocalData(
-        formData
-      )) as MigrationResult;
+      const migrationResult = await migrateLocalDataToSupabase();
       setResult(migrationResult);
 
       // If successful, optionally clear localStorage
@@ -48,6 +35,8 @@ export default function MigrationForm() {
         ) {
           localStorage.removeItem('timerSessions');
           localStorage.removeItem('focusAccomplishments');
+          localStorage.removeItem('focusGoals');
+          localStorage.removeItem('focusTasks');
         }
       }
     } catch (error) {
@@ -63,16 +52,21 @@ export default function MigrationForm() {
 
   return (
     <div className={styles.migrationContainer}>
-      <h2>Migrate Local Storage Data to Database</h2>
+      <h2>Migrate Local Storage Data to Supabase</h2>
       <p>
-        This will transfer your locally stored sessions and accomplishments to
-        the database.
+        This will transfer your locally stored data to your Supabase account.
       </p>
+
+      {!user && (
+        <div className={styles.error}>
+          You need to be logged in to migrate your data.
+        </div>
+      )}
 
       <button
         className={styles.primaryButton}
         onClick={handleMigrate}
-        disabled={isLoading}
+        disabled={isLoading || !user}
       >
         {isLoading ? 'Migrating...' : 'Migrate My Data'}
       </button>
@@ -85,8 +79,9 @@ export default function MigrationForm() {
         >
           {result.success ? (
             <p>
-              Successfully migrated {result.sessionsCount} sessions and{' '}
-              {result.accomplishmentsCount} accomplishments!
+              Successfully migrated {result.sessionsMigrated} sessions,{' '}
+              {result.accomplishmentsMigrated} accomplishments,{' '}
+              {result.goalsMigrated} goals, and {result.tasksMigrated} tasks!
             </p>
           ) : (
             <p>Error: {result.error}</p>
@@ -102,6 +97,10 @@ export default function MigrationForm() {
             Your locally stored data will remain until you choose to clear it.
           </li>
           <li>You should migrate your data only once to avoid duplicates.</li>
+          <li>
+            After migration, your data will be accessible from any device you
+            log in to.
+          </li>
         </ul>
       </div>
     </div>
