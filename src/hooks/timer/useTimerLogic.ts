@@ -1,5 +1,5 @@
 // src/hooks/timer/useTimerLogic.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TimerState, getSettings, TimerSettings } from '@/lib/timer';
 import { useTimerState } from '../timer/useTimerState';
 import { useSessionTracking } from '../timer/useSessionTracking';
@@ -10,57 +10,55 @@ import { getTimerEndTime, calculateTimeRemaining, playNotificationSound } from '
 import { useSessionDB } from '@/hooks/useSessionDB';
 import { getTasks, updateTask } from '@/lib/timer';
 
-
 export function useTimerLogic(selectedActivity: string) {
-  // Declare state variables at the top - only once
+  // Separate state that doesn't depend on timerData
   const [lastSessionId, setLastSessionId] = useState<string>('');
-
-  // Compose the smaller hooks
-  const {
-    timerData,
-    initializeSettings,
-    startTimer,
-    pauseTimer,
-    resetTimer,
-    updateSettings,
-    updateTimer,
-    completeTimer,
-    decrementTimer,
-  } = useTimerState();
-
-  const {
-    startSession,
-    recordSession,
-    isSessionActive,
-    getSessionStartTime,
-    setSessionStartTime,
-  } = useSessionTracking();
-
-  const {
-    showAccomplishmentPrompt,
-    saveAccomplishment: _saveAccomplishment,
-    skipAccomplishment,
-    promptForAccomplishment,
-    setSessionForAccomplishment,
-  } = useAccomplishments();
-
-  // Add the DB hook if it exists
-  const { saveAccomplishment: saveAccomplishmentToDB } = useSessionDB?.() || 
-  { saveSession: null, saveAccomplishment: null };
-
-  // Initial settings loading
- useEffect(() => {
-  const settings = getSettings();
-  initializeSettings(settings);
-}, [initializeSettings]);
-
-
-// In your useTimerLogic.ts file, modify the saveAccomplishment function:
-// In useTimerLogic.ts
-const saveAccomplishment = (text: string, sessionId?: string, category?: string) => {
-  const effectiveSessionId = sessionId || lastSessionId;
+  const [shouldShowAccomplishment, setShouldShowAccomplishment] = useState(false);
   
-  if (text.trim() && effectiveSessionId) {
+  // Ref to track if we're inside an effect to prevent double updates
+  const isUpdatingRef = useRef(false);
+  
+  // Get the base timer hooks
+  const timerStateHook = useTimerState();
+  const { timerData, startTimer, pauseTimer, resetTimer, updateSettings, 
+          updateTimer, completeTimer, decrementTimer } = timerStateHook;
+  
+  const sessionHook = useSessionTracking();
+  const { startSession, recordSession, isSessionActive, 
+          getSessionStartTime, setSessionStartTime } = sessionHook;
+  
+  const accomplishmentsHook = useAccomplishments();
+  const { showAccomplishmentPrompt, saveAccomplishment: _saveAccomplishment, 
+          skipAccomplishment, promptForAccomplishment, 
+          setSessionForAccomplishment } = accomplishmentsHook;
+  
+  // Optional DB hook
+  const dbHook = useSessionDB?.() || { saveSession: null, saveAccomplishment: null };
+  const { saveAccomplishment: saveAccomplishmentToDB } = dbHook;
+
+  // Load initial settings only once
+  useEffect(() => {
+    if (!isUpdatingRef.current) {
+      isUpdatingRef.current = true;
+      const settings = getSettings();
+      updateSettings(settings);
+      isUpdatingRef.current = false;
+    }
+  }, []);
+  
+  // Handle the accomplishment saving
+  const saveAccomplishment = (text: string, sessionId?: string, category?: string) => {
+    const effectiveSessionId = sessionId || lastSessionId;
+    
+    if (!text.trim() || !effectiveSessionId) {
+      return typeof saveAccomplishmentToDB === 'function' 
+        ? Promise.resolve(false) 
+        : false;
+    }
+    
+    // Reset state
+    setShouldShowAccomplishment(false);
+    
     if (typeof saveAccomplishmentToDB === 'function') {
       return saveAccomplishmentToDB(text.trim(), effectiveSessionId, category)
         .then(success => {
@@ -78,29 +76,23 @@ const saveAccomplishment = (text: string, sessionId?: string, category?: string)
       setLastSessionId('');
       return success;
     }
-  }
-  return typeof saveAccomplishmentToDB === 'function' ? Promise.resolve(false) : false;
-};
+  };
   
-  // Update the recordFreeSession function
+  // Record a free session
   const recordFreeSession = (duration: number, activity: string): string => {
-    // Create and save the session, getting its ID
     const sessionId = recordSession('focus', activity, true, duration);
-    
-    // Save the session ID for the accomplishment
     setLastSessionId(sessionId);
     setSessionForAccomplishment(sessionId);
-    
-    // Return the sessionId so the component can use it
+    setShouldShowAccomplishment(true);
     return sessionId;
   };
 
-  // Define handler functions for background timer
+  // Background timer handlers
   const handleStoreTimerState = () => {
     if (timerData.state !== TimerState.RUNNING && timerData.state !== TimerState.BREAK) {
       return;
     }
-
+    
     const endTime = getTimerEndTime(timerData.timeRemaining);
     
     const stateToStore: StoredTimerState = {
@@ -119,7 +111,6 @@ const saveAccomplishment = (text: string, sessionId?: string, category?: string)
     
     if (!endTime || !timerState) return;
     
-    // Remove the unused 'now' variable
     const timeRemaining = calculateTimeRemaining(endTime);
     
     if (timeRemaining <= 0) {
@@ -136,109 +127,91 @@ const saveAccomplishment = (text: string, sessionId?: string, category?: string)
     startInterval();
   };
 
-  // Instantiate background timer hook
-  const {
-    storeTimer,
-    retrieveStoredTimer,
-    clearStoredTimer,
-  } = useBackgroundTimer(
+  // Background timer hook
+  const backgroundHook = useBackgroundTimer(
     (isVisible) => {
-      // This fires when visibility changes
       console.log(`Document visibility changed: ${isVisible ? 'visible' : 'hidden'}`);
     },
     handleStoreTimerState,
     handleRestoreTimerState
   );
+  
+  const { storeTimer, retrieveStoredTimer, clearStoredTimer } = backgroundHook;
 
-  // Handle timer completion (from background or foreground)
+  // Timer completion handler
   const handleTimerCompletion = (state: StoredTimerState) => {
-    // Record the completed session
-    if (state.sessionStartTime) {
-      const sessionType = state.state === TimerState.BREAK ? 'break' : 'focus';
-      recordSession(sessionType, state.activity);
-      
-      // Only prompt for accomplishment if it was a focus session
-      if (sessionType === 'focus') {
-        promptForAccomplishment();
-      }
+    if (!state.sessionStartTime) {
+      // No active session to record
+      playNotificationSound();
+      clearStoredTimer();
+      completeTimer();
+      return;
     }
     
-    // Play notification
+    const sessionType = state.state === TimerState.BREAK ? 'break' : 'focus';
+    recordSession(sessionType, state.activity);
+    
+    // Only prompt for accomplishment if it was a focus session
+    if (sessionType === 'focus') {
+      promptForAccomplishment();
+      setShouldShowAccomplishment(true);
+    }
+    
     playNotificationSound();
-    
-    // Clear stored state
     clearStoredTimer();
-    
-    // Move to next timer state (break or focus)
     completeTimer();
   };
 
-  // Handle each timer tick
+  // Timer tick handler
   const handleTimerTick = () => {
     decrementTimer();
   };
 
+  // Timer completion handler
   const handleInterval = () => {
-    // Record completed session
     const sessionType = timerData.state === TimerState.BREAK ? 'break' : 'focus';
     const sessionId = recordSession(sessionType, selectedActivity);
     
-    // Only prompt for accomplishment if it was a focus session
+    // Only setup accomplishment for focus sessions
     if (sessionType === 'focus') {
-      // Save the session ID for the accomplishment
       setLastSessionId(sessionId);
       setSessionForAccomplishment(sessionId);
-      
-      // Call promptForAccomplishment
       promptForAccomplishment();
-      
-      // Set flag for accomplishment recorder
-      timerData.showAccomplishmentRecorder = true;
+      setShouldShowAccomplishment(true);
     }
-    // Play notification
+    
     playNotificationSound();
-    
-    // Clear stored state
     clearStoredTimer();
-    
-    // Complete timer and move to next state
     completeTimer();
   };
 
-  // Instantiate timer interval hook
-  const {
-    startInterval,
-    stopInterval,
-  } = useTimerInterval(
+  // Timer interval hook
+  const intervalHook = useTimerInterval(
     timerData.state === TimerState.RUNNING || timerData.state === TimerState.BREAK,
     handleTimerTick,
     handleInterval,
     timerData.timeRemaining
   );
+  
+  const { startInterval, stopInterval } = intervalHook;
 
-  // Public methods to expose to components
+  // Public handlers
   const startTimerHandler = () => {
-    // Start tracking the session if not already tracking
     if (!isSessionActive()) {
       startSession();
     }
     
     startTimer();
-    
-    // Store timer state for background operation
     handleStoreTimerState();
   };
 
   const pauseTimerHandler = () => {
     pauseTimer();
     stopInterval();
-    
-    // Clear stored state
     clearStoredTimer();
   };
 
   const resetTimerHandler = () => {
-    // Record incomplete session if active
     if (isSessionActive() && 
         (timerData.state === TimerState.RUNNING || timerData.state === TimerState.BREAK)) {
       const sessionType = timerData.state === TimerState.BREAK ? 'break' : 'focus';
@@ -247,9 +220,8 @@ const saveAccomplishment = (text: string, sessionId?: string, category?: string)
     
     stopInterval();
     resetTimer();
-    
-    // Clear stored state
     clearStoredTimer();
+    setShouldShowAccomplishment(false);
   };
 
   const updateSettingsHandler = (newSettings: TimerSettings) => {
@@ -261,7 +233,6 @@ const saveAccomplishment = (text: string, sessionId?: string, category?: string)
     const task = tasks.find(t => t.id === taskId);
     
     if (task) {
-      // Mark task as completed
       const updatedTask = {
         ...task,
         completed: true,
@@ -275,17 +246,19 @@ const saveAccomplishment = (text: string, sessionId?: string, category?: string)
     return false;
   };
 
-
-
+  // Return public API
   return {
     timerData,
     startTimer: startTimerHandler,
     pauseTimer: pauseTimerHandler,
     resetTimer: resetTimerHandler,
     updateSettings: updateSettingsHandler,
-    showAccomplishmentPrompt,
+    showAccomplishmentPrompt: shouldShowAccomplishment || showAccomplishmentPrompt,
     saveAccomplishment,
-    skipAccomplishment,
+    skipAccomplishment: () => {
+      setShouldShowAccomplishment(false);
+      return skipAccomplishment();
+    },
     recordFreeSession,
     completeTask
   };
