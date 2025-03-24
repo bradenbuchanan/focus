@@ -1,12 +1,16 @@
+// src/app/providers.tsx
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
-import { ThemeProvider } from '../providers/ThemeProvider'; // Adjust path as needed
+import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/providers/ThemeProvider';
+import { DataProvider } from '@/providers/DataProvider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
-      <ThemeProvider>{children}</ThemeProvider>
-    </SessionProvider>
+    <AuthProvider>
+      <DataProvider>
+        <ThemeProvider>{children}</ThemeProvider>
+      </DataProvider>
+    </AuthProvider>
   );
 }
