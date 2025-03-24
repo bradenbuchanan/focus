@@ -29,27 +29,23 @@ export default function TimerContainer() {
     pauseTimer,
     resetTimer,
     updateSettings,
+    showAccomplishmentPrompt,
     saveAccomplishment,
     skipAccomplishment,
     recordFreeSession,
     completeTask,
   } = useTimerLogic(selectedActivity);
 
-  // Check if we should show the accomplishment recorder based on timer state
+  // Check if we should show the accomplishment recorder
   useEffect(() => {
-    if (
-      timerData.state === TimerState.BREAK &&
-      timerData.showAccomplishmentRecorder
-    ) {
-      setShowAccomplishmentRecorder(true);
-    }
-  }, [timerData.state, timerData.showAccomplishmentRecorder]);
+    setShowAccomplishmentRecorder(showAccomplishmentPrompt);
+  }, [showAccomplishmentPrompt]);
 
   // Handle free session completion directly
   const handleFreeSessionComplete = (duration: number) => {
     const sessionId = recordFreeSession(duration, selectedActivity);
     setCurrentSessionId(sessionId);
-    setShowAccomplishmentRecorder(true);
+    // The showAccomplishmentRecorder will be set by the effect above
   };
 
   // Handle saving an accomplishment with category support
