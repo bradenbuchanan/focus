@@ -2,9 +2,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Goal, saveGoal, defaultActivityCategories } from '@/lib/timer';
+import { defaultActivityCategories } from '@/lib/timer';
 import styles from './GoalForm.module.css';
-import { v4 as uuidv4 } from 'uuid';
+import { useData } from '@/providers/DataProvider';
 
 interface GoalFormProps {
   onSave: () => void;
@@ -20,31 +20,35 @@ export default function GoalForm({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<'time' | 'sessions'>('time');
-  const [target, setTarget] = useState(60); // Default 60 minutes or sessions
+  const [target, setTarget] = useState(60);
   const [period, setPeriod] = useState<
     'daily' | 'weekly' | 'monthly' | 'yearly'
   >('weekly');
   const [selectedActivity, setSelectedActivity] = useState<string>(
     activity || ''
-  ); // Use the activity prop if provided
+  );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { saveGoal } = useData();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newGoal: Goal = {
-      id: uuidv4(),
-      title,
-      description,
-      type,
-      target,
-      period,
-      startDate: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      activity: selectedActivity || undefined, // Only include if an activity is selected
-    };
+    try {
+      await saveGoal({
+        title,
+        description: description || undefined,
+        type,
+        target,
+        period,
+        activity: selectedActivity || undefined,
+        startDate: new Date().toISOString(),
+      });
 
-    saveGoal(newGoal);
-    onSave();
+      onSave();
+    } catch (error) {
+      console.error('Error saving goal:', error);
+      // Consider adding error handling UI here
+    }
   };
 
   return (
