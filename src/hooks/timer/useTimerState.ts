@@ -14,7 +14,7 @@ export function useTimerState() {
 
   // Load initial settings
   const initializeSettings = (settings: TimerSettings) => {
-    setTimerData((prev) => ({
+    setTimerData(prev => ({
       ...prev,
       settings,
       timeRemaining: settings.focusDuration * 60,
@@ -23,17 +23,17 @@ export function useTimerState() {
 
   // Start timer
   const startTimer = () => {
-    setTimerData((prev) => ({ ...prev, state: TimerState.RUNNING }));
+    setTimerData(prev => ({ ...prev, state: TimerState.RUNNING }));
   };
 
   // Pause timer
   const pauseTimer = () => {
-    setTimerData((prev) => ({ ...prev, state: TimerState.PAUSED }));
+    setTimerData(prev => ({ ...prev, state: TimerState.PAUSED }));
   };
 
   // Reset timer
   const resetTimer = () => {
-    setTimerData((prev) => ({
+    setTimerData(prev => ({
       ...prev,
       state: TimerState.IDLE,
       timeRemaining: prev.settings.focusDuration * 60,
@@ -43,7 +43,7 @@ export function useTimerState() {
 
   // Update settings
   const updateSettings = (newSettings: TimerSettings) => {
-    setTimerData((prev) => {
+    setTimerData(prev => {
       // Calculate correct time remaining based on current state
       const timeRemaining = 
         prev.state === TimerState.BREAK
@@ -62,12 +62,12 @@ export function useTimerState() {
 
   // Update timer (called each second or when restoring from background)
   const updateTimer = (newTimeRemaining: number) => {
-    setTimerData((prev) => ({ ...prev, timeRemaining: newTimeRemaining }));
+    setTimerData(prev => ({ ...prev, timeRemaining: newTimeRemaining }));
   };
 
   // Handle timer completion
   const completeTimer = () => {
-    setTimerData((prev) => {
+    setTimerData(prev => {
       if (prev.state === TimerState.BREAK) {
         // After break, go to next focus session
         return {
@@ -94,7 +94,7 @@ export function useTimerState() {
 
   // Decrement timer by one second
   const decrementTimer = () => {
-    setTimerData((prev) => {
+    setTimerData(prev => {
       // Don't decrement if time is up
       if (prev.timeRemaining <= 0) return prev;
       return { ...prev, timeRemaining: prev.timeRemaining - 1 };
