@@ -54,31 +54,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, name: string) => {
     setIsLoading(true);
+    try {
+      console.log('Attempting signup with:', { email, name });
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name },
-      },
-    });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name },
+        },
+      });
 
-    if (error) throw error;
+      if (error) {
+        console.error('Supabase auth error:', error);
+        throw error;
+      }
 
-    // Create user profile
-    if (data?.user) {
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .insert({
-          id: data.user.id,
-          email,
-          name,
-        });
+      console.log('Signup successful, user data:', data);
 
-      if (profileError) throw profileError;
+      // Create user profile
+      if (data?.user) {
+        console.log('Creating user profile for:', data.user.id);
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .insert({
+            id: data.user.id,
+            email,
+            name,
+          });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          throw profileError;
+        }
+
+        console.log('User profile created successfully');
+      }
+    } catch (error) {
+      console.error('Signup process error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const signIn = async (email: string, password: string) => {

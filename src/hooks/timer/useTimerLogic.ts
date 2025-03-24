@@ -7,8 +7,8 @@ import { useBackgroundTimer, StoredTimerState } from '../timer/useBackgroundTime
 import { useTimerInterval } from '../timer/useTimerInterval';
 import { useAccomplishments } from '../timer/useAccomplishments';
 import { getTimerEndTime, calculateTimeRemaining, playNotificationSound } from '../timer/utils';
-import { useSessionDB } from '@/hooks/useSessionDB';
-import { getTasks, updateTask } from '@/lib/timer';
+import { useData } from '../../providers/DataProvider';
+import { getTasks } from '@/lib/timer';
 
 export function useTimerLogic(selectedActivity: string) {
   // Separate state that doesn't depend on timerData
@@ -18,23 +18,22 @@ export function useTimerLogic(selectedActivity: string) {
   // Ref to track if we're inside an effect to prevent double updates
   const isUpdatingRef = useRef(false);
   
+  // Get the data context
+  const { saveSession, updateTask, saveAccomplishment: saveAccomplishmentToSupabase } = useData();
+  
   // Get the base timer hooks
   const timerStateHook = useTimerState();
   const { timerData, startTimer, pauseTimer, resetTimer, updateSettings, 
           updateTimer, completeTimer, decrementTimer } = timerStateHook;
   
   const sessionHook = useSessionTracking();
-  const { startSession, recordSession, isSessionActive, 
+  const { startSession, recordSession: recordLocalSession, isSessionActive, 
           getSessionStartTime, setSessionStartTime } = sessionHook;
   
   const accomplishmentsHook = useAccomplishments();
-  const { showAccomplishmentPrompt, saveAccomplishment: _saveAccomplishment, 
+  const { showAccomplishmentPrompt, saveAccomplishment: saveLocalAccomplishment, 
           skipAccomplishment, promptForAccomplishment, 
           setSessionForAccomplishment } = accomplishmentsHook;
-  
-  // Optional DB hook
-  const dbHook = useSessionDB?.() || { saveSession: null, saveAccomplishment: null };
-  const { saveAccomplishment: saveAccomplishmentToDB } = dbHook;
 
   // Load initial settings only once
   useEffect(() => {
@@ -44,43 +43,80 @@ export function useTimerLogic(selectedActivity: string) {
       updateSettings(settings);
       isUpdatingRef.current = false;
     }
-  }, []);
+  }, [updateSettings]);
+  
+  // Record a session (first to Supabase, fallback to localStorage)
+  const recordSession = async (
+    sessionType: 'focus' | 'break', 
+    activity: string, 
+    completed: boolean = true,
+    customDuration?: number
+  ) => {
+    if (!isSessionActive() && customDuration === undefined) return '';
+    
+    // Use custom duration if provided, otherwise calculate from start time
+    const sessionDuration = customDuration !== undefined 
+      ? customDuration 
+      : Math.floor((Date.now() - (getSessionStartTime() || Date.now())) / 1000);
+    
+    try {
+      // Try to save to Supabase first
+      const sessionId = await saveSession({
+        startTime: new Date(getSessionStartTime() || Date.now()),
+        endTime: new Date(),
+        duration: sessionDuration,
+        type: sessionType,
+        completed,
+        activity,
+      });
+      
+      if (customDuration === undefined) {
+        setSessionStartTime(null);
+      }
+      
+      return sessionId;
+    } catch (error) {
+      console.error('Failed to save session to Supabase:', error);
+      
+      // Fallback to localStorage
+      return recordLocalSession(sessionType, activity, completed, customDuration);
+    }
+  };
   
   // Handle the accomplishment saving
-  const saveAccomplishment = (text: string, sessionId?: string, category?: string) => {
+  const saveAccomplishment = async (text: string, sessionId?: string, category?: string) => {
     const effectiveSessionId = sessionId || lastSessionId;
     
     if (!text.trim() || !effectiveSessionId) {
-      return typeof saveAccomplishmentToDB === 'function' 
-        ? Promise.resolve(false) 
-        : false;
+      return false;
     }
     
     // Reset state
     setShouldShowAccomplishment(false);
     
-    if (typeof saveAccomplishmentToDB === 'function') {
-      return saveAccomplishmentToDB(text.trim(), effectiveSessionId, category)
-        .then(success => {
-          if (success) {
-            setLastSessionId('');
-            return true;
-          }
-          return _saveAccomplishment(text, effectiveSessionId, category);
-        })
-        .catch(() => {
-          return _saveAccomplishment(text, effectiveSessionId, category);
-        });
-    } else {
-      const success = _saveAccomplishment(text, effectiveSessionId, category);
+    try {
+      // Try to save to Supabase first
+      await saveAccomplishmentToSupabase({
+        sessionId: effectiveSessionId,
+        text: text.trim(),
+        categories: category,
+      });
+      
+      setLastSessionId('');
+      return true;
+    } catch (error) {
+      console.error('Failed to save accomplishment to Supabase:', error);
+      
+      // Fallback to localStorage
+      const success = saveLocalAccomplishment(text, effectiveSessionId, category);
       setLastSessionId('');
       return success;
     }
   };
   
   // Record a free session
-  const recordFreeSession = (duration: number, activity: string): string => {
-    const sessionId = recordSession('focus', activity, true, duration);
+  const recordFreeSession = async (duration: number, activity: string): Promise<string> => {
+    const sessionId = await recordSession('focus', activity, true, duration);
     setLastSessionId(sessionId);
     setSessionForAccomplishment(sessionId);
     setShouldShowAccomplishment(true);
@@ -139,7 +175,7 @@ export function useTimerLogic(selectedActivity: string) {
   const { storeTimer, retrieveStoredTimer, clearStoredTimer } = backgroundHook;
 
   // Timer completion handler
-  const handleTimerCompletion = (state: StoredTimerState) => {
+  const handleTimerCompletion = async (state: StoredTimerState) => {
     if (!state.sessionStartTime) {
       // No active session to record
       playNotificationSound();
@@ -149,7 +185,7 @@ export function useTimerLogic(selectedActivity: string) {
     }
     
     const sessionType = state.state === TimerState.BREAK ? 'break' : 'focus';
-    recordSession(sessionType, state.activity);
+    await recordSession(sessionType, state.activity);
     
     // Only prompt for accomplishment if it was a focus session
     if (sessionType === 'focus') {
@@ -168,9 +204,9 @@ export function useTimerLogic(selectedActivity: string) {
   };
 
   // Timer completion handler
-  const handleInterval = () => {
+  const handleInterval = async () => {
     const sessionType = timerData.state === TimerState.BREAK ? 'break' : 'focus';
-    const sessionId = recordSession(sessionType, selectedActivity);
+    const sessionId = await recordSession(sessionType, selectedActivity);
     
     // Only setup accomplishment for focus sessions
     if (sessionType === 'focus') {
@@ -211,11 +247,11 @@ export function useTimerLogic(selectedActivity: string) {
     clearStoredTimer();
   };
 
-  const resetTimerHandler = () => {
+  const resetTimerHandler = async () => {
     if (isSessionActive() && 
         (timerData.state === TimerState.RUNNING || timerData.state === TimerState.BREAK)) {
       const sessionType = timerData.state === TimerState.BREAK ? 'break' : 'focus';
-      recordSession(sessionType, selectedActivity, false);
+      await recordSession(sessionType, selectedActivity, false);
     }
     
     stopInterval();
@@ -228,22 +264,36 @@ export function useTimerLogic(selectedActivity: string) {
     updateSettings(newSettings);
   };
 
-  const completeTask = (taskId: string) => {
-    const tasks = getTasks();
-    const task = tasks.find(t => t.id === taskId);
-    
-    if (task) {
-      const updatedTask = {
-        ...task,
+  const completeTask = async (taskId: string) => {
+    try {
+      // Try to update in Supabase first
+      await updateTask({
+        id: taskId,
         completed: true,
         completedAt: new Date().toISOString()
-      };
+      });
       
-      updateTask(updatedTask);
       return true;
+    } catch (error) {
+      console.error('Failed to update task in Supabase:', error);
+      
+      // Fallback to localStorage
+      const tasks = getTasks();
+      const task = tasks.find(t => t.id === taskId);
+      
+      if (task) {
+        const updatedTask = {
+          ...task,
+          completed: true,
+          completedAt: new Date().toISOString()
+        };
+        
+        updateTask(updatedTask);
+        return true;
+      }
+      
+      return false;
     }
-    
-    return false;
   };
 
   // Return public API
