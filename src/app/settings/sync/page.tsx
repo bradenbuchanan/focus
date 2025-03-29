@@ -42,8 +42,8 @@ export default function DataSyncPage() {
         <h2>Synchronize Data</h2>
         <p>
           This will fetch the latest data from the server and update your local
-          cache. Use this if you've made changes on another device and want to
-          see them here.
+          cache. Use this if you&apos;ve made changes on another device and want
+          to see them here.
         </p>
 
         <button
@@ -74,7 +74,8 @@ export default function DataSyncPage() {
         <p>
           Focus automatically syncs your data when you take actions like
           completing a session or updating a goal. Use this manual sync only if
-          you notice that some changes made on other devices aren't appearing.
+          you notice that some changes made on other devices aren&apos;t
+          appearing.
         </p>
       </div>
     </div>
