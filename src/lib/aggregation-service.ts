@@ -13,16 +13,6 @@ interface AccomplishmentType {
   updatedAt: Date;
   categories: string | null;
 }
-
-interface SessionSummary {
-  id: string;
-  date: string;
-  duration: number;
-  category: string | null;
-  accomplishment: string | null;
-  accomplishmentCategory: string | null;
-}
-
 interface DailySummary {
   date: string;
   totalMinutes: number;
@@ -86,25 +76,28 @@ export async function generateUserWeeklySummary(userId: string): Promise<WeeklyS
     // Then get accomplishments separately using raw query
     // Using raw query to bypass type issues
     const accomplishments = await prisma.$queryRaw<AccomplishmentType[]>`
-      SELECT * FROM "Accomplishment" 
-      WHERE "userId" = ${userId} 
-      AND "sessionId" IN (${Prisma.join(focusSessions.map(s => s.id))})
-    `;
+    SELECT * FROM "Accomplishment" 
+    WHERE "userId" = ${userId} 
+    AND "sessionId" IN (${Prisma.join(focusSessions.map((s: FocusSession) => s.id))})
+  `;
     
-    // Group accomplishments by session ID
-    const accomplishmentsBySession = accomplishments.reduce<Record<string, AccomplishmentType[]>>((acc, accomplishment) => {
-      if (!acc[accomplishment.sessionId]) {
-        acc[accomplishment.sessionId] = [];
-      }
-      acc[accomplishment.sessionId].push(accomplishment);
-      return acc;
-    }, {});
+// Group accomplishments by session ID
+const accomplishmentsBySession = accomplishments.reduce((acc: Record<string, AccomplishmentType[]>, accomplishment: AccomplishmentType) => {
+  if (!acc[accomplishment.sessionId]) {
+    acc[accomplishment.sessionId] = [];
+  }
+  acc[accomplishment.sessionId].push(accomplishment);
+  return acc;
+}, {} as Record<string, AccomplishmentType[]>);
+    
     
     // Add accomplishments to sessions
-    const sessionsWithAccomplishments: FocusSessionWithAccomplishments[] = focusSessions.map(session => ({
-      ...session,
-      accomplishments: accomplishmentsBySession[session.id] || []
-    }));
+    const sessionsWithAccomplishments: FocusSessionWithAccomplishments[] = focusSessions.map(
+      (session: FocusSession) => ({
+        ...session,
+        accomplishments: accomplishmentsBySession[session.id] || []
+      })
+    );
     
     // Initialize day-by-day data
     const dayMap = new Map<string, DailySummary>();

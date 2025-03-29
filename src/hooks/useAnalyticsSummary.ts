@@ -1,6 +1,6 @@
 // src/hooks/useAnalyticsSummary.ts
 import { useState, useEffect } from 'react';
-import { getSessions, getLocalDateString } from '@/lib/timer';
+import { getSessions } from '@/lib/timer';
 
 export interface AnalyticsSummary {
   totalFocusTime: number;

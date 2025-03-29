@@ -11,11 +11,7 @@ interface FreeTimerProps {
   onCancel: () => void;
 }
 
-export default function FreeTimer({
-  activity,
-  onComplete,
-  onCancel,
-}: FreeTimerProps) {
+export default function FreeTimer({ onComplete, onCancel }: FreeTimerProps) {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
 

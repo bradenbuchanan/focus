@@ -12,7 +12,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { useState, useEffect } from 'react';
-import { TimerSession, getSessions } from '@/lib/timer';
+import { getSessions } from '@/lib/timer';
 import styles from './analytics.module.css';
 
 ChartJS.register(

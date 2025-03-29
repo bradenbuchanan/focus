@@ -5,8 +5,21 @@ import { useState, useEffect } from 'react';
 import styles from './weeklySummary.module.css';
 import { getSessions } from '@/lib/timer'; // Import localStorage function
 
-interface WeeklySummaryProps {
-  userId: string;
+interface WeeklySummary {
+  startDate: string;
+  endDate: string;
+  totalFocusTime: number;
+  totalSessions: number;
+  mostProductiveDay: { day: string; minutes: number };
+  topCategories: Array<{ name: string; minutes: number }>;
+  dailySummaries?: Array<{
+    date: string;
+    totalMinutes: number;
+    sessions: number;
+    topCategory?: string;
+    accomplishments?: Array<{ text: string; category: string | null }>;
+  }>;
+  allAccomplishments?: Array<{ text: string; category: string | null }>;
 }
 
 // Interface for interacting with Gemini API
@@ -20,7 +33,7 @@ interface GeminiResponse {
   }[];
 }
 
-export default function WeeklySummaryCard({ userId }: WeeklySummaryProps) {
+export default function WeeklySummaryCard() {
   // ====================================================
   // NOTE: This is a temporary implementation that uses localStorage data
   // In the future, this will be replaced with data from the database API
@@ -33,7 +46,7 @@ export default function WeeklySummaryCard({ userId }: WeeklySummaryProps) {
   const [loading, setLoading] = useState(false);
   const [apiLoading, setApiLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [summary, setSummary] = useState<any | null>(null);
+  const [summary, setSummary] = useState<WeeklySummary | null>(null);
   const [insights, setInsights] = useState<string | null>(null);
 
   // Filtering options
@@ -90,8 +103,9 @@ export default function WeeklySummaryCard({ userId }: WeeklySummaryProps) {
   };
 
   // Function to call Gemini API directly
-  // Function to call Gemini API directly
-  const generateInsightsWithAI = async (summaryData: any): Promise<string> => {
+  const generateInsightsWithAI = async (
+    summaryData: WeeklySummary
+  ): Promise<string> => {
     // Make sure you have an API key
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
@@ -154,7 +168,7 @@ export default function WeeklySummaryCard({ userId }: WeeklySummaryProps) {
     }
   };
 
-  function formatSummaryForLLM(summary: any): string {
+  function formatSummaryForLLM(summary: WeeklySummary): string {
     const dateOptions: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       year: 'numeric',
@@ -177,7 +191,7 @@ export default function WeeklySummaryCard({ userId }: WeeklySummaryProps) {
       summary.allAccomplishments && summary.allAccomplishments.length > 0
         ? summary.allAccomplishments
             .map(
-              (acc: any) =>
+              (acc: { text: string; category: string | null }) =>
                 `- ${acc.text}${acc.category ? ` (${acc.category})` : ''}`
             )
             .join('\n')
@@ -187,14 +201,16 @@ export default function WeeklySummaryCard({ userId }: WeeklySummaryProps) {
     let dailySummariesText = '';
     if (summary.dailySummaries && summary.dailySummaries.length > 0) {
       dailySummariesText = summary.dailySummaries
-        .map((day: any) => {
-          const dayDate = new Date(day.date).toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'short',
-            day: 'numeric',
-          });
-          return `${dayDate}: ${day.totalMinutes} minutes across ${day.sessions} sessions`;
-        })
+        .map(
+          (day: { date: string; totalMinutes: number; sessions: number }) => {
+            const dayDate = new Date(day.date).toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'short',
+              day: 'numeric',
+            });
+            return `${dayDate}: ${day.totalMinutes} minutes across ${day.sessions} sessions`;
+          }
+        )
         .join('\n');
     }
 
@@ -212,7 +228,9 @@ FOCUS SUMMARY (${startDate} to ${endDate}):
       summary.mostProductiveDay.minutes
     } minutes)
 - Top Focus Categories: ${summary.topCategories
-      .map((c: any) => `${c.name} (${c.minutes} min)`)
+      .map(
+        (c: { name: string; minutes: number }) => `${c.name} (${c.minutes} min)`
+      )
       .join(', ')}
 
 ${dailySummariesText ? `DAILY BREAKDOWN:\n${dailySummariesText}\n\n` : ''}
@@ -299,7 +317,7 @@ Make your response personal, specific to the data, and limited to 2-3 paragraphs
       const totalSessions = filteredSessions.length;
 
       // Group by day to find most productive day
-      const dayMap = new Map();
+      const dayMap = new Map<string, number>();
       filteredSessions.forEach((session) => {
         const dateStr = session.localDate || session.date.split('T')[0];
         const minutes = session.duration / 60;
@@ -318,7 +336,7 @@ Make your response personal, specific to the data, and limited to 2-3 paragraphs
       });
 
       // Group activities to find top categories
-      const categoryMap = new Map();
+      const categoryMap = new Map<string, number>();
       filteredSessions.forEach((session) => {
         const category = session.activity || 'Other';
         const minutes = session.duration / 60;
@@ -328,7 +346,7 @@ Make your response personal, specific to the data, and limited to 2-3 paragraphs
       const topCategories = Array.from(categoryMap.entries())
         .map(([name, minutes]) => ({
           name,
-          minutes: Math.round(minutes as number),
+          minutes: Math.round(minutes),
         }))
         .sort((a, b) => b.minutes - a.minutes)
         .slice(0, 3);
@@ -344,7 +362,7 @@ Make your response personal, specific to the data, and limited to 2-3 paragraphs
       // Create daily summaries
       const dailySummaries = Array.from(dayMap).map(([day, minutes]) => ({
         date: day,
-        totalMinutes: Math.round(minutes as number),
+        totalMinutes: Math.round(minutes),
         sessions: filteredSessions.filter(
           (s) => (s.localDate || s.date.split('T')[0]) === day
         ).length,
@@ -352,7 +370,7 @@ Make your response personal, specific to the data, and limited to 2-3 paragraphs
       }));
 
       // Create a summary object
-      const generatedSummary = {
+      const generatedSummary: WeeklySummary = {
         startDate: start.toISOString().split('T')[0],
         endDate: end.toISOString().split('T')[0],
         totalFocusTime,
@@ -600,7 +618,7 @@ ${
             <div className={styles.topCategories}>
               <h3>Top Focus Categories</h3>
               <div className={styles.categoryBars}>
-                {summary.topCategories.map((category: any, index: number) => (
+                {summary.topCategories.map((category, index) => (
                   <div key={index} className={styles.categoryBar}>
                     <div className={styles.categoryName}>{category.name}</div>
                     <div className={styles.categoryBarContainer}>

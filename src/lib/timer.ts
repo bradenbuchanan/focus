@@ -78,7 +78,7 @@ export interface TimerData {
   currentSession: number;
   totalSessions: number;
   settings: TimerSettings;
-  showAccomplishmentRecorder?: boolean; // Add this line
+  showAccomplishmentRecorder?: boolean;
 }
 
 // Helper function to format time as MM:SS

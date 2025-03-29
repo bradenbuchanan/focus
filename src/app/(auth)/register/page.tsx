@@ -1,9 +1,11 @@
+// src/app/(auth)/register/page.tsx
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../auth.module.css';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -12,6 +14,7 @@ export default function Register() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,25 +22,16 @@ export default function Register() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong');
-      }
-
+      await signUp(email, password, name);
       router.push('/login?registered=true');
     } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An unexpected error occurred');
-      }
+      console.error('Registration error:', error);
+      setError(
+        `Registration failed: ${
+          error instanceof Error ? error.message : 'Something went wrong'
+        }`
+      );
+    } finally {
       setIsLoading(false);
     }
   };

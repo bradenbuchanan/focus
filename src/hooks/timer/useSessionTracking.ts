@@ -1,7 +1,6 @@
 // src/hooks/timer/useSessionTracking.ts
 import { useRef } from 'react';
 import { TimerSession, getLocalDateString, saveSession } from '@/lib/timer';
-import { getFormattedDateString } from './utils';
 
 export function useSessionTracking() {
   const sessionStartTimeRef = useRef<number | null>(null);

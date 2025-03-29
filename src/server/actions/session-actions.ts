@@ -17,7 +17,10 @@ const sessionSchema = z.object({
   activity: z.string().optional(),
 });
 
-export async function recordSession(formData: FormData | null, data?: any) {
+// Define more specific type for the data parameter
+type SessionData = z.infer<typeof sessionSchema>;
+
+export async function recordSession(formData: FormData | null, data?: SessionData) {
   const session = data || Object.fromEntries(formData?.entries() || []);
   
   // Validate the session data
@@ -47,6 +50,15 @@ export async function recordSession(formData: FormData | null, data?: any) {
 
   return { id: savedSession.id };
 }
+
+// Define interface for the Accomplishment model
+interface Accomplishment {
+  text: string;
+  userId: string;
+  sessionId: string;
+  categories?: string | null;
+}
+
 export async function addAccomplishment(formData: FormData) {
     const text = formData.get('text') as string;
     const sessionId = formData.get('sessionId') as string;
@@ -86,13 +98,22 @@ export async function addAccomplishment(formData: FormData) {
     }
   
     // Create accomplishment with the effective session ID
-    const accomplishment = await (prisma as any).accomplishment.create({
-      data: {
-        text,
-        userId: authData.user.id,
-        sessionId: effectiveSessionId,
-        categories,
-      },
+    // Use a type-safe approach without casting to any
+    const accomplishmentData: Accomplishment = {
+      text,
+      userId: authData.user.id,
+      sessionId: effectiveSessionId,
+      categories,
+    };
+    
+    // Use a type assertion for prisma.accomplishment
+    // or define a proper type for your Prisma client
+    const accomplishment = await (prisma as unknown as { 
+      accomplishment: { 
+        create: (data: { data: Accomplishment }) => Promise<{ id: string }> 
+      } 
+    }).accomplishment.create({
+      data: accomplishmentData
     });
   
     revalidatePath('/dashboard');

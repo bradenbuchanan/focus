@@ -1,7 +1,7 @@
 // src/app/analytics/page.tsx
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/context/AuthContext';
 import styles from './analytics.module.css';
 import WeeklySummaryCard from '@/app/components/analytics/WeeklySummaryCard';
 
@@ -16,7 +16,7 @@ import ProductivityPatternsSection from '../../app/components/analytics/Producti
 import WeeklyPatternSection from '../../app/components/analytics/WeeklyPatternSection';
 
 export default function AnalyticsPage() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const summary = useAnalyticsSummary();
 
   return (
@@ -24,7 +24,7 @@ export default function AnalyticsPage() {
       <h1>Analytics & Insights</h1>
       <p>Detailed breakdown of your focus habits and productivity patterns.</p>
 
-      {session?.user?.id && <WeeklySummaryCard userId={session.user.id} />}
+      {user && <WeeklySummaryCard />}
 
       <div className={styles.statsSection}>
         <SummaryCard summary={summary} />

@@ -16,7 +16,7 @@ export default function DashboardStats({ stats }: StatsProps) {
   return (
     <div className={styles.stats}>
       <div className={styles.statCard}>
-        <h3>Today's Focus Time</h3>
+        <h3>Today&apos;s Focus Time</h3>
         <p className={styles.statValue}>
           {formatTimeValue(stats.focusTimeToday)}
         </p>

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TimerSession, getSessions } from '@/lib/timer';
+import { getSessions } from '@/lib/timer';
 import styles from './analytics.module.css';
 
 export default function WeeklyHeatmap() {

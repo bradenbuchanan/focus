@@ -19,10 +19,6 @@ export function CalendarGrid({ calendarData, colorScheme }: CalendarGridProps) {
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
-    const getCellColor = (intensity: number) => {
-      return colorScheme.levels[intensity] || colorScheme.levels[0];
-    };
-
     // Group by weeks
     const weeks: { [key: string]: CalendarDay[] } = {};
 

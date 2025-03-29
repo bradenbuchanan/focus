@@ -1,5 +1,4 @@
 // src/hooks/timer/utils.ts
-import { TimerSession, TimerState } from '@/lib/timer';
 
 // Format a date consistently to prevent timezone issues
 export function getFormattedDateString(date: Date): string {

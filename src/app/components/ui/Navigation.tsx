@@ -1,14 +1,23 @@
+// src/app/components/ui/Navigation.tsx
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
 import styles from './navigation.module.css';
 import ThemeToggle from '../layouts/ThemeToggle';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navigation() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
 
   return (
     <header className={styles.header}>
@@ -25,7 +34,7 @@ export default function Navigation() {
             Timer
           </Link>
 
-          {session ? (
+          {user ? (
             <>
               <Link
                 href="/dashboard"
@@ -50,11 +59,8 @@ export default function Navigation() {
         </nav>
 
         <div className={styles.actions}>
-          {session ? (
-            <button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className={styles.signOut}
-            >
+          {user ? (
+            <button onClick={handleSignOut} className={styles.signOut}>
               Sign Out
             </button>
           ) : (
