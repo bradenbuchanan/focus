@@ -9,7 +9,7 @@ import AccomplishmentRecorder from './AccomplishmentRecorder';
 import FreeTimer from './FreeTimer';
 import TimerGoalsTasksPanel from './TimerGoalsTasksPanel';
 import { useTimerLogic } from '@/hooks/timer/useTimerLogic';
-import { defaultActivityCategories, TimerState } from '@/lib/timer';
+import { defaultActivityCategories } from '@/lib/timer';
 import styles from './timer.module.css';
 
 export default function TimerContainer() {
@@ -42,8 +42,9 @@ export default function TimerContainer() {
   }, [showAccomplishmentPrompt]);
 
   // Handle free session completion directly
-  const handleFreeSessionComplete = (duration: number) => {
-    const sessionId = recordFreeSession(duration, selectedActivity);
+  const handleFreeSessionComplete = async (duration: number) => {
+    // Use await to resolve the Promise before setting state
+    const sessionId = await recordFreeSession(duration, selectedActivity);
     setCurrentSessionId(sessionId);
     // The showAccomplishmentRecorder will be set by the effect above
   };
