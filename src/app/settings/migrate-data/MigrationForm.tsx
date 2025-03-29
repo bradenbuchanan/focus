@@ -5,9 +5,17 @@ import { useState } from 'react';
 import { migrateLocalData } from './actions';
 import styles from './migration.module.css';
 
+// Define a specific type for the migration result
+interface MigrationResult {
+  success: boolean;
+  sessionsCount?: number;
+  accomplishmentsCount?: number;
+  error?: string;
+}
+
 export default function MigrationForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<MigrationResult | null>(null);
 
   const handleMigrate = async () => {
     if (typeof window === 'undefined') return;
@@ -26,12 +34,9 @@ export default function MigrationForm() {
       formData.append('accomplishments', accomplishmentsData);
 
       // Call the server action
-      const migrationResult = (await migrateLocalData(formData)) as {
-        success: boolean;
-        sessionsCount?: number;
-        accomplishmentsCount?: number;
-        error?: string;
-      };
+      const migrationResult = (await migrateLocalData(
+        formData
+      )) as MigrationResult;
       setResult(migrationResult);
 
       // If successful, optionally clear localStorage
