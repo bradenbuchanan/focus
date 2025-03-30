@@ -13,12 +13,19 @@ interface LocalAccomplishment {
   categories?: string;
 }
 
-// Type for the session structure in localStorage
 interface LocalSession {
   id: string;
   accomplishment?: string;
   accomplishmentCategory?: string;
-  [key: string]: any; // For other session properties we don't need to specify
+  date?: string;
+  localDate?: string;
+  duration?: number;
+  type?: string;
+  completed?: boolean;
+  activity?: string;
+  startTime?: string;
+  endTime?: string;
+  // Add any other specific properties that might exist in your session objects
 }
 
 export async function saveAccomplishment(data: {
