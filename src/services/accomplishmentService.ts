@@ -4,6 +4,23 @@ import { Database } from '@/types/supabase';
 
 type Accomplishment = Database['public']['Tables']['accomplishments']['Row'];
 
+// Create a type for local accomplishment structure
+interface LocalAccomplishment {
+  id: string;
+  text: string;
+  date: string;
+  sessionId?: string;
+  categories?: string;
+}
+
+// Type for the session structure in localStorage
+interface LocalSession {
+  id: string;
+  accomplishment?: string;
+  accomplishmentCategory?: string;
+  [key: string]: any; // For other session properties we don't need to specify
+}
+
 export async function saveAccomplishment(data: {
   sessionId: string;
   text: string;
@@ -31,7 +48,7 @@ export async function saveAccomplishment(data: {
     console.error('Error saving accomplishment to Supabase:', error);
     
     // Fallback to localStorage
-    const localAccomplishment = {
+    const localAccomplishment: LocalAccomplishment = {
       id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
       text: data.text,
       date: new Date().toISOString(),
@@ -45,8 +62,8 @@ export async function saveAccomplishment(data: {
     localStorage.setItem('focusAccomplishments', JSON.stringify(accomplishments));
     
     // Also update the session in localStorage
-    const sessions = JSON.parse(localStorage.getItem('timerSessions') || '[]');
-    const sessionIndex = sessions.findIndex((s: any) => s.id === data.sessionId);
+    const sessions = JSON.parse(localStorage.getItem('timerSessions') || '[]') as LocalSession[];
+    const sessionIndex = sessions.findIndex(s => s.id === data.sessionId);
     if (sessionIndex !== -1) {
       sessions[sessionIndex].accomplishment = data.text;
       sessions[sessionIndex].accomplishmentCategory = data.categories;
@@ -83,7 +100,7 @@ export async function getAccomplishments(): Promise<Accomplishment[]> {
 }
 
 // Helper function to get local accomplishments
-function getLocalAccomplishments(): any[] {
+function getLocalAccomplishments(): LocalAccomplishment[] {
   if (typeof window === 'undefined') return [];
   
   const accomplishmentsData = localStorage.getItem('focusAccomplishments');
