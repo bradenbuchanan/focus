@@ -24,21 +24,32 @@ interface GoalProgress {
   percentage: number;
 }
 
-// Define session interface with both Supabase and localStorage fields
-interface Session {
+// Define our combined session type to handle both formats
+interface SupabaseSession {
   id: string;
-  // Supabase fields
-  start_time?: string;
-  end_time?: string;
-  category?: string;
-  // localStorage fields
-  date?: string;
+  user_id: string;
+  start_time: string;
+  end_time: string | null;
+  duration: number | null;
+  category: string | null;
+  activity: string | null;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface LocalStorageSession {
+  id: string;
+  date: string;
   localDate?: string;
-  type?: 'focus' | 'break';
   duration: number;
+  type: 'focus' | 'break';
   completed: boolean;
   activity?: string;
 }
+
+// Use a type union to represent either format
+type Session = SupabaseSession | LocalStorageSession;
 
 export function useDashboardData() {
   const [stats, setStats] = useState({
@@ -67,11 +78,26 @@ export function useDashboardData() {
     return new Date(year, month - 1, day, 12, 0, 0); // Using noon to avoid any timezone shift issues
   };
 
+  // Helper function to check if it's a Supabase session
+  const isSupabaseSession = (session: Session): session is SupabaseSession => {
+    return 'user_id' in session && 'category' in session;
+  };
+
+  // Helper function to check if it's a localStorage session
+  const isLocalStorageSession = (session: Session): session is LocalStorageSession => {
+    return 'type' in session && 'date' in session;
+  };
+
   // Helper function to get a consistent date string from a session
   const getSessionDateString = (session: Session): string => {
-    return session.localDate || 
-           (session.start_time ? session.start_time.split('T')[0] : 
-           (session.date ? session.date.split('T')[0] : ''));
+    if (isLocalStorageSession(session) && session.localDate) {
+      return session.localDate;
+    } else if (isLocalStorageSession(session)) {
+      return session.date.split('T')[0];
+    } else if (isSupabaseSession(session)) {
+      return session.start_time.split('T')[0];
+    }
+    return '';
   };
 
   useEffect(() => {
@@ -81,9 +107,14 @@ export function useDashboardData() {
         const sessions = await getSessions();
         
         // Filter focus sessions - handle both Supabase and localStorage formats
-        const focusSessions = sessions.filter(
-          (s) => s.type === 'focus' || s.category === 'focus'
-        );
+        const focusSessions = sessions.filter((s: Session) => {
+          if (isLocalStorageSession(s)) {
+            return s.type === 'focus';
+          } else if (isSupabaseSession(s)) {
+            return s.category === 'focus';
+          }
+          return false;
+        });
 
         // Calculate stats from sessions
         const today = getLocalDateString(new Date());
@@ -91,7 +122,12 @@ export function useDashboardData() {
         // Calculate focus time for today (in minutes)
         const focusTimeToday = focusSessions
           .filter((s) => getSessionDateString(s) === today)
-          .reduce((total, session) => total + (session.duration || 0) / 60, 0);
+          .reduce((total, session) => {
+            const duration = isLocalStorageSession(session) 
+              ? session.duration 
+              : (session.duration || 0);
+            return total + (duration / 60);
+          }, 0);
 
         // Count completed sessions
         const sessionsCompleted = focusSessions.filter((s) => s.completed).length;
@@ -115,11 +151,13 @@ export function useDashboardData() {
           
           // Extract all unique session dates and normalize them to YYYY-MM-DD format
           const sessionDates = completedSessions.map(session => {
-            // Handle multiple date formats - Supabase and localStorage
-            if (session.localDate) return session.localDate;
-            if (session.start_time) return formatToDateString(new Date(session.start_time));
-            if (session.date) return formatToDateString(new Date(session.date));
-            return ''; // Should never happen, but TypeScript needs this
+            // Handle multiple date formats based on the session type
+            if (isLocalStorageSession(session)) {
+              return session.localDate || formatToDateString(new Date(session.date));
+            } else if (isSupabaseSession(session)) {
+              return formatToDateString(new Date(session.start_time));
+            }
+            return '';
           }).filter(date => date !== ''); // Filter out empty dates
           
           // Get unique dates and sort in descending order (newest first)
@@ -189,7 +227,12 @@ export function useDashboardData() {
           // Sum up minutes for this day - handle both Supabase and localStorage formats
           const dayMinutes = focusSessions
             .filter((s) => getSessionDateString(s) === dateString)
-            .reduce((total, session) => total + (session.duration || 0) / 60, 0);
+            .reduce((total, session) => {
+              const duration = isLocalStorageSession(session) 
+                ? session.duration 
+                : (session.duration || 0);
+              return total + (duration / 60);
+            }, 0);
 
           weeklyValues.push(Math.round(dayMinutes));
         }
@@ -199,7 +242,11 @@ export function useDashboardData() {
 
         focusSessions.forEach((session) => {
           const activity = session.activity || 'Other';
-          const minutes = (session.duration || 0) / 60;
+          const duration = isLocalStorageSession(session) 
+            ? session.duration 
+            : (session.duration || 0);
+          const minutes = duration / 60;
+          
           if (activityMap.has(activity)) {
             activityMap.set(activity, activityMap.get(activity)! + minutes);
           } else {
