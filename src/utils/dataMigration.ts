@@ -10,6 +10,49 @@ interface MigrationResult {
   error?: string;
 }
 
+// Define interfaces for each localStorage data type
+interface LocalSession {
+  id: string;
+  date: string;
+  localDate?: string;
+  endTime?: string;
+  duration: number;
+  type: 'focus' | 'break';
+  completed: boolean;
+  activity?: string;
+}
+
+interface LocalAccomplishment {
+  id: string;
+  text: string;
+  date: string;
+  sessionId?: string;
+  categories?: string;
+}
+
+interface LocalGoal {
+  id: string;
+  title: string;
+  description?: string;
+  type: 'time' | 'sessions';
+  target: number;
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  startDate: string;
+  endDate?: string;
+  activity?: string;
+}
+
+interface LocalTask {
+  id: string;
+  goalId?: string;
+  text: string;
+  completed: boolean;
+  activity?: string;
+  priority?: 'low' | 'medium' | 'high';
+  dueDate?: string;
+  completedAt?: string;
+}
+
 export async function migrateLocalDataToSupabase(): Promise<MigrationResult> {
   try {
     // Check if user is authenticated
@@ -18,17 +61,17 @@ export async function migrateLocalDataToSupabase(): Promise<MigrationResult> {
     
     const userId = authData.user.id;
     
-    // Get all data from localStorage
-    const sessions = JSON.parse(localStorage.getItem('timerSessions') || '[]');
-    const accomplishments = JSON.parse(localStorage.getItem('focusAccomplishments') || '[]');
-    const goals = JSON.parse(localStorage.getItem('focusGoals') || '[]');
-    const tasks = JSON.parse(localStorage.getItem('focusTasks') || '[]');
+    // Get all data from localStorage with proper typing
+    const sessions = JSON.parse(localStorage.getItem('timerSessions') || '[]') as LocalSession[];
+    const accomplishments = JSON.parse(localStorage.getItem('focusAccomplishments') || '[]') as LocalAccomplishment[];
+    const goals = JSON.parse(localStorage.getItem('focusGoals') || '[]') as LocalGoal[];
+    const tasks = JSON.parse(localStorage.getItem('focusTasks') || '[]') as LocalTask[];
     
     // Map from local IDs to Supabase IDs
     const sessionIdMap = new Map<string, string>();
     
     // Migrate sessions
-    const sessionPromises = sessions.map(async (session: any) => {
+    const sessionPromises = sessions.map(async (session: LocalSession) => {
       const { data, error } = await supabase
         .from('focus_sessions')
         .insert({
@@ -55,7 +98,7 @@ export async function migrateLocalDataToSupabase(): Promise<MigrationResult> {
     const migratedSessions = await Promise.all(sessionPromises);
     
     // Migrate accomplishments
-    const accomplishmentPromises = accomplishments.map(async (accomplishment: any) => {
+    const accomplishmentPromises = accomplishments.map(async (accomplishment: LocalAccomplishment) => {
       const supabaseSessionId = accomplishment.sessionId ? sessionIdMap.get(accomplishment.sessionId) : null;
       
       const { data, error } = await supabase
@@ -77,7 +120,7 @@ export async function migrateLocalDataToSupabase(): Promise<MigrationResult> {
     const migratedAccomplishments = await Promise.all(accomplishmentPromises);
     
     // Migrate goals
-    const goalPromises = goals.map(async (goal: any) => {
+    const goalPromises = goals.map(async (goal: LocalGoal) => {
       const { data, error } = await supabase
         .from('goals')
         .insert({
@@ -106,7 +149,7 @@ export async function migrateLocalDataToSupabase(): Promise<MigrationResult> {
     const migratedGoals = await Promise.all(goalPromises);
     
     // Migrate tasks
-    const taskPromises = tasks.map(async (task: any) => {
+    const taskPromises = tasks.map(async (task: LocalTask) => {
       const supabaseGoalId = task.goalId ? sessionIdMap.get(task.goalId) : null;
       
       const { data, error } = await supabase
