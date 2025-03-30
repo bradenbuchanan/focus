@@ -10,6 +10,59 @@ import {
 } from '@/services/accomplishmentService';
 import { saveGoal, getGoals } from '@/services/goalService';
 import { saveTask, updateTask, getTasks } from '@/services/taskService';
+import { Database } from '@/types/supabase';
+
+// Define types based on your Supabase database schema
+type Session = Database['public']['Tables']['focus_sessions']['Row'];
+type Accomplishment = Database['public']['Tables']['accomplishments']['Row'];
+type Goal = Database['public']['Tables']['goals']['Row'];
+type Task = Database['public']['Tables']['tasks']['Row'];
+
+// Define types for the input data
+interface SessionInput {
+  startTime: Date;
+  endTime?: Date | null;
+  duration: number;
+  type: 'focus' | 'break';
+  completed: boolean;
+  activity?: string;
+}
+
+interface AccomplishmentInput {
+  sessionId: string;
+  text: string;
+  categories?: string;
+}
+
+interface GoalInput {
+  title: string;
+  description?: string;
+  type: 'time' | 'sessions';
+  target: number;
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  activity?: string;
+  startDate: string;
+  endDate?: string;
+}
+
+interface TaskInput {
+  goalId?: string;
+  text: string;
+  activity?: string;
+  priority?: 'low' | 'medium' | 'high';
+  dueDate?: string;
+}
+
+interface TaskUpdateInput {
+  id: string;
+  goalId?: string;
+  text?: string;
+  completed?: boolean;
+  activity?: string;
+  priority?: 'low' | 'medium' | 'high';
+  dueDate?: string;
+  completedAt?: string;
+}
 
 interface DataProviderProps {
   children: ReactNode;
@@ -17,21 +70,21 @@ interface DataProviderProps {
 
 interface DataContextType {
   // Sessions
-  saveSession: (session: any) => Promise<string>;
-  getSessions: () => Promise<any[]>;
+  saveSession: (session: SessionInput) => Promise<string>;
+  getSessions: () => Promise<Session[]>;
 
   // Accomplishments
-  saveAccomplishment: (data: any) => Promise<string>;
-  getAccomplishments: () => Promise<any[]>;
+  saveAccomplishment: (data: AccomplishmentInput) => Promise<string>;
+  getAccomplishments: () => Promise<Accomplishment[]>;
 
   // Goals
-  saveGoal: (goal: any) => Promise<string>;
-  getGoals: () => Promise<any[]>;
+  saveGoal: (goal: GoalInput) => Promise<string>;
+  getGoals: () => Promise<Goal[]>;
 
   // Tasks
-  saveTask: (task: any) => Promise<string>;
-  updateTask: (task: any) => Promise<void>;
-  getTasks: () => Promise<any[]>;
+  saveTask: (task: TaskInput) => Promise<string>;
+  updateTask: (task: TaskUpdateInput) => Promise<void>;
+  getTasks: () => Promise<Task[]>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -51,10 +104,9 @@ export function DataProvider({ children }: DataProviderProps) {
   // Create wrapper functions that check authentication
   const wrappedServices = {
     saveSession: useCallback(
-      async (session: any) => {
+      async (session: SessionInput) => {
         if (!isAuthenticated()) {
           // Use localStorage fallback
-          // ...
           return '';
         }
         return await saveSession(session);
@@ -65,17 +117,15 @@ export function DataProvider({ children }: DataProviderProps) {
     getSessions: useCallback(async () => {
       if (!isAuthenticated()) {
         // Use localStorage fallback
-        // ...
         return [];
       }
       return await getSessions();
     }, [isAuthenticated]),
 
     saveAccomplishment: useCallback(
-      async (data: any) => {
+      async (data: AccomplishmentInput) => {
         if (!isAuthenticated()) {
           // Use localStorage fallback
-          // ...
           return '';
         }
         return await saveAccomplishment(data);
@@ -86,17 +136,15 @@ export function DataProvider({ children }: DataProviderProps) {
     getAccomplishments: useCallback(async () => {
       if (!isAuthenticated()) {
         // Use localStorage fallback
-        // ...
         return [];
       }
       return await getAccomplishments();
     }, [isAuthenticated]),
 
     saveGoal: useCallback(
-      async (goal: any) => {
+      async (goal: GoalInput) => {
         if (!isAuthenticated()) {
           // Use localStorage fallback
-          // ...
           return '';
         }
         return await saveGoal(goal);
@@ -107,17 +155,15 @@ export function DataProvider({ children }: DataProviderProps) {
     getGoals: useCallback(async () => {
       if (!isAuthenticated()) {
         // Use localStorage fallback
-        // ...
         return [];
       }
       return await getGoals();
     }, [isAuthenticated]),
 
     saveTask: useCallback(
-      async (task: any) => {
+      async (task: TaskInput) => {
         if (!isAuthenticated()) {
           // Use localStorage fallback
-          // ...
           return '';
         }
         return await saveTask(task);
@@ -126,10 +172,9 @@ export function DataProvider({ children }: DataProviderProps) {
     ),
 
     updateTask: useCallback(
-      async (task: any) => {
+      async (task: TaskUpdateInput) => {
         if (!isAuthenticated()) {
           // Use localStorage fallback
-          // ...
           return;
         }
         await updateTask(task);
@@ -140,7 +185,6 @@ export function DataProvider({ children }: DataProviderProps) {
     getTasks: useCallback(async () => {
       if (!isAuthenticated()) {
         // Use localStorage fallback
-        // ...
         return [];
       }
       return await getTasks();
