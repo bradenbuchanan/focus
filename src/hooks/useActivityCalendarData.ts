@@ -19,6 +19,42 @@ export type ActivityData = {
   };
 };
 
+// Define our session types
+interface SupabaseSession {
+  id: string;
+  user_id: string;
+  start_time: string;
+  end_time: string | null;
+  duration: number | null;
+  category: string | null;
+  activity: string | null;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface LocalStorageSession {
+  id: string;
+  date: string;
+  localDate?: string;
+  duration: number;
+  type: 'focus' | 'break';
+  completed: boolean;
+  activity?: string;
+}
+
+// Use a type union
+type Session = SupabaseSession | LocalStorageSession;
+
+// Type guard functions
+const isSupabaseSession = (session: Session): session is SupabaseSession => {
+  return 'user_id' in session && 'category' in session;
+};
+
+const isLocalStorageSession = (session: Session): session is LocalStorageSession => {
+  return 'type' in session && 'date' in session;
+};
+
 export function useMultiActivityData() {
   const [activityDataSets, setActivityDataSets] = useState<ActivityData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,8 +65,16 @@ export function useMultiActivityData() {
       try {
         // Get sessions from Supabase
         const sessions = await getSessions();
-        // Filter for focus sessions (now "category" instead of "type" in Supabase)
-        const focusSessions = sessions.filter((s) => s.category === 'focus' || s.type === 'focus');
+        
+        // Filter for focus sessions (handle both formats)
+        const focusSessions = sessions.filter((s: Session) => {
+          if (isLocalStorageSession(s)) {
+            return s.type === 'focus';
+          } else if (isSupabaseSession(s)) {
+            return s.category === 'focus';
+          }
+          return false;
+        });
 
         // Extract unique activities
         const activityMap: Map<string, number[]> = new Map();
@@ -38,7 +82,7 @@ export function useMultiActivityData() {
         // Add "All Activities" as a category
         activityMap.set("All Activities", []);
         
-        // Collect activities (now "activity" field in Supabase)
+        // Collect activities from both formats
         focusSessions.forEach((session) => {
           const activity = session.activity || 'Other';
           if (!activityMap.has(activity)) {
@@ -75,12 +119,24 @@ export function useMultiActivityData() {
           
           relevantSessions.forEach((session) => {
             // Handle both Supabase and localStorage date formats
-            const dateStr = session.localDate || 
-                          getLocalDateString(new Date(session.start_time || session.date));
+            let dateStr: string;
+            
+            if (isLocalStorageSession(session)) {
+              dateStr = session.localDate || getLocalDateString(new Date(session.date));
+            } else {
+              dateStr = getLocalDateString(new Date(session.start_time));
+            }
             
             if (dateMap.has(dateStr)) {
               // Convert duration to minutes (handle both formats)
-              const minutes = Math.round((session.duration || 0) / 60);
+              let minutes: number;
+              
+              if (isLocalStorageSession(session)) {
+                minutes = Math.round(session.duration / 60);
+              } else {
+                minutes = Math.round((session.duration || 0) / 60);
+              }
+              
               dateMap.set(dateStr, (dateMap.get(dateStr) || 0) + minutes);
             }
           });
