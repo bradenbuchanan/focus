@@ -3,6 +3,17 @@ import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/supabase';
 import { TimerSession } from '@/lib/timer';
 
+// Add this interface definition
+interface LocalSession {
+  id: string;
+  date: string;  // ISO string format
+  localDate?: string; // Local YYYY-MM-DD format
+  duration: number;  // in seconds
+  type: 'focus' | 'break';
+  completed: boolean;
+  activity?: string; // Activity category
+}
+
 type FocusSession = Database['public']['Tables']['focus_sessions']['Row'];
 
 export async function saveSession(session: {
@@ -14,9 +25,16 @@ export async function saveSession(session: {
   activity?: string;
 }): Promise<string> {
   try {
+    // Get the current user first - ADD THIS
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) throw userError;
+    
+    // Now insert with the user_id explicitly set
     const { data, error } = await supabase
       .from('focus_sessions')
       .insert({
+        user_id: userData.user.id, // ADD THIS LINE - extremely important!
         start_time: session.startTime.toISOString(),
         end_time: session.endTime?.toISOString() || null,
         duration: session.duration,
