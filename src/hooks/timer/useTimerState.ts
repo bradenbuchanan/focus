@@ -1,5 +1,5 @@
 // src/hooks/timer/useTimerState.ts
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { TimerData, TimerState, TimerSettings, defaultSettings } from '@/lib/timer';
 import { isLongBreak } from './utils';
 
@@ -42,8 +42,13 @@ export function useTimerState() {
   };
 
   // Update settings
-  const updateSettings = (newSettings: TimerSettings) => {
+  const updateSettings = useCallback((newSettings: TimerSettings) => {
     setTimerData(prev => {
+      // Only update if settings have actually changed
+      if (JSON.stringify(prev.settings) === JSON.stringify(newSettings)) {
+        return prev; // Return the same state object to avoid re-render
+      }
+      
       // Calculate correct time remaining based on current state
       const timeRemaining = 
         prev.state === TimerState.BREAK
@@ -58,7 +63,7 @@ export function useTimerState() {
         timeRemaining,
       };
     });
-  };
+  }, []);
 
   // Update timer (called each second or when restoring from background)
   const updateTimer = (newTimeRemaining: number) => {

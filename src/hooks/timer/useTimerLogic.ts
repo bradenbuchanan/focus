@@ -36,14 +36,17 @@ export function useTimerLogic(selectedActivity: string) {
           setSessionForAccomplishment } = accomplishmentsHook;
 
   // Load initial settings only once
+  const settingsLoadedRef = useRef(false);
+
+  // Load initial settings only once
   useEffect(() => {
-    if (!isUpdatingRef.current) {
-      isUpdatingRef.current = true;
-      const settings = getSettings();
-      updateSettings(settings);
-      isUpdatingRef.current = false;
-    }
-  }, [updateSettings]);
+    if (settingsLoadedRef.current) return; // Skip if already loaded
+    
+    console.log('Loading initial timer settings');
+    settingsLoadedRef.current = true;
+    const settings = getSettings();
+    updateSettings(settings);
+  }, []); // Empty dependency array - this will run only once on mount
   
   // Record a session (first to Supabase, fallback to localStorage)
   const recordSession = async (
@@ -141,26 +144,48 @@ export function useTimerLogic(selectedActivity: string) {
     
     storeTimer(endTime, stateToStore);
   };
-
   const handleRestoreTimerState = () => {
-    const { endTime, timerState } = retrieveStoredTimer();
+    // Skip if we're already updating
+    if (isUpdatingRef.current) return;
     
-    if (!endTime || !timerState) return;
+    isUpdatingRef.current = true;
     
-    const timeRemaining = calculateTimeRemaining(endTime);
-    
-    if (timeRemaining <= 0) {
-      handleTimerCompletion(timerState);
-      return;
+    try {
+      const { endTime, timerState } = retrieveStoredTimer();
+      
+      if (!endTime || !timerState) {
+        isUpdatingRef.current = false;
+        return;
+      }
+      
+      // Skip restoration if timer is already running
+      if (timerData.state === TimerState.RUNNING || timerData.state === TimerState.BREAK) {
+        console.log('Timer already running, skipping state restoration');
+        isUpdatingRef.current = false;
+        return;
+      }
+      
+      const timeRemaining = calculateTimeRemaining(endTime);
+      
+      if (timeRemaining <= 0) {
+        handleTimerCompletion(timerState);
+        isUpdatingRef.current = false;
+        return;
+      }
+      
+      // Restore timer state
+      console.log('Restoring timer state', { timeRemaining });
+      updateTimer(timeRemaining);
+      startTimer();
+      setSessionStartTime(timerState.sessionStartTime);
+      
+      // Restart the interval
+      startInterval();
+    } catch (error) {
+      console.error('Error restoring timer state:', error);
+    } finally {
+      isUpdatingRef.current = false;
     }
-    
-    // Restore timer state
-    updateTimer(timeRemaining);
-    startTimer();
-    setSessionStartTime(timerState.sessionStartTime);
-    
-    // Restart the interval
-    startInterval();
   };
 
   // Background timer hook

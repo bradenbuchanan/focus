@@ -1,6 +1,7 @@
 // src/hooks/timer/useBackgroundTimer.ts
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { TimerState } from '@/lib/timer';
+
 
 // Define interface for storing timer state
 export interface StoredTimerState {
@@ -16,9 +17,18 @@ export function useBackgroundTimer(
   storeTimerState: () => void,
   restoreTimerState: () => void
 ) {
+  const lastVisibilityChangeRef = useRef(0);
+
   // Handle visibility changes
   useEffect(() => {
     const handleVisibilityChange = () => {
+      // Throttle visibility changes to prevent multiple rapid triggers
+      const now = Date.now();
+      if (now - lastVisibilityChangeRef.current < 300) { // 300ms threshold
+        return;
+      }
+      lastVisibilityChangeRef.current = now;
+      
       const isVisible = document.visibilityState === 'visible';
       onVisibilityChange(isVisible);
       
@@ -28,7 +38,7 @@ export function useBackgroundTimer(
         storeTimerState();
       }
     };
-
+  
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
