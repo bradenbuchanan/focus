@@ -60,7 +60,7 @@ export default function WeeklyFocusChart({
       y: {
         beginAtZero: true,
         grid: {
-          color: 'rgba(var(--gray-rgb), 0.1)',
+          display: false, // This will hide the horizontal grid lines
           drawBorder: false,
         },
         ticks: {
