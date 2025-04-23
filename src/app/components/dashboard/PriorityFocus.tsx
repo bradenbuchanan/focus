@@ -10,18 +10,24 @@ import {
   getGoals,
   getTasksForGoal,
   calculateGoalProgress,
+  updateTask,
 } from '@/lib/timer';
 import styles from './priorityFocus.module.css';
+import { useData } from '@/providers/DataProvider';
 
 export default function PriorityFocus() {
+  // Move the useData call inside the component
+  const { updateTask: updateServerTask } = useData();
+
   const [highPriorityTasks, setHighPriorityTasks] = useState<Task[]>([]);
   const [goalsWithTasks, setGoalsWithTasks] = useState<
-    {
+    Array<{
       goal: Goal;
       progress: number;
       tasks: Task[];
-    }[]
+    }>
   >([]);
+  const [completingTask, setCompletingTask] = useState<string | null>(null);
 
   // Helper function to get urgent tasks from all sources
   const getUrgentTasksFromAllSources = () => {
@@ -35,6 +41,53 @@ export default function PriorityFocus() {
 
     // Combine and limit to 3 total
     return [...standaloneUrgent, ...goalUrgent].slice(0, 3);
+  };
+
+  // Handle completing a task
+  const handleCompleteTask = async (taskId: string) => {
+    setCompletingTask(taskId);
+
+    try {
+      // Find the task
+      const allTasks = getTasks();
+      const task = allTasks.find((t) => t.id === taskId);
+
+      if (task) {
+        // Update the task in Supabase
+        await updateServerTask({
+          id: taskId,
+          completed: true,
+          completedAt: new Date().toISOString(),
+        });
+
+        // Update the UI immediately
+        setHighPriorityTasks((prev) => prev.filter((t) => t.id !== taskId));
+        setGoalsWithTasks((prev) =>
+          prev.map((goalWithTasks) => ({
+            ...goalWithTasks,
+            tasks: goalWithTasks.tasks.filter((t) => t.id !== taskId),
+          }))
+        );
+      }
+    } catch (error) {
+      console.error('Error completing task:', error);
+      // Fallback to localStorage
+      const allTasks = getTasks();
+      const taskIndex = allTasks.findIndex((t) => t.id === taskId);
+
+      if (taskIndex !== -1) {
+        const task = allTasks[taskIndex];
+        const updatedTask = {
+          ...task,
+          completed: true,
+          completedAt: new Date().toISOString(),
+        };
+
+        updateTask(updatedTask);
+      }
+    } finally {
+      setCompletingTask(null);
+    }
   };
 
   useEffect(() => {
@@ -108,6 +161,13 @@ export default function PriorityFocus() {
             <ul className={styles.priorityList}>
               {urgentTasks.map((task) => (
                 <li key={task.id} className={styles.priorityItem}>
+                  <div className={styles.taskCheckbox}>
+                    <input
+                      type="checkbox"
+                      onChange={() => handleCompleteTask(task.id)}
+                      disabled={completingTask === task.id}
+                    />
+                  </div>
                   <span className={styles.priorityBadge}>High</span>
                   <span className={styles.priorityText}>{task.text}</span>
                   {task.activity && (
@@ -151,6 +211,13 @@ export default function PriorityFocus() {
                   <ul className={styles.goalTasks}>
                     {tasks.map((task) => (
                       <li key={task.id} className={styles.goalTask}>
+                        <div className={styles.taskCheckbox}>
+                          <input
+                            type="checkbox"
+                            onChange={() => handleCompleteTask(task.id)}
+                            disabled={completingTask === task.id}
+                          />
+                        </div>
                         {task.priority === 'high' && (
                           <span className={styles.taskPriority}>High</span>
                         )}

@@ -171,6 +171,61 @@
     text-decoration: underline;
   }
   
+  .taskCheckbox {
+    margin-right: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .taskCheckbox input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  
+  /* For goal tasks */
+  .goalTask {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    margin-bottom: 0.25rem;
+    border-radius: 0.25rem;
+    background-color: var(--background);
+    transition: opacity 0.3s ease;
+  }
+  
+  .goalTask .taskCheckbox {
+    margin-right: 0.5rem;
+  }
+  
+  /* For priority items */
+  .priorityItem {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: var(--gray-alpha-100);
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
+    transition: opacity 0.3s ease;
+  }
+  
+  /* Completing state styles */
+  .priorityItem.completing,
+  .goalTask.completing {
+    opacity: 0.5;
+  }
+  
+  /* Completed task animation */
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; height: 0; padding: 0; margin: 0; overflow: hidden; }
+  }
+  
+  .completed {
+    animation: fadeOut 0.5s forwards;
+  }
+
   @media (max-width: 768px) {
     .priorityContainer {
       padding: 1.25rem;
