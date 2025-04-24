@@ -13,7 +13,7 @@ import SummaryCard from '@/app/components/analytics/SummaryCard';
 import CalendarSection from '@/app/components/analytics/CalendarSection';
 import FocusDistributionSection from '../../app/components/analytics/FocusDistributionSection';
 import ProductivityPatternsSection from '../../app/components/analytics/ProductivityPatternsSection';
-import WeeklyPatternSection from '../../app/components/analytics/WeeklyPatternSection';
+// Remove the WeeklyPatternSection import
 
 export default function AnalyticsPage() {
   const { user } = useAuth();
@@ -34,7 +34,7 @@ export default function AnalyticsPage() {
         <CalendarSection />
         <FocusDistributionSection />
         <ProductivityPatternsSection />
-        <WeeklyPatternSection />
+        {/* Remove the WeeklyPatternSection component */}
       </div>
     </div>
   );
