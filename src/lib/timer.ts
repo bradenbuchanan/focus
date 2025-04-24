@@ -253,24 +253,19 @@ export const saveTask = (task: Task): void => {
   localStorage.setItem('focusTasks', JSON.stringify(tasks));
 };
 
-export const updateTask = (updatedTask: Task): void => {
+// Update the updateTask function to handle completion timestamps
+export const updateTask = (task: Task): void => {
   if (typeof window === 'undefined') return;
   
-  // Add completedAt date if task is being marked as completed
   const tasks = getTasks();
-  const existingTask = tasks.find(t => t.id === updatedTask.id);
+  const index = tasks.findIndex(t => t.id === task.id);
   
-  if (existingTask && !existingTask.completed && updatedTask.completed) {
-    // Task is being marked as completed
-    updatedTask.completedAt = new Date().toISOString();
-  } else if (existingTask && existingTask.completed && !updatedTask.completed) {
-    // Task is being uncompleted
-    delete updatedTask.completedAt;
-  }
-  
-  const index = tasks.findIndex(t => t.id === updatedTask.id);
   if (index !== -1) {
-    tasks[index] = updatedTask;
+    // Add completedAt timestamp when marking as complete
+    if (task.completed && !tasks[index].completed) {
+      task.completedAt = new Date().toISOString();
+    }
+    tasks[index] = task;
     localStorage.setItem('focusTasks', JSON.stringify(tasks));
   }
 };
