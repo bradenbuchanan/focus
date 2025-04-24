@@ -118,9 +118,13 @@ export default function GoalsPage() {
   };
 
   useEffect(() => {
+    // Load data immediately when component mounts
+    loadData();
+
+    // Set up visibility change listener
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        loadData(); // Your function to load tasks and goals
+        loadData();
       }
     };
 
@@ -129,7 +133,7 @@ export default function GoalsPage() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
   // Filter tasks based on activity and completion status
   const getFilteredTasks = (tasksList: Task[]) => {
