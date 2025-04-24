@@ -118,7 +118,17 @@ export default function GoalsPage() {
   };
 
   useEffect(() => {
-    loadData();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadData(); // Your function to load tasks and goals
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Filter tasks based on activity and completion status
