@@ -159,12 +159,12 @@
   }
   
   .taskItem {
-    display: flex;
-    align-items: flex-start;
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    background-color: var(--gray-alpha-100);
-    transition: background-color 0.2s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  .completing {
+    opacity: 0.5;
+    transform: translateX(10px);
   }
   
   .taskItem:hover {
