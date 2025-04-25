@@ -17,6 +17,7 @@ import TaskItem from '@/app/components/goals/TaskItem';
 import TaskForm from '@/app/components/goals/TaskForm';
 import styles from './goals.module.css';
 import tasksStyles from '@/app/components/goals/TaskList.module.css';
+import { useData } from '@/providers/DataProvider';
 
 type TabType = 'goals' | 'tasks' | 'completed';
 
@@ -30,101 +31,153 @@ export default function GoalsPage() {
   // Removed the unused taskFilter state variable
   const [activityFilter, setActivityFilter] = useState<string>('all');
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
+  const { getGoals: getSessions } = useData(); // We're aliasing getGoals as getSessions
 
   // Load goals and tasks
-  const loadData = () => {
+  const loadData = async () => {
     console.log('Loading goals data');
 
-    // Get all goals
-    const allGoals = getGoals();
-    console.log('All goals:', allGoals);
+    try {
+      // Get all goals using the useData hook
+      const dbGoals = await getSessions();
+      console.log('All goals from database:', dbGoals);
 
-    // Initially, don't filter by completion
-    setGoals(allGoals);
+      // Map database goals to application's Goal type
+      const allGoals = dbGoals.map((dbGoal) => ({
+        id: dbGoal.id,
+        title: dbGoal.title,
+        description: dbGoal.description || undefined,
+        type: dbGoal.type as 'time' | 'sessions',
+        target: dbGoal.target,
+        period: dbGoal.period as 'daily' | 'weekly' | 'monthly' | 'yearly',
+        startDate: dbGoal.start_date, // Convert snake_case to camelCase
+        endDate: dbGoal.end_date || undefined, // Convert snake_case to camelCase
+        createdAt: dbGoal.created_at, // Convert snake_case to camelCase
+        activity: dbGoal.activity || undefined,
+      }));
 
-    // Separate active and completed goals (consider a goal completed if progress ≥ 100%)
-    const active: Goal[] = [];
-    const completed: Goal[] = [];
+      // Get all tasks
+      const allTasks = getTasks();
 
-    allGoals.forEach((goal) => {
-      // Calculate progress
-      const progress = calculateGoalProgress(goal);
-      if (progress.percentage >= 100) {
-        completed.push(goal);
-      } else {
-        active.push(goal);
+      // Separate active and completed goals
+      const active: Goal[] = [];
+      const completed: Goal[] = [];
+
+      allGoals.forEach((goal) => {
+        // Calculate progress
+        const progress = calculateGoalProgress(goal);
+        if (progress.percentage >= 100) {
+          completed.push(goal);
+        } else {
+          active.push(goal);
+        }
+      });
+
+      setGoals(active);
+      setCompletedGoals(completed);
+
+      // Rest of your existing code for tasks...
+      // Separate active and completed tasks
+      const activeTasks = allTasks.filter((task) => !task.completed);
+      const doneTasks = allTasks.filter((task) => task.completed);
+
+      // Sort active tasks by due date and creation date
+      activeTasks.sort((a, b) => {
+        // First sort by due date (if available)
+        if (a.dueDate && b.dueDate) {
+          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        } else if (a.dueDate) {
+          return -1; // a has due date, b doesn't, a comes first
+        } else if (b.dueDate) {
+          return 1; // b has due date, a doesn't, b comes first
+        }
+
+        // Then by creation date (newest first)
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
+
+      // Sort completed tasks by completion date
+      doneTasks.sort((a, b) => {
+        // Sort by completion date if available, otherwise creation date
+        const dateA = a.completedAt
+          ? new Date(a.completedAt).getTime()
+          : new Date(a.createdAt).getTime();
+        const dateB = b.completedAt
+          ? new Date(b.completedAt).getTime()
+          : new Date(b.createdAt).getTime();
+        return dateB - dateA;
+      });
+
+      setTasks(activeTasks);
+      setCompletedTasks(doneTasks);
+
+      // Extract unique activities from all tasks AND goals
+      const activities = new Set<string>();
+
+      // Add activities from tasks
+      allTasks.forEach((task) => {
+        if (task.activity) {
+          activities.add(task.activity);
+        }
+      });
+
+      // Also add activities from goals
+      allGoals.forEach((goal) => {
+        if (goal.activity) {
+          activities.add(goal.activity);
+        }
+      });
+
+      // Combine with default activities
+      defaultActivityCategories.forEach((activity) => activities.add(activity));
+      setAvailableActivities(Array.from(activities));
+    } catch (error) {
+      console.error('Error loading data:', error);
+
+      // Add more specific error handling
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+
+        // Fallback to localStorage if database fails
+        const localGoals = getGoals();
+        console.log('Falling back to localStorage goals:', localGoals);
+
+        // Set goals from localStorage
+        const active: Goal[] = [];
+        const completed: Goal[] = [];
+
+        localGoals.forEach((goal) => {
+          const progress = calculateGoalProgress(goal);
+          if (progress.percentage >= 100) {
+            completed.push(goal);
+          } else {
+            active.push(goal);
+          }
+        });
+
+        setGoals(active);
+        setCompletedGoals(completed);
       }
-    });
-
-    setGoals(active);
-    setCompletedGoals(completed);
-
-    // Get all tasks
-    const allTasks = getTasks();
-
-    // Separate active and completed tasks
-    const activeTasks = allTasks.filter((task) => !task.completed);
-    const doneTasks = allTasks.filter((task) => task.completed);
-
-    // Sort active tasks by due date and creation date
-    activeTasks.sort((a, b) => {
-      // First sort by due date (if available)
-      if (a.dueDate && b.dueDate) {
-        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      } else if (a.dueDate) {
-        return -1; // a has due date, b doesn't, a comes first
-      } else if (b.dueDate) {
-        return 1; // b has due date, a doesn't, b comes first
-      }
-
-      // Then by creation date (newest first)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-
-    doneTasks.sort((a, b) => {
-      // Sort by completion date if available, otherwise creation date
-      const dateA = a.completedAt
-        ? new Date(a.completedAt).getTime()
-        : new Date(a.createdAt).getTime();
-      const dateB = b.completedAt
-        ? new Date(b.completedAt).getTime()
-        : new Date(b.createdAt).getTime();
-      return dateB - dateA;
-    });
-
-    setTasks(activeTasks);
-    setCompletedTasks(doneTasks);
-
-    // Extract unique activities from all tasks AND goals
-    const activities = new Set<string>();
-
-    // Add activities from tasks
-    allTasks.forEach((task) => {
-      if (task.activity) {
-        activities.add(task.activity);
-      }
-    });
-
-    // Also add activities from goals
-    allGoals.forEach((goal) => {
-      if (goal.activity) {
-        activities.add(goal.activity);
-      }
-    });
-
-    // Combine with default activities
-    defaultActivityCategories.forEach((activity) => activities.add(activity));
-    setAvailableActivities(Array.from(activities));
+    }
   };
 
   useEffect(() => {
-    // Load data immediately when component mounts
-    loadData();
+    // Use an async IIFE to properly handle the async loadData
+    (async () => {
+      await loadData();
+      console.log('Initial data load complete');
+    })();
 
     // Set up visibility change listener
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        loadData();
+        // Again, use an async IIFE
+        (async () => {
+          await loadData();
+          console.log('Visibility change data load complete');
+        })();
       }
     };
 
@@ -133,7 +186,7 @@ export default function GoalsPage() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   // Filter tasks based on activity and completion status
   const getFilteredTasks = (tasksList: Task[]) => {
