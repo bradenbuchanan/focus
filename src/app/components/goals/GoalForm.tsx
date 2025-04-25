@@ -27,14 +27,17 @@ export default function GoalForm({
   const [selectedActivity, setSelectedActivity] = useState<string>(
     activity || ''
   );
+  const [error, setError] = useState<string>(''); // Add error state
 
   const { saveGoal } = useData();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(''); // Clear any previous errors
 
     try {
-      await saveGoal({
+      // Create the goal object
+      const goalData = {
         title,
         description: description || undefined,
         type,
@@ -42,12 +45,19 @@ export default function GoalForm({
         period,
         activity: selectedActivity || undefined,
         startDate: new Date().toISOString(),
-      });
+      };
 
-      onSave();
+      // Wait for the goal to be saved
+      const goalId = await saveGoal(goalData);
+
+      if (!goalId) {
+        throw new Error('Failed to create goal');
+      }
+
+      onSave(); // Only call onSave if successful
     } catch (error) {
       console.error('Error saving goal:', error);
-      // Consider adding error handling UI here
+      setError('Failed to create goal. Please try again.');
     }
   };
 
