@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Goal,
   calculateGoalProgress,
-  deleteGoal,
+  deleteGoal as deleteLocalGoal, // Rename it here
   getTasksForGoal,
   Task,
 } from '@/lib/timer';
@@ -13,6 +13,7 @@ import styles from './GoalCard.module.css';
 import GoalEditForm from './GoalEditForm';
 import TaskForm from './TaskForm';
 import TaskItem from './TaskItem';
+import { useData } from '@/providers/DataProvider';
 
 interface GoalCardProps {
   goal: Goal;
@@ -26,6 +27,7 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [showCompleted, setShowCompleted] = useState(false);
   const { current, percentage } = calculateGoalProgress(goal);
+  const { deleteGoal } = useData();
 
   // Load tasks associated with this goal
   const loadTasks = useCallback(() => {
@@ -65,8 +67,23 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
     setCompletedTasks(completed);
   }, [goal.id]); // Now goal.id is the only dependency
 
+  // In GoalCard.tsx
   useEffect(() => {
+    // Load tasks when the component mounts
     loadTasks();
+
+    // Set up visibility change listener to reload tasks when the tab becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadTasks();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [loadTasks]);
 
   const formatPeriod = (period: string) => {
@@ -84,16 +101,28 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this goal?')) {
-      deleteGoal(goal.id);
+      try {
+        // Try to delete from database using the DataProvider
+        await deleteGoal(goal.id);
+        console.log('Goal deleted successfully', goal.id);
+      } catch (error) {
+        console.error('Error deleting goal:', error);
+
+        // Fallback to localStorage if database operation fails
+        deleteLocalGoal(goal.id); // Use the renamed local function
+        console.log('Attempted localStorage fallback delete');
+      }
+
+      // Always call onDelete to refresh the parent component
       onDelete();
     }
   };
 
   const handleEditComplete = () => {
     setIsEditing(false);
-    onEdit();
+    onEdit(); // Call the onEdit prop from parent component
   };
 
   const handleTaskUpdate = () => {
