@@ -11,6 +11,7 @@ import {
 import { saveGoal, getGoals } from '@/services/goalService';
 import { saveTask, updateTask, getTasks } from '@/services/taskService';
 import { Database } from '@/types/supabase';
+import { supabase } from '@/lib/supabase';
 
 // Define types based on your Supabase database schema
 type Session = Database['public']['Tables']['focus_sessions']['Row'];
@@ -80,6 +81,7 @@ interface DataContextType {
   // Goals
   saveGoal: (goal: GoalInput) => Promise<string>;
   getGoals: () => Promise<Goal[]>;
+  deleteGoal: (goalId: string) => Promise<void>; // Added this line
 
   // Tasks
   saveTask: (task: TaskInput) => Promise<string>;
@@ -159,6 +161,36 @@ export function DataProvider({ children }: DataProviderProps) {
       }
       return await getGoals();
     }, [isAuthenticated]),
+
+    // Add the deleteGoal function here
+    deleteGoal: useCallback(
+      async (goalId: string) => {
+        if (!isAuthenticated()) {
+          // Use localStorage fallback from @/lib/timer
+          // We need to import the local version or get it from the window
+          try {
+            // This assumes you have a local function called getLocalGoals()
+            const localGoals = JSON.parse(
+              localStorage.getItem('focusGoals') || '[]'
+            );
+            const updatedGoals = localGoals.filter((g: any) => g.id !== goalId);
+            localStorage.setItem('focusGoals', JSON.stringify(updatedGoals));
+            return;
+          } catch (error) {
+            console.error('Error with localStorage fallback:', error);
+          }
+        }
+
+        // Delete from Supabase database
+        const { error } = await supabase
+          .from('goals')
+          .delete()
+          .eq('id', goalId);
+
+        if (error) throw error;
+      },
+      [isAuthenticated]
+    ),
 
     saveTask: useCallback(
       async (task: TaskInput) => {
