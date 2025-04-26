@@ -201,6 +201,14 @@
   border-color: var(--foreground);
 }
 
+.loadingState {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--gray-alpha-100);
+  border-radius: 0.75rem;
+  margin: 1rem 0;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .goalsHeader {

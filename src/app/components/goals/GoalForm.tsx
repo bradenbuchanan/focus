@@ -33,7 +33,15 @@ export default function GoalForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); // Clear any previous errors
+    setError('');
+    console.log('Submitting goal:', {
+      title,
+      description,
+      type,
+      target,
+      period,
+      selectedActivity,
+    });
 
     try {
       // Create the goal object
@@ -47,8 +55,11 @@ export default function GoalForm({
         startDate: new Date().toISOString(),
       };
 
+      console.log('Saving goal data:', goalData);
+
       // Wait for the goal to be saved
       const goalId = await saveGoal(goalData);
+      console.log('Goal saved with ID:', goalId);
 
       if (!goalId) {
         throw new Error('Failed to create goal');

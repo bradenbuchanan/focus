@@ -1,4 +1,3 @@
-// src/providers/DataProvider.tsx
 'use client';
 
 import { createContext, useContext, ReactNode, useCallback } from 'react';
@@ -13,13 +12,11 @@ import { saveTask, updateTask, getTasks } from '@/services/taskService';
 import { Database } from '@/types/supabase';
 import { supabase } from '@/lib/supabase';
 
-// Define types based on your Supabase database schema
 type Session = Database['public']['Tables']['focus_sessions']['Row'];
 type Accomplishment = Database['public']['Tables']['accomplishments']['Row'];
 type Goal = Database['public']['Tables']['goals']['Row'];
 type Task = Database['public']['Tables']['tasks']['Row'];
 
-// Define types for the input data
 interface SessionInput {
   startTime: Date;
   endTime?: Date | null;
@@ -70,20 +67,13 @@ interface DataProviderProps {
 }
 
 interface DataContextType {
-  // Sessions
   saveSession: (session: SessionInput) => Promise<string>;
   getSessions: () => Promise<Session[]>;
-
-  // Accomplishments
   saveAccomplishment: (data: AccomplishmentInput) => Promise<string>;
   getAccomplishments: () => Promise<Accomplishment[]>;
-
-  // Goals
   saveGoal: (goal: GoalInput) => Promise<string>;
   getGoals: () => Promise<Goal[]>;
-  deleteGoal: (goalId: string) => Promise<void>; // Added this line
-
-  // Tasks
+  deleteGoal: (goalId: string) => Promise<void>;
   saveTask: (task: TaskInput) => Promise<string>;
   updateTask: (task: TaskUpdateInput) => Promise<void>;
   getTasks: () => Promise<Task[]>;
@@ -94,7 +84,6 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export function DataProvider({ children }: DataProviderProps) {
   const { user } = useAuth();
 
-  // Check if user is authenticated before performing data operations
   const isAuthenticated = useCallback(() => {
     if (!user) {
       console.warn('User not authenticated. Using localStorage fallback.');
@@ -103,12 +92,10 @@ export function DataProvider({ children }: DataProviderProps) {
     return true;
   }, [user]);
 
-  // Create wrapper functions that check authentication
   const wrappedServices = {
     saveSession: useCallback(
       async (session: SessionInput) => {
         if (!isAuthenticated()) {
-          // Use localStorage fallback
           return '';
         }
         return await saveSession(session);
@@ -118,7 +105,6 @@ export function DataProvider({ children }: DataProviderProps) {
 
     getSessions: useCallback(async () => {
       if (!isAuthenticated()) {
-        // Use localStorage fallback
         return [];
       }
       return await getSessions();
@@ -127,7 +113,6 @@ export function DataProvider({ children }: DataProviderProps) {
     saveAccomplishment: useCallback(
       async (data: AccomplishmentInput) => {
         if (!isAuthenticated()) {
-          // Use localStorage fallback
           return '';
         }
         return await saveAccomplishment(data);
@@ -137,7 +122,6 @@ export function DataProvider({ children }: DataProviderProps) {
 
     getAccomplishments: useCallback(async () => {
       if (!isAuthenticated()) {
-        // Use localStorage fallback
         return [];
       }
       return await getAccomplishments();
@@ -145,31 +129,97 @@ export function DataProvider({ children }: DataProviderProps) {
 
     saveGoal: useCallback(
       async (goal: GoalInput) => {
-        if (!isAuthenticated()) {
-          // Use localStorage fallback
+        console.log('saveGoal called with:', goal);
+
+        try {
+          if (!isAuthenticated()) {
+            console.log('User not authenticated, falling back to localStorage');
+            return '';
+          }
+
+          const { data: userData } = await supabase.auth.getUser();
+          console.log('Current user:', userData);
+
+          if (!userData?.user) {
+            throw new Error('User data not found');
+          }
+
+          const { data, error } = await supabase
+            .from('goals')
+            .insert({
+              user_id: userData.user.id,
+              title: goal.title,
+              description: goal.description || null,
+              type: goal.type,
+              target: goal.target,
+              period: goal.period,
+              activity: goal.activity || null,
+              start_date: goal.startDate,
+              end_date: goal.endDate || null,
+            })
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Supabase error saving goal:', error);
+            throw error;
+          }
+
+          console.log('Goal saved successfully:', data);
+          return data.id;
+        } catch (error) {
+          console.error('Error in saveGoal:', error);
+          if (error instanceof Error) {
+            console.error('Error details:', error.message);
+          }
           return '';
         }
-        return await saveGoal(goal);
       },
       [isAuthenticated]
     ),
 
     getGoals: useCallback(async () => {
-      if (!isAuthenticated()) {
-        // Use localStorage fallback
+      console.log('getGoals called');
+
+      try {
+        if (!isAuthenticated()) {
+          console.log('User not authenticated, falling back to localStorage');
+          return getGoals();
+        }
+
+        const { data: userData } = await supabase.auth.getUser();
+        console.log('Current user for getGoals:', userData);
+
+        if (!userData?.user) {
+          throw new Error('User data not found');
+        }
+
+        const { data, error } = await supabase
+          .from('goals')
+          .select('*')
+          .eq('user_id', userData.user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Supabase error getting goals:', error);
+          throw error;
+        }
+
+        console.log('Goals retrieved:', data);
+        return data || [];
+      } catch (error) {
+        console.error('Error in getGoals:', error);
+        if (error instanceof Error) {
+          console.error('Error details:', error.message);
+        }
         return [];
       }
-      return await getGoals();
     }, [isAuthenticated]),
 
-    // Add the deleteGoal function here
     deleteGoal: useCallback(
       async (goalId: string) => {
         if (!isAuthenticated()) {
-          // Use localStorage fallback from @/lib/timer
-          // We need to import the local version or get it from the window
           try {
-            // This assumes you have a local function called getLocalGoals()
             const localGoals = JSON.parse(
               localStorage.getItem('focusGoals') || '[]'
             );
@@ -181,7 +231,6 @@ export function DataProvider({ children }: DataProviderProps) {
           }
         }
 
-        // Delete from Supabase database
         const { error } = await supabase
           .from('goals')
           .delete()
@@ -195,7 +244,6 @@ export function DataProvider({ children }: DataProviderProps) {
     saveTask: useCallback(
       async (task: TaskInput) => {
         if (!isAuthenticated()) {
-          // Use localStorage fallback
           return '';
         }
         return await saveTask(task);
@@ -206,7 +254,6 @@ export function DataProvider({ children }: DataProviderProps) {
     updateTask: useCallback(
       async (task: TaskUpdateInput) => {
         if (!isAuthenticated()) {
-          // Use localStorage fallback
           return;
         }
         await updateTask(task);
@@ -216,7 +263,6 @@ export function DataProvider({ children }: DataProviderProps) {
 
     getTasks: useCallback(async () => {
       if (!isAuthenticated()) {
-        // Use localStorage fallback
         return [];
       }
       return await getTasks();
