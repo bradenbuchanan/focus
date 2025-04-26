@@ -1,344 +1,290 @@
-/* src/components/timer/timer.module.css */
-.timerPage {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    text-align: center;
-  }
-  
-  .timerPage h1 {
-    margin-bottom: 1rem;
-  }
-  
-  .timerPage p {
-    color: var(--foreground);
-    opacity: 0.7;
-    margin-bottom: 2.5rem;
-  }
-  
-  .timerContainer {
-    background-color: var(--gray-alpha-100);
-    border-radius: 1rem;
-    padding: 2rem;
-    margin: 0 auto;
-  }
-
-  .tabsContainer {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 2rem;
-    gap: 1rem;
-  }
-
-  .tabButton {
-    padding: 0.75rem 2rem;
-    border-radius: 0.75rem;
-    border: none;
-    background-color: var(--gray-alpha-200);
-    color: var(--foreground);
-    font-weight: 500;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 120px;
-  }
-  
-  .tabButton:hover:not(.activeTab) {
-    background-color: var(--gray-alpha-300);
-  }
-  
-  .activeTab {
-    background-color: var(--foreground);
-    color: var(--background);
-  }
-  
-  .tabContent {
-    min-height: 400px; /* Ensure consistent height between tabs */
-    width: 100%;
-
-  }
-
-  
-  /* Settings styles */
-  .settingsContainer {
-    width: 100%;
-  }
-  
-  .settingsContainer h2 {
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-  
-  .settingGroup {
-    margin-bottom: 1.25rem;
-  }
-  
-  .settingGroup label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-  }
-  
-  .settingGroup input[type="number"] {
-    width: 100%;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--gray-alpha-200);
-    background-color: var(--background);
-  }
-  
-  .checkboxContainer {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .checkboxContainer input {
-    margin: 0;
-  }
-  
-  .settingsButtons {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-    justify-content: center;
-  }
-
-/* Accomplishment recorder styles */
-.accomplishmentRecorder {
-  margin-top: 1.5rem;
-  animation: fadeIn 0.3s ease-in;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.accomplishmentRecorder h3 {
-  margin-bottom: 0.5rem;
-}
-
-.accomplishmentRecorder p {
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-  opacity: 0.7;
-}
-
-.quickOptions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.quickOptionButton {
-  padding: 0.5rem 0.75rem;
-  background-color: var(--gray-alpha-100);
-  border: none;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.quickOptionButton:hover {
-  background-color: var(--gray-alpha-200);
-}
-
-.accomplishmentInput {
-  width: 100%;
-  min-height: 80px;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--gray-alpha-200);
-  background-color: var(--background);
-  resize: vertical;
-  margin-bottom: 1rem;
-}
-
-.recorderActions {
-  display: flex;
-  gap: 1rem;
-}
-
-.timerContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.timerDisplay, 
-.freeTimer {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.timerContainer::after {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 1px;
-  background-color: var(--gray-alpha-200);
-  margin: 2rem 0;
-}
-
-.freeTimerInfo {
-  margin-top: 0.5rem;
-  font-size: 1rem;
-  opacity: 0.7;
-}
-
-.modeSwitcher {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.modeButton {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--gray-alpha-200);
-  background-color: var(--background);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.modeButtonActive {
-  background-color: var(--foreground);
-  color: var(--background);
-  border-color: var(--foreground);
-}
-
-
-.categorySelector {
-  margin: 1rem 0;
-}
-
-.categorySelector label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.categoryOptions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.categoryButton {
-  padding: 0.5rem 0.75rem;
-  background-color: var(--gray-alpha-100);
-  border: none;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.categoryButton:hover {
-  background-color: var(--gray-alpha-200);
-}
-
-.categoryButton.selected {
-  background-color: var(--foreground);
-  color: var(--background);
-}
+/* Main container and wrapper */
 .timerPageContainer {
   max-width: 800px;
   margin: 0 auto;
+  padding: 1.5rem;
 }
 
-.goalsTasksToggle {
+.timerWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Card styling with no borders */
+.timerCard, .tasksCard {
+  background-color: rgba(30, 30, 30, 0.3);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Activity section styling */
+.activitySection {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+  text-align: center;
+  color: var(--foreground);
+  letter-spacing: 0.02em;
+}
+
+/* Activity pills */
+.activityPills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.activityPill {
+  padding: 0.6rem 1.25rem;
+  border-radius: 2rem;
   background-color: var(--gray-alpha-200);
   color: var(--foreground);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-left: auto; /* Push to the right */
-}
-
-.goalsTasksToggle:hover {
-  background-color: var(--gray-alpha-100);
-}
-
-.modeSwitcher {
-  display: flex;
-  justify-content: center; /* Center the buttons horizontally */
-  gap: 1rem;
-  margin-bottom: 2rem;
-  width: 100%; /* Ensure the container takes full width */
-}
-
-.modeButton {
-  flex: 1; /* Make buttons take equal width */
-  max-width: 200px; /* Limit maximum width */
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  border: none;
-  background-color: var(--gray-alpha-200);
-  color: var(--foreground);
-  font-weight: 500;
-  font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.modeButtonActive {
-  background-color: var(--foreground);
-  color: var(--background);
+.activityPill:hover {
+  background-color: var(--gray-alpha-300, var(--gray-alpha-200));
+  transform: translateY(-2px);
 }
 
+.pillSelected {
+  background-color: var(--foreground);
+  color: var(--background);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Mode tabs styling */
+.modeTabsContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.modeTabs {
+  display: flex;
+  background-color: var(--gray-alpha-200);
+  border-radius: 2rem;
+  padding: 0.3rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.modeTab {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 1.75rem;
+  border: none;
+  background-color: transparent;
+  color: var(--foreground);
+  opacity: 0.7;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.activeTab {
+  background-color: var(--foreground);
+  color: var(--background);
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Timer display wrapper */
+.timerDisplayWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+/* Timer circle styling */
+.timerCircle {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 0 auto 2rem;
+  border-radius: 50%;
+  background-color: var(--gray-alpha-200);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.timerCircleProgress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--foreground) 0%, 
+    var(--foreground) var(--progress-percent, 0%), 
+    transparent var(--progress-percent, 0%)
+  );
+  opacity: 0.2;
+  mask: radial-gradient(transparent 65%, black 66%);
+  -webkit-mask: radial-gradient(transparent 65%, black 66%);
+}
+
+.timerTime {
+  font-size: 3.75rem;
+  font-weight: 500;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.timerLabel {
+  font-size: 0.95rem;
+  color: var(--foreground);
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+/* Button styling */
+.timerControls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.primaryButton {
+  background-color: var(--foreground);
+  color: var(--background);
+  padding: 0.75rem 2rem;
+  border-radius: 2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 110px;
+  text-align: center;
+  border: none;
+}
+
+.primaryButton:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.secondaryButton {
+  background-color: var(--gray-alpha-200);
+  color: var(--foreground);
+  padding: 0.75rem 1.25rem;
+  border-radius: 2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.secondaryButton:hover {
+  background-color: var(--gray-alpha-300, var(--gray-alpha-200));
+  opacity: 0.9;
+}
+
+/* Tasks section styling */
+.tasksSection {
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: rgba(25, 25, 25, 0.3);
+  border-radius: 1rem;
+}
+
+.tasksSectionTitle {
+  font-size: 1.1rem;
+  color: var(--foreground);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--foreground);
+  opacity: 0.6;
+  font-size: 0.95rem;
+  text-align: center;
+  border-radius: 0.75rem;
+}
+
+.emptyStateIcon {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.7;
+}
+
+.emptyStateAction {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #4a9eff;
+}
+
+.emptyStateAction:hover {
+  text-decoration: underline;
+}
+
+/* Use a proper display:none instead of just hiding */
 .hidden {
   display: none;
 }
 
-.timerContent,
-.goalsContent {
-  width: 100%;
-}
-
-
+/* Responsive adjustments */
 @media (max-width: 600px) {
-  .accomplishmentRecorder h3 {
-    font-size: 1.1rem;
+  .timerPageContainer {
+    padding: 1rem;
   }
   
-  .quickOptions {
-    gap: 0.4rem;
+  .timerCard, .tasksCard {
+    padding: 1.5rem;
   }
   
-  .quickOptionButton {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
+  .timerCircle {
+    width: 240px;
+    height: 240px;
   }
   
-  .accomplishmentInput {
-    min-height: 60px;
+  .timerTime {
+    font-size: 3rem;
+  }
+  
+  .activityPill {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .timerControls {
+    flex-wrap: wrap;
+  }
+  
+  .primaryButton, .secondaryButton {
+    flex: 1;
+    min-width: 0;
   }
 }
-  
-  @media (max-width: 600px) {
-    .progressRing {
-      width: 200px;
-      height: 200px;
-    }
-    
-    .progressInner {
-      width: 170px;
-      height: 170px;
-    }
-    
-    .time {
-      font-size: 2.5rem;
-    }
-  }
