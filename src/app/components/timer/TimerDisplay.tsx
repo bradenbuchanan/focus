@@ -49,7 +49,9 @@ export default function TimerDisplay({
           isBreak ? styles.breakProgress : styles.focusProgress
         }`}
         style={{
-          background: `conic-gradient(currentColor ${progressValue}%, transparent 0)`,
+          background: `conic-gradient(${
+            isBreak ? 'var(--break-color)' : 'var(--focus-color)'
+          } ${progressValue}%, var(--gray-alpha-100) ${progressValue}%)`,
         }}
       >
         <div className={styles.progressInner}>
