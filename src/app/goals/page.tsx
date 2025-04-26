@@ -1,11 +1,11 @@
+// src/app/goals/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Goal,
   Task,
-  getGoals,
   getTasks,
   defaultActivityCategories,
   calculateGoalProgress,
@@ -17,153 +17,191 @@ import TaskForm from '@/app/components/goals/TaskForm';
 import styles from './goals.module.css';
 import tasksStyles from '@/app/components/goals/TaskList.module.css';
 import { useData } from '@/providers/DataProvider';
-import { useRouter } from 'next/navigation';
 
 type TabType = 'goals' | 'tasks' | 'completed';
 
 export default function GoalsPage() {
+  // State declarations
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [completedGoals, setCompletedGoals] = useState<Goal[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
-  const [showForm, setShowForm] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('goals');
+  const [showForm, setShowForm] = useState(false);
   const [activityFilter, setActivityFilter] = useState<string>('all');
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
-  const { getGoals: getSessions } = useData();
-  const router = useRouter();
 
-  // Load goals and tasks
+  const { getGoals: getSessions } = useData();
+
+  // Computed values using useMemo
+  const filteredGoals = useMemo(() => {
+    if (activityFilter === 'all') return goals;
+    return goals.filter((goal) => goal.activity === activityFilter);
+  }, [goals, activityFilter]);
+
+  const filteredCompletedGoals = useMemo(() => {
+    if (activityFilter === 'all') return completedGoals;
+    return completedGoals.filter((goal) => goal.activity === activityFilter);
+  }, [completedGoals, activityFilter]);
+
+  const filteredActiveTasks = useMemo(() => {
+    if (activityFilter === 'all') return tasks;
+    return tasks.filter((task) => task.activity === activityFilter);
+  }, [tasks, activityFilter]);
+
+  const filteredCompletedTasks = useMemo(() => {
+    if (activityFilter === 'all') return completedTasks;
+    return completedTasks.filter((task) => task.activity === activityFilter);
+  }, [completedTasks, activityFilter]);
+
+  // Debug logging effect
+  useEffect(() => {
+    console.log('Current state:', {
+      isLoading,
+      error,
+      goals: goals.length,
+      completedGoals: completedGoals.length,
+      tasks: tasks.length,
+      completedTasks: completedTasks.length,
+      filteredGoals: filteredGoals.length,
+      filteredCompletedGoals: filteredCompletedGoals.length,
+      filteredActiveTasks: filteredActiveTasks.length,
+      filteredCompletedTasks: filteredCompletedTasks.length,
+      activityFilter,
+      activeTab,
+    });
+  }, [
+    isLoading,
+    error,
+    goals,
+    completedGoals,
+    tasks,
+    completedTasks,
+    filteredGoals,
+    filteredCompletedGoals,
+    filteredActiveTasks,
+    filteredCompletedTasks,
+    activityFilter,
+    activeTab,
+  ]);
+
+  // Load data function
   const loadData = async () => {
+    console.log('Starting data load');
     setIsLoading(true);
-    console.log('Loading goals data');
+    setError(null);
 
     try {
-      // Get all goals using the useData hook
+      // Get goals from database
       const dbGoals = await getSessions();
-      console.log('All goals from database:', dbGoals);
+      console.log('Received goals from database:', dbGoals);
 
-      if (!dbGoals || dbGoals.length === 0) {
-        console.log('No goals found, retrying...');
-        // Add a small delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        // Retry the fetch
-        const retryGoals = await getSessions();
-        console.log('Retry results:', retryGoals);
-        if (!retryGoals || retryGoals.length === 0) {
-          console.log('Still no goals after retry');
-        }
+      if (!dbGoals || !Array.isArray(dbGoals)) {
+        throw new Error('Invalid goals data received');
       }
 
-      // Rest of your existing loadData logic...
+      // Map database goals to application's Goal type
+      const allGoals = dbGoals.map((dbGoal) => ({
+        id: dbGoal.id,
+        title: dbGoal.title,
+        description: dbGoal.description || undefined,
+        type: dbGoal.type as 'time' | 'sessions',
+        target: dbGoal.target,
+        period: dbGoal.period as 'daily' | 'weekly' | 'monthly' | 'yearly',
+        startDate: dbGoal.start_date,
+        endDate: dbGoal.end_date || undefined,
+        createdAt: dbGoal.created_at,
+        activity: dbGoal.activity || undefined,
+      }));
+
+      console.log('Mapped goals:', allGoals);
+
+      // Separate active and completed goals
+      const active: Goal[] = [];
+      const completed: Goal[] = [];
+
+      allGoals.forEach((goal) => {
+        const progress = calculateGoalProgress(goal);
+        if (progress.percentage >= 100) {
+          completed.push(goal);
+        } else {
+          active.push(goal);
+        }
+      });
+
+      // Get and process tasks
+      const allTasks = getTasks();
+      const activeTasks = allTasks.filter((task) => !task.completed);
+      const doneTasks = allTasks.filter((task) => task.completed);
+
+      // Sort tasks by date
+      activeTasks.sort((a, b) => {
+        if (a.dueDate && b.dueDate) {
+          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        }
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
+
+      doneTasks.sort((a, b) => {
+        const dateA = a.completedAt
+          ? new Date(a.completedAt)
+          : new Date(a.createdAt);
+        const dateB = b.completedAt
+          ? new Date(b.completedAt)
+          : new Date(b.createdAt);
+        return dateB.getTime() - dateA.getTime();
+      });
+
+      // Extract unique activities
+      const activities = new Set<string>();
+      [...allGoals, ...allTasks].forEach((item) => {
+        if (item.activity) {
+          activities.add(item.activity);
+        }
+      });
+      defaultActivityCategories.forEach((activity) => activities.add(activity));
+
+      // Update all state at once
+      setGoals(active);
+      setCompletedGoals(completed);
+      setTasks(activeTasks);
+      setCompletedTasks(doneTasks);
+      setAvailableActivities(Array.from(activities));
+
+      console.log('Data load complete', {
+        activeGoals: active.length,
+        completedGoals: completed.length,
+        activeTasks: activeTasks.length,
+        completedTasks: doneTasks.length,
+        activities: Array.from(activities),
+      });
     } catch (error) {
       console.error('Error loading data:', error);
-      // Your existing error handling...
+      setError(error instanceof Error ? error.message : 'Failed to load data');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Modify your useEffect
+  // Initial data load effect
   useEffect(() => {
-    let mounted = true;
-
-    // Use an async IIFE to properly handle the async loadData
-    (async () => {
-      if (mounted) {
-        await loadData();
-        console.log('Initial data load complete');
-      }
-    })();
-
-    // Add a revalidation check after a short delay
-    const revalidationTimeout = setTimeout(() => {
-      if (mounted && goals.length === 0) {
-        console.log('No goals found after initial load, revalidating...');
-        loadData();
-      }
-    }, 2000);
-
-    // Set up visibility change listener
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && mounted) {
-        loadData();
-      }
-    };
-
-    // Add a focus event listener
-    const handleFocus = () => {
-      if (mounted) {
-        loadData();
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      mounted = false;
-      clearTimeout(revalidationTimeout);
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    loadData();
   }, []);
 
-  useEffect(() => {
-    let mounted = true;
-
-    // Use an async IIFE to properly handle the async loadData
-    (async () => {
-      if (mounted) {
-        await loadData();
-        console.log('Initial data load complete');
-      }
-    })();
-
-    // Set up visibility change listener
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && mounted) {
-        // Again, use an async IIFE
-        (async () => {
-          await loadData();
-          console.log('Visibility change data load complete');
-        })();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      mounted = false;
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
-
-  // Filter tasks based on activity and completion status
-  const getFilteredTasks = (tasksList: Task[]) => {
-    return tasksList.filter((task) => {
-      // Filter by activity
-      if (activityFilter !== 'all' && task.activity !== activityFilter) {
-        return false;
-      }
-      return true;
+  // Helper function for date formatting
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   };
 
-  // Filter goals based on activity
-  const getFilteredGoals = (goalsList: Goal[]) => {
-    if (activityFilter === 'all') return goalsList;
-
-    // Only return goals where the activity matches the filter
-    return goalsList.filter((goal) => goal.activity === activityFilter);
-  };
-
-  const filteredActiveTasks = getFilteredTasks(tasks);
-  const filteredCompletedTasks = getFilteredTasks(completedTasks);
-  const filteredGoals = getFilteredGoals(goals);
-  const filteredCompletedGoals = getFilteredGoals(completedGoals);
-
+  // Return JSX
   return (
     <div className={styles.goalsPage}>
       <div className={styles.goalsHeader}>
@@ -197,23 +235,29 @@ export default function GoalsPage() {
             Completed
           </button>
         </div>
-        {activeTab === 'goals' ? (
+        {activeTab === 'goals' && (
           <button
             className={styles.createButton}
             onClick={() => setShowForm(true)}
           >
             Create New Goal
           </button>
-        ) : null}
+        )}
       </div>
 
       {isLoading ? (
         <div className={styles.loadingState}>
           <p>Loading goals...</p>
         </div>
+      ) : error ? (
+        <div className={styles.errorState}>
+          <p>{error}</p>
+          <button onClick={loadData} className={styles.retryButton}>
+            Retry
+          </button>
+        </div>
       ) : (
         <>
-          {/* Activity filter section - show for all tabs */}
           {availableActivities.length > 0 && (
             <div className={styles.filterBar}>
               <div className={styles.activityFilters}>
@@ -244,7 +288,6 @@ export default function GoalsPage() {
           )}
 
           {activeTab === 'goals' ? (
-            // Goals tab content
             <>
               {showForm ? (
                 <GoalForm
@@ -279,8 +322,8 @@ export default function GoalsPage() {
                           : ''}
                       </h3>
                       <p>
-                        Create your first productivity goal to start tracking
-                        your progress
+                        Create your first productivity goal to track your
+                        progress
                       </p>
                       <button
                         className={styles.createButton}
@@ -294,7 +337,6 @@ export default function GoalsPage() {
               )}
             </>
           ) : activeTab === 'tasks' ? (
-            // Tasks tab content
             <div className={styles.tasksSection}>
               <TaskForm
                 onAdd={loadData}
@@ -316,9 +358,7 @@ export default function GoalsPage() {
               </div>
             </div>
           ) : (
-            // Completed tab content
             <div className={styles.completedSection}>
-              {/* Completed goals section */}
               <div className={styles.completedGoals}>
                 <h3 className={styles.sectionTitle}>Completed Goals</h3>
                 {filteredCompletedGoals.length > 0 ? (
@@ -341,7 +381,6 @@ export default function GoalsPage() {
                 )}
               </div>
 
-              {/* Completed tasks section */}
               <div className={styles.completedTasks}>
                 <h3 className={styles.sectionTitle}>Completed Tasks</h3>
                 <div className={tasksStyles.tasksList}>
@@ -376,14 +415,4 @@ export default function GoalsPage() {
       )}
     </div>
   );
-}
-
-// Helper function to format dates nicely
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
 }
