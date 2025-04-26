@@ -11,6 +11,7 @@ import TimerGoalsTasksPanel from './TimerGoalsTasksPanel';
 import { useTimerLogic } from '@/hooks/timer/useTimerLogic';
 import { defaultActivityCategories } from '@/lib/timer';
 import styles from './timer.module.css';
+import { formatTime, TimerState } from '@/lib/timer';
 
 export default function TimerContainer() {
   const [showSettings, setShowSettings] = useState(false);
@@ -69,7 +70,7 @@ export default function TimerContainer() {
 
   return (
     <div className={styles.timerPageContainer}>
-      <div className={styles.timerContainer}>
+      <div className={styles.timerWrapper}>
         {showSettings ? (
           <TimerSettings
             settings={timerData.settings}
@@ -87,58 +88,155 @@ export default function TimerContainer() {
           />
         ) : (
           <>
-            {/* Activity selector stays at the top */}
-            <ActivitySelector
-              selectedActivity={selectedActivity}
-              onSelectActivity={setSelectedActivity}
-            />
+            <div className={styles.timerCard}>
+              {/* Activity selector with improved styling */}
+              <div className={styles.activitySection}>
+                <h2 className={styles.sectionTitle}>
+                  What are you focusing on?
+                </h2>
+                <div className={styles.activityPills}>
+                  {defaultActivityCategories.map((activity) => (
+                    <button
+                      key={activity}
+                      className={`${styles.activityPill} ${
+                        selectedActivity === activity ? styles.pillSelected : ''
+                      }`}
+                      onClick={() => setSelectedActivity(activity)}
+                    >
+                      {activity}
+                    </button>
+                  ))}
+                  <button
+                    className={styles.activityPill}
+                    onClick={() => {
+                      /* Add custom activity logic */
+                    }}
+                  >
+                    Custom
+                  </button>
+                </div>
+              </div>
 
-            {/* Timer mode switcher */}
-            <div className={styles.modeSwitcher}>
-              <button
-                className={`${styles.modeButton} ${
-                  timerMode === 'pomodoro' ? styles.modeButtonActive : ''
-                }`}
-                onClick={() => setTimerMode('pomodoro')}
-              >
-                Pomodoro Timer
-              </button>
-              <button
-                className={`${styles.modeButton} ${
-                  timerMode === 'free' ? styles.modeButtonActive : ''
-                }`}
-                onClick={() => setTimerMode('free')}
-              >
-                Free Timer
-              </button>
+              {/* Timer mode selector */}
+              <div className={styles.modeTabsContainer}>
+                <div className={styles.modeTabs}>
+                  <button
+                    className={`${styles.modeTab} ${
+                      timerMode === 'pomodoro' ? styles.activeTab : ''
+                    }`}
+                    onClick={() => setTimerMode('pomodoro')}
+                  >
+                    Pomodoro Timer
+                  </button>
+                  <button
+                    className={`${styles.modeTab} ${
+                      timerMode === 'free' ? styles.activeTab : ''
+                    }`}
+                    onClick={() => setTimerMode('free')}
+                  >
+                    Free Timer
+                  </button>
+                </div>
+              </div>
+
+              {/* Enhanced timer display */}
+              <div className={styles.timerDisplayWrapper}>
+                {/* Pomodoro timer */}
+                <div className={timerMode === 'pomodoro' ? '' : styles.hidden}>
+                  <div className={styles.timerCircle}>
+                    <div
+                      className={styles.timerCircleProgress}
+                      style={
+                        {
+                          '--progress-percent': `${
+                            ((timerData.settings.focusDuration * 60 -
+                              timerData.timeRemaining) /
+                              (timerData.settings.focusDuration * 60)) *
+                            100
+                          }%`,
+                        } as React.CSSProperties
+                      }
+                    ></div>
+                    <div className={styles.timerTime}>
+                      {formatTime(timerData.timeRemaining)}
+                    </div>
+                    <div className={styles.timerLabel}>
+                      {timerData.state === TimerState.BREAK
+                        ? 'Break Time'
+                        : 'Focus Time'}
+                    </div>
+                  </div>
+
+                  <div className={styles.timerControls}>
+                    {timerData.state === TimerState.RUNNING ? (
+                      <button
+                        onClick={pauseTimer}
+                        className={styles.primaryButton}
+                      >
+                        Pause
+                      </button>
+                    ) : (
+                      <button
+                        onClick={startTimer}
+                        className={styles.primaryButton}
+                      >
+                        {timerData.state === TimerState.IDLE
+                          ? 'Start'
+                          : 'Resume'}
+                      </button>
+                    )}
+                    <button
+                      onClick={resetTimer}
+                      className={styles.secondaryButton}
+                    >
+                      Reset
+                    </button>
+                    <button
+                      onClick={() => setShowSettings(true)}
+                      className={styles.secondaryButton}
+                    >
+                      Settings
+                    </button>
+                  </div>
+                </div>
+
+                {/* Free timer */}
+                <div className={timerMode === 'free' ? '' : styles.hidden}>
+                  <FreeTimer
+                    activity={selectedActivity}
+                    onComplete={handleFreeSessionComplete}
+                    onCancel={() => setTimerMode('pomodoro')}
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Timer display */}
-            <div
-              style={{ display: timerMode === 'pomodoro' ? 'block' : 'none' }}
-            >
-              <TimerDisplay
-                timerData={timerData}
-                onStart={startTimer}
-                onPause={pauseTimer}
-                onReset={resetTimer}
-                onOpenSettings={() => setShowSettings(true)}
-              />
-            </div>
+            {/* Tasks and goals section */}
+            <div className={styles.tasksCard}>
+              <div className={styles.tasksSection}>
+                <h3 className={styles.tasksSectionTitle}>
+                  Tasks for {selectedActivity}
+                </h3>
+                {/* Empty state with icon and action */}
+                <div className={styles.emptyState}>
+                  <div className={styles.emptyStateIcon}>📋</div>
+                  <div>No active tasks for {selectedActivity}.</div>
+                  <div className={styles.emptyStateAction}>+ Add a task</div>
+                </div>
+              </div>
 
-            <div style={{ display: timerMode === 'free' ? 'block' : 'none' }}>
-              <FreeTimer
-                activity={selectedActivity}
-                onComplete={handleFreeSessionComplete}
-                onCancel={() => setTimerMode('pomodoro')}
-              />
+              <div className={styles.tasksSection}>
+                <h3 className={styles.tasksSectionTitle}>
+                  Goals for {selectedActivity}
+                </h3>
+                {/* Empty state with icon and action */}
+                <div className={styles.emptyState}>
+                  <div className={styles.emptyStateIcon}>🎯</div>
+                  <div>No active goals for {selectedActivity}.</div>
+                  <div className={styles.emptyStateAction}>+ Create a goal</div>
+                </div>
+              </div>
             </div>
-
-            {/* Goals & Tasks Panel - now always visible below timer */}
-            <TimerGoalsTasksPanel
-              activity={selectedActivity}
-              onTaskComplete={completeTask}
-            />
           </>
         )}
       </div>
