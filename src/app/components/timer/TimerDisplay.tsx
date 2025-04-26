@@ -42,28 +42,28 @@ export default function TimerDisplay({
 
   const progressValue = calculateProgress();
 
+  // In TimerDisplay.tsx, update the return statement
   return (
     <div className={styles.timerDisplay}>
-      <div
-        className={`${styles.progressRing} ${
-          isBreak ? styles.breakProgress : styles.focusProgress
-        }`}
-        style={{
-          background: `conic-gradient(${
-            isBreak ? 'var(--break-color)' : 'var(--focus-color)'
-          } ${progressValue}%, var(--gray-alpha-100) ${progressValue}%)`,
-        }}
-      >
-        <div className={styles.progressInner}>
-          <div className={styles.time}>
-            {formatTime(timerData.timeRemaining)}
-          </div>
-          <div className={styles.sessionInfo}>
-            {isBreak ? 'Break Time' : 'Focus Time'}
-          </div>
+      <div className={styles.timerCircle}>
+        <div
+          className={styles.timerCircleProgress}
+          style={
+            {
+              // Calculate progress based on current state and settings
+              '--progress-percent': `${calculateProgress()}%`,
+            } as React.CSSProperties
+          }
+        ></div>
+        <div className={styles.timerTime}>
+          {formatTime(timerData.timeRemaining)}
+        </div>
+        <div className={styles.timerLabel}>
+          {isBreak ? 'Break Time' : 'Focus Time'}
         </div>
       </div>
-      <div className={styles.controls}>
+
+      <div className={styles.timerControls}>
         {isRunning ? (
           <button onClick={onPause} className={styles.primaryButton}>
             Pause
