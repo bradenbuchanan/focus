@@ -1,88 +1,158 @@
-// src/app/components/timer/TimerGoalsTasksPanel.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Goal,
-  Task,
-  getGoals,
-  getTasks,
-  calculateGoalProgress,
-  updateTask,
-} from '@/lib/timer';
+import Link from 'next/link';
+import { Goal, Task, calculateGoalProgress } from '@/lib/timer';
+import { Database } from '@/types/supabase';
 import styles from './timerGoalsTasks.module.css';
+import { useData } from '@/providers/DataProvider';
+import { supabase } from '@/lib/supabase';
+
+type SupabaseTask = Database['public']['Tables']['tasks']['Row'];
+type SupabaseGoal = Database['public']['Tables']['goals']['Row'];
 
 interface TimerGoalsTasksPanelProps {
-  activity: string;
-  onTaskComplete: (taskId: string) => void;
+  activity: string | undefined;
+  onTaskComplete: (taskId: string) => Promise<void>;
 }
+
+// Helper function to convert Supabase task to local Task type
+const convertSupabaseTask = (task: SupabaseTask): Task => ({
+  id: task.id,
+  goalId: task.goal_id || undefined,
+  text: task.text,
+  completed: task.completed,
+  createdAt: task.created_at,
+  dueDate: task.due_date || undefined,
+  activity: task.activity || undefined,
+  priority: (task.priority as 'low' | 'medium' | 'high') || undefined,
+  completedAt: task.completed_at || undefined,
+});
+
+// Helper function to convert Supabase goal to local Goal type
+const convertSupabaseGoal = (goal: SupabaseGoal): Goal => ({
+  id: goal.id,
+  title: goal.title,
+  description: goal.description || undefined,
+  type: goal.type as 'time' | 'sessions',
+  target: goal.target,
+  period: goal.period as 'daily' | 'weekly' | 'monthly' | 'yearly',
+  startDate: goal.start_date,
+  endDate: goal.end_date || undefined,
+  createdAt: goal.created_at,
+  activity: goal.activity || undefined,
+});
 
 export default function TimerGoalsTasksPanel({
   activity,
   onTaskComplete,
 }: TimerGoalsTasksPanelProps) {
+  const [isLoading, setIsLoading] = useState(true);
   const [relevantTasks, setRelevantTasks] = useState<Task[]>([]);
   const [relevantGoals, setRelevantGoals] = useState<
     (Goal & { progress: number })[]
   >([]);
   const [completingTaskId, setCompletingTaskId] = useState<string | null>(null);
+  const { getTasks, getGoals, updateTask } = useData();
 
-  // Function to load tasks and goals
-  const loadData = useCallback(() => {
-    const allTasks = getTasks();
-    const filteredTasks = allTasks.filter((task) => {
-      const isNotCompleted = !task.completed;
-      const matchesActivity = !task.activity || task.activity === activity;
-      return isNotCompleted && matchesActivity;
-    });
-    setRelevantTasks(filteredTasks);
+  const debugTasks = async () => {
+    try {
+      console.log('Starting task debug...');
+      const allTasks = await getTasks();
+      console.log('Tasks from service:', {
+        count: allTasks.length,
+        tasks: allTasks,
+      });
 
-    const allGoals = getGoals();
-    const filteredGoals = allGoals.filter(
-      (goal) => !goal.activity || goal.activity === activity
-    );
-    const goalsWithProgress = filteredGoals.map((goal) => ({
-      ...goal,
-      progress: calculateGoalProgress(goal).percentage,
-    }));
-    setRelevantGoals(goalsWithProgress);
-  }, [activity]);
+      const { data: userData } = await supabase.auth.getUser();
+      console.log('Debug - Current user:', userData?.user?.id);
 
-  // Load data on mount and when activity changes
+      const { data: directTasks, error } = await supabase
+        .from('tasks')
+        .select('*');
+
+      console.log('Direct query results:', {
+        success: !error,
+        count: directTasks?.length || 0,
+        tasks: directTasks,
+        error,
+      });
+    } catch (error) {
+      console.error('Debug error:', error);
+    }
+  };
+
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [dbTasks, dbGoals] = await Promise.all([getTasks(), getGoals()]);
+
+      // Convert Supabase data to local types
+      const convertedTasks = dbTasks.map(convertSupabaseTask);
+      const convertedGoals = dbGoals.map(convertSupabaseGoal);
+
+      console.log('Converted data:', {
+        tasks: convertedTasks,
+        goals: convertedGoals,
+        currentActivity: activity,
+      });
+
+      // Filter tasks
+      const filteredTasks = convertedTasks.filter((task) => {
+        const taskActivity = task.activity?.trim();
+        const currentActivity = activity?.trim();
+
+        return (
+          !task.completed &&
+          (!taskActivity ||
+            taskActivity === currentActivity ||
+            currentActivity === 'All Activities' ||
+            !currentActivity)
+        );
+      });
+
+      // Filter and process goals
+      const filteredGoals = convertedGoals
+        .filter((goal) => {
+          const goalActivity = goal.activity?.trim();
+          const currentActivity = activity?.trim();
+
+          return (
+            !goalActivity ||
+            goalActivity === currentActivity ||
+            currentActivity === 'All Activities' ||
+            !currentActivity
+          );
+        })
+        .map((goal) => ({
+          ...goal,
+          progress: calculateGoalProgress(goal).percentage,
+        }));
+
+      setRelevantTasks(filteredTasks);
+      setRelevantGoals(filteredGoals);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activity, getTasks, getGoals]);
+
   useEffect(() => {
     loadData();
   }, [activity, loadData]);
 
-  // Handle task completion
   const handleTaskComplete = async (taskId: string) => {
     setCompletingTaskId(taskId);
     try {
-      // Get the task
-      const tasks = getTasks();
-      const task = tasks.find((t) => t.id === taskId);
-
-      if (task) {
-        // Update the task
-        const updatedTask = {
-          ...task,
-          completed: true,
-          completedAt: new Date().toISOString(),
-        };
-
-        // Save the updated task
-        await onTaskComplete(taskId);
-
-        // Update local storage
-        updateTask(updatedTask);
-
-        // Remove from current view
-        setRelevantTasks((prevTasks) =>
-          prevTasks.filter((t) => t.id !== taskId)
-        );
-
-        // Force a reload of all data
-        loadData();
-      }
+      await onTaskComplete(taskId);
+      await updateTask({
+        id: taskId,
+        completed: true,
+        completedAt: new Date().toISOString(),
+      });
+      setRelevantTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskId));
+      await loadData();
     } catch (error) {
       console.error('Error completing task:', error);
     } finally {
@@ -90,8 +160,21 @@ export default function TimerGoalsTasksPanel({
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className={styles.panelContainer}>
+        <div className={styles.loadingState}>
+          Loading your tasks and goals...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.panelContainer}>
+      <button onClick={debugTasks} className={styles.secondaryButton}>
+        Debug Tasks
+      </button>
       <div className={styles.tasksSection}>
         <h3 className={styles.sectionTitle}>
           {activity ? `Tasks for ${activity}` : 'Current Tasks'}
@@ -143,11 +226,13 @@ export default function TimerGoalsTasksPanel({
         ) : (
           <div className={styles.emptyState}>
             <p>No active tasks for {activity || 'any activity'}.</p>
+            <Link href="/tasks" className={styles.actionLink}>
+              Add a task
+            </Link>
           </div>
         )}
       </div>
 
-      {/* Show goals section */}
       <div className={styles.goalsSection}>
         <h3 className={styles.sectionTitle}>
           {activity ? `Goals for ${activity}` : 'Current Goals'}
@@ -179,6 +264,9 @@ export default function TimerGoalsTasksPanel({
         ) : (
           <div className={styles.emptyState}>
             <p>No active goals for {activity || 'any activity'}.</p>
+            <Link href="/goals" className={styles.actionLink}>
+              Create a goal
+            </Link>
           </div>
         )}
       </div>

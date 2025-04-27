@@ -243,10 +243,48 @@ export function DataProvider({ children }: DataProviderProps) {
 
     saveTask: useCallback(
       async (task: TaskInput) => {
-        if (!isAuthenticated()) {
-          return '';
+        console.log('saveTask called with:', task);
+        try {
+          if (!isAuthenticated()) {
+            console.log('User not authenticated, falling back to localStorage');
+            return saveTask(task);
+          }
+
+          const { data: userData } = await supabase.auth.getUser();
+          console.log('Attempting to save task for user:', userData?.user?.id);
+
+          // Log the exact data being sent to Supabase
+          const taskData = {
+            user_id: userData?.user?.id,
+            goal_id: task.goalId || null,
+            text: task.text,
+            completed: false,
+            activity: task.activity || null,
+            priority: task.priority || 'medium',
+            due_date: task.dueDate || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          console.log('Task data being sent to Supabase:', taskData);
+
+          const { data, error } = await supabase
+            .from('tasks')
+            .insert(taskData)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Supabase insert error:', error);
+            throw error;
+          }
+
+          console.log('Task successfully saved to Supabase:', data);
+          return data.id;
+        } catch (error) {
+          console.error('Error in saveTask:', error);
+          console.log('Falling back to localStorage');
+          return saveTask(task);
         }
-        return await saveTask(task);
       },
       [isAuthenticated]
     ),
@@ -261,11 +299,59 @@ export function DataProvider({ children }: DataProviderProps) {
       [isAuthenticated]
     ),
 
+    // In DataProvider.tsx
     getTasks: useCallback(async () => {
-      if (!isAuthenticated()) {
+      console.log('getTasks called from Timer');
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        console.log('Current user for getTasks:', userData?.user?.id);
+
+        // Direct query for tasks
+        const { data, error } = await supabase
+          .from('tasks')
+          .select('*')
+          .eq('user_id', userData?.user?.id);
+
+        console.log('Tasks query result:', {
+          success: !error,
+          count: data?.length || 0,
+          data,
+          error,
+        });
+
+        if (error) {
+          console.error('Supabase error getting tasks:', error);
+          throw error;
+        }
+
+        const mappedTasks =
+          data?.map((task) => ({
+            id: task.id,
+            user_id: task.user_id,
+            goal_id: task.goal_id,
+            text: task.text,
+            completed: task.completed,
+            activity: task.activity,
+            priority: task.priority,
+            due_date: task.due_date,
+            completed_at: task.completed_at,
+            created_at: task.created_at,
+            updated_at: task.updated_at,
+          })) || [];
+
+        console.log('Mapped tasks:', {
+          count: mappedTasks.length,
+          tasks: mappedTasks,
+        });
+
+        return mappedTasks;
+      } catch (error) {
+        console.error('Error in getTasks:', error);
+        if (error instanceof Error) {
+          console.error('Error details:', error.message);
+        }
         return [];
       }
-      return await getTasks();
     }, [isAuthenticated]),
   };
 

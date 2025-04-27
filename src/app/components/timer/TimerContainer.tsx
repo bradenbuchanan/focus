@@ -213,29 +213,16 @@ export default function TimerContainer() {
 
             {/* Tasks and goals section */}
             <div className={styles.tasksCard}>
-              <div className={styles.tasksSection}>
-                <h3 className={styles.tasksSectionTitle}>
-                  Tasks for {selectedActivity}
-                </h3>
-                {/* Empty state with icon and action */}
-                <div className={styles.emptyState}>
-                  <div className={styles.emptyStateIcon}>📋</div>
-                  <div>No active tasks for {selectedActivity}.</div>
-                  <div className={styles.emptyStateAction}>+ Add a task</div>
-                </div>
-              </div>
-
-              <div className={styles.tasksSection}>
-                <h3 className={styles.tasksSectionTitle}>
-                  Goals for {selectedActivity}
-                </h3>
-                {/* Empty state with icon and action */}
-                <div className={styles.emptyState}>
-                  <div className={styles.emptyStateIcon}>🎯</div>
-                  <div>No active goals for {selectedActivity}.</div>
-                  <div className={styles.emptyStateAction}>+ Create a goal</div>
-                </div>
-              </div>
+              <TimerGoalsTasksPanel
+                activity={
+                  selectedActivity === 'All Activities'
+                    ? undefined
+                    : selectedActivity
+                }
+                onTaskComplete={async (taskId) => {
+                  await completeTask(taskId);
+                }}
+              />
             </div>
           </>
         )}
