@@ -89,3 +89,26 @@
   .authLinks a:hover {
     text-decoration: underline;
   }
+
+  .successMessage {
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  .successMessage h2 {
+    color: #4caf50;
+    margin-bottom: 1rem;
+  }
+  
+  .successMessage p {
+    margin-bottom: 1rem;
+  }
+  
+  .successMessage a {
+    color: #3b82f6;
+    font-weight: 500;
+  }
+  
+  .successMessage a:hover {
+    text-decoration: underline;
+  }
