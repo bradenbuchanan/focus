@@ -9,12 +9,14 @@ interface TaskFormProps {
   goalId?: string;
   onAdd: () => void;
   activity?: string;
+  onAddImmediate?: (task: Task) => void;
 }
 
 export default function TaskForm({
   goalId,
   onAdd,
   activity: defaultActivity,
+  onAddImmediate,
 }: TaskFormProps) {
   const [text, setText] = useState('');
   const [activity, setActivity] = useState(defaultActivity || '');
@@ -29,24 +31,27 @@ export default function TaskForm({
 
     if (text.trim()) {
       try {
-        console.log('Submitting task:', {
+        // Create task object
+        const newTask: Task = {
+          id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
           goalId,
           text: text.trim(),
-          activity,
-          priority,
-          dueDate,
-        });
-
-        // Use the DataProvider's saveTask instead of direct localStorage
-        const taskId = await saveTask({
-          goalId: goalId,
-          text: text.trim(),
           activity: activity || undefined,
+          completed: false,
+          createdAt: new Date().toISOString(),
           priority: priority,
           dueDate: dueDate || undefined,
-        });
+        };
 
-        console.log('Task created with ID:', taskId);
+        // Update UI immediately
+        if (onAddImmediate) {
+          onAddImmediate(newTask);
+        }
+
+        console.log('Saving task:', newTask);
+        // Save to database
+        const savedId = await saveTask(newTask);
+        console.log('Task saved with ID:', savedId);
 
         // Reset form
         setText('');
@@ -54,6 +59,8 @@ export default function TaskForm({
         setPriority('medium');
         setDueDate('');
         setShowActivitySelector(false);
+
+        // Refresh the full task list (this will now get tasks from Supabase)
         onAdd();
       } catch (error) {
         console.error('Error saving task:', error);

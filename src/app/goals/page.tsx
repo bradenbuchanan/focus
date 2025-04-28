@@ -17,6 +17,7 @@ import TaskForm from '@/app/components/goals/TaskForm';
 import styles from './goals.module.css';
 import tasksStyles from '@/app/components/goals/TaskList.module.css';
 import { useData } from '@/providers/DataProvider';
+import { supabase } from '@/lib/supabase';
 
 type TabType = 'goals' | 'tasks' | 'completed';
 
@@ -32,6 +33,7 @@ export default function GoalsPage() {
   const [showForm, setShowForm] = useState(false);
   const [activityFilter, setActivityFilter] = useState<string>('all');
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
+  const { getGoals, getTasks } = useData();
 
   const { getGoals: getSessions } = useData();
 
@@ -95,7 +97,7 @@ export default function GoalsPage() {
 
     try {
       // Get goals from database
-      const dbGoals = await getSessions();
+      const dbGoals = await getGoals();
       console.log('Received goals from database:', dbGoals);
 
       if (!dbGoals || !Array.isArray(dbGoals)) {
@@ -131,15 +133,38 @@ export default function GoalsPage() {
         }
       });
 
-      // Get and process tasks
-      const allTasks = getTasks();
+      // Load tasks from Supabase using the DataProvider
+      console.log('Loading tasks from DataProvider...');
+      const tasksFromDB = await getTasks();
+      console.log('Tasks from database:', tasksFromDB);
+
+      // Convert Supabase tasks to app's Task format
+      const allTasks = tasksFromDB.map((task) => ({
+        id: task.id,
+        goalId: task.goal_id || undefined,
+        text: task.text,
+        completed: task.completed,
+        createdAt: task.created_at,
+        dueDate: task.due_date || undefined,
+        activity: task.activity || undefined,
+        priority: (task.priority as 'low' | 'medium' | 'high') || 'medium',
+        completedAt: task.completed_at || undefined,
+      }));
+
+      console.log('Converted tasks:', allTasks);
+
+      // Filter active and completed tasks
       const activeTasks = allTasks.filter((task) => !task.completed);
       const doneTasks = allTasks.filter((task) => task.completed);
 
-      // Sort tasks by date
+      // Sort active tasks by dueDate (if available) and then by creation date
       activeTasks.sort((a, b) => {
         if (a.dueDate && b.dueDate) {
           return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        } else if (a.dueDate) {
+          return -1; // a has due date, b doesn't, a comes first
+        } else if (b.dueDate) {
+          return 1; // b has due date, a doesn't, b comes first
         }
         return (
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -154,6 +179,11 @@ export default function GoalsPage() {
           ? new Date(b.completedAt)
           : new Date(b.createdAt);
         return dateB.getTime() - dateA.getTime();
+      });
+
+      console.log('Sorted tasks:', {
+        active: activeTasks.length,
+        completed: doneTasks.length,
       });
 
       // Extract unique activities
@@ -184,6 +214,32 @@ export default function GoalsPage() {
       setError(error instanceof Error ? error.message : 'Failed to load data');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Add this debug function to your component
+  const debugTasksDirectly = async () => {
+    try {
+      console.log('=== DEBUG: Directly checking tasks in Supabase ===');
+      const { data: userData } = await supabase.auth.getUser();
+      console.log('Current user:', userData?.user?.id);
+
+      // Direct query to database
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', userData?.user?.id);
+
+      console.log('Tasks directly from Supabase:', {
+        success: !error,
+        count: data?.length || 0,
+        tasks: data,
+      });
+
+      // Also reload data to see if the UI updates
+      await loadData();
+    } catch (error) {
+      console.error('Debug error:', error);
     }
   };
 

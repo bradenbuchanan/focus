@@ -326,16 +326,22 @@ export function DataProvider({ children }: DataProviderProps) {
 
     // In DataProvider.tsx
     getTasks: useCallback(async () => {
-      console.log('getTasks called from Timer');
+      console.log('Getting tasks from Supabase...');
       try {
         const { data: userData } = await supabase.auth.getUser();
-        console.log('Current user for getTasks:', userData?.user?.id);
+
+        if (!userData?.user) {
+          console.warn('No authenticated user, returning empty tasks array');
+          return [];
+        }
+
+        console.log('Fetching tasks for user:', userData.user.id);
 
         // Direct query for tasks
         const { data, error } = await supabase
           .from('tasks')
           .select('*')
-          .eq('user_id', userData?.user?.id);
+          .eq('user_id', userData.user.id);
 
         console.log('Tasks query result:', {
           success: !error,
@@ -349,6 +355,7 @@ export function DataProvider({ children }: DataProviderProps) {
           throw error;
         }
 
+        // Maintain your existing mapping logic
         const mappedTasks =
           data?.map((task) => ({
             id: task.id,
@@ -364,7 +371,7 @@ export function DataProvider({ children }: DataProviderProps) {
             updated_at: task.updated_at,
           })) || [];
 
-        console.log('Mapped tasks:', {
+        console.log('Tasks retrieved from Supabase:', {
           count: mappedTasks.length,
           tasks: mappedTasks,
         });
