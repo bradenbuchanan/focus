@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../auth.module.css';
 import { useAuth } from '@/context/AuthContext';
@@ -13,9 +12,8 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const { signUp } = useAuth();
   const [success, setSuccess] = useState(false);
+  const { signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +22,7 @@ export default function Register() {
 
     try {
       await signUp(email, password, name);
-      // Instead of redirecting to login immediately, show a success message
-      setSuccess(true); // Add this state variable
+      setSuccess(true);
     } catch (error) {
       console.error('Registration error:', error);
       setError(
@@ -46,8 +43,8 @@ export default function Register() {
             <h2>Account Created Successfully!</h2>
             <p>Please check your email to confirm your registration.</p>
             <p>
-              <Link href="/login">Return to login</Link> once you've confirmed
-              your email.
+              <Link href="/login">Return to login</Link> once you&apos;ve
+              confirmed your email.
             </p>
           </div>
         ) : (
