@@ -55,6 +55,56 @@ export default function TimerGoalsTasksPanel({
   const [completingTaskId, setCompletingTaskId] = useState<string | null>(null);
   const { getTasks, getGoals, updateTask } = useData();
 
+  const debugTaskCreation = async () => {
+    try {
+      // Create a test task directly with Supabase
+      const { data: userData } = await supabase.auth.getUser();
+      console.log('Debug - Creating test task for user:', userData?.user?.id);
+
+      const testTask = {
+        user_id: userData?.user?.id,
+        text: 'Test task ' + new Date().toISOString(),
+        completed: false,
+        activity: 'Reading',
+        priority: 'medium',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert(testTask)
+        .select();
+
+      console.log('Direct task creation result:', {
+        success: !error,
+        data,
+        error,
+      });
+    } catch (e) {
+      console.error('Debug task creation error:', e);
+    }
+  };
+
+  const debugAllTasks = async () => {
+    try {
+      // Warning: This is only for debugging
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .limit(100);
+
+      console.log('All tasks in database:', {
+        success: !error,
+        count: data?.length || 0,
+        tasks: data,
+        error,
+      });
+    } catch (e) {
+      console.error('Debug all tasks error:', e);
+    }
+  };
+
   const debugTasks = async () => {
     try {
       console.log('Starting task debug...');
@@ -85,31 +135,46 @@ export default function TimerGoalsTasksPanel({
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
+      console.log('Loading data with activity filter:', activity);
+
       const [dbTasks, dbGoals] = await Promise.all([getTasks(), getGoals()]);
+      console.log('Raw data from database:', {
+        tasks: dbTasks.length,
+        goals: dbGoals.length,
+      });
+
+      // Log the tasks before conversion
+      console.log('Tasks before conversion:', dbTasks);
 
       // Convert Supabase data to local types
       const convertedTasks = dbTasks.map(convertSupabaseTask);
       const convertedGoals = dbGoals.map(convertSupabaseGoal);
 
-      console.log('Converted data:', {
-        tasks: convertedTasks,
-        goals: convertedGoals,
-        currentActivity: activity,
+      console.log('After conversion:', {
+        tasks: convertedTasks.length,
+        goals: convertedGoals.length,
       });
 
-      // Filter tasks
-      const filteredTasks = convertedTasks.filter((task) => {
+      // Filter tasks - add detailed logging
+      let filteredTasks = convertedTasks.filter((task) => {
         const taskActivity = task.activity?.trim();
         const currentActivity = activity?.trim();
 
-        return (
+        const include =
           !task.completed &&
           (!taskActivity ||
             taskActivity === currentActivity ||
             currentActivity === 'All Activities' ||
-            !currentActivity)
+            !currentActivity);
+
+        console.log(
+          `Task "${task.text}": activity=${taskActivity}, currentFilter=${currentActivity}, include=${include}`
         );
+
+        return include;
       });
+
+      console.log('Filtered tasks count:', filteredTasks.length);
 
       // Filter and process goals
       const filteredGoals = convertedGoals
@@ -172,9 +237,17 @@ export default function TimerGoalsTasksPanel({
 
   return (
     <div className={styles.panelContainer}>
-      <button onClick={debugTasks} className={styles.secondaryButton}>
-        Debug Tasks
-      </button>
+      <div className={styles.debugButtons}>
+        <button onClick={debugTaskCreation} className={styles.secondaryButton}>
+          Create Test Task
+        </button>
+        <button onClick={debugAllTasks} className={styles.secondaryButton}>
+          List All Tasks
+        </button>
+        <button onClick={debugTasks} className={styles.secondaryButton}>
+          Debug Tasks
+        </button>
+      </div>
       <div className={styles.tasksSection}>
         <h3 className={styles.sectionTitle}>
           {activity ? `Tasks for ${activity}` : 'Current Tasks'}
@@ -270,6 +343,10 @@ export default function TimerGoalsTasksPanel({
           </div>
         )}
       </div>
+
+      <button onClick={debugTaskCreation} className={styles.secondaryButton}>
+        Create Test Task
+      </button>
     </div>
   );
 }

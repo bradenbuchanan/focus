@@ -81,6 +81,31 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+const saveTaskToLocalStorage = (task: TaskInput): string => {
+  if (typeof window === 'undefined') return '';
+
+  const localTask = {
+    id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+    goalId: task.goalId,
+    text: task.text,
+    completed: false,
+    activity: task.activity,
+    priority: task.priority || 'medium',
+    dueDate: task.dueDate,
+    createdAt: new Date().toISOString(),
+  };
+
+  // Get existing tasks from localStorage
+  const tasksData = localStorage.getItem('focusTasks');
+  const tasks = tasksData ? JSON.parse(tasksData) : [];
+
+  // Add new task
+  tasks.push(localTask);
+  localStorage.setItem('focusTasks', JSON.stringify(tasks));
+
+  return localTask.id;
+};
+
 export function DataProvider({ children }: DataProviderProps) {
   const { user } = useAuth();
 
@@ -241,53 +266,53 @@ export function DataProvider({ children }: DataProviderProps) {
       [isAuthenticated]
     ),
 
-    saveTask: useCallback(
-      async (task: TaskInput) => {
-        console.log('saveTask called with:', task);
-        try {
-          if (!isAuthenticated()) {
-            console.log('User not authenticated, falling back to localStorage');
-            return saveTask(task);
-          }
+    saveTask: useCallback(async (task: TaskInput) => {
+      console.log('DataProvider saveTask called with:', task);
+      try {
+        const { data: userData } = await supabase.auth.getUser();
 
-          const { data: userData } = await supabase.auth.getUser();
-          console.log('Attempting to save task for user:', userData?.user?.id);
-
-          // Log the exact data being sent to Supabase
-          const taskData = {
-            user_id: userData?.user?.id,
-            goal_id: task.goalId || null,
-            text: task.text,
-            completed: false,
-            activity: task.activity || null,
-            priority: task.priority || 'medium',
-            due_date: task.dueDate || null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-          console.log('Task data being sent to Supabase:', taskData);
-
-          const { data, error } = await supabase
-            .from('tasks')
-            .insert(taskData)
-            .select()
-            .single();
-
-          if (error) {
-            console.error('Supabase insert error:', error);
-            throw error;
-          }
-
-          console.log('Task successfully saved to Supabase:', data);
-          return data.id;
-        } catch (error) {
-          console.error('Error in saveTask:', error);
-          console.log('Falling back to localStorage');
-          return saveTask(task);
+        if (!userData?.user?.id) {
+          console.error('No authenticated user found');
+          return saveTaskToLocalStorage(task);
         }
-      },
-      [isAuthenticated]
-    ),
+
+        // Create the task data
+        const taskData = {
+          user_id: userData.user.id,
+          goal_id: task.goalId || null,
+          text: task.text,
+          completed: false,
+          activity: task.activity || null,
+          priority: task.priority || 'medium',
+          due_date: task.dueDate || null,
+        };
+
+        console.log('Sending to Supabase:', taskData);
+
+        // Insert the task
+        const { data, error } = await supabase
+          .from('tasks')
+          .insert(taskData)
+          .select();
+
+        if (error) {
+          console.error('Supabase insert error:', error);
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          console.error('No data returned from insert');
+          throw new Error('Failed to create task');
+        }
+
+        console.log('Task successfully created:', data[0]);
+        return data[0].id;
+      } catch (error) {
+        console.error('Error creating task:', error);
+        // Fall back to localStorage
+        return saveTaskToLocalStorage(task);
+      }
+    }, []),
 
     updateTask: useCallback(
       async (task: TaskUpdateInput) => {

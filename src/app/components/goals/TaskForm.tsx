@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, saveTask, defaultActivityCategories } from '@/lib/timer';
 import styles from './TaskForm.module.css';
+import { useData } from '@/providers/DataProvider';
 
 interface TaskFormProps {
   goalId?: string;
@@ -21,27 +22,37 @@ export default function TaskForm({
   const [dueDate, setDueDate] = useState<string>(''); // Add due date state
   const [showActivitySelector, setShowActivitySelector] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { saveTask } = useData();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (text.trim()) {
       try {
-        const newTask: Task = {
-          id: uuidv4(),
+        console.log('Submitting task:', {
           goalId,
           text: text.trim(),
-          activity: activity || undefined,
-          completed: false,
-          createdAt: new Date().toISOString(),
-          priority: priority,
-          dueDate: dueDate || undefined, // Add due date to task
-        };
+          activity,
+          priority,
+          dueDate,
+        });
 
-        saveTask(newTask);
+        // Use the DataProvider's saveTask instead of direct localStorage
+        const taskId = await saveTask({
+          goalId: goalId,
+          text: text.trim(),
+          activity: activity || undefined,
+          priority: priority,
+          dueDate: dueDate || undefined,
+        });
+
+        console.log('Task created with ID:', taskId);
+
+        // Reset form
         setText('');
         setActivity(defaultActivity || '');
         setPriority('medium');
-        setDueDate(''); // Reset due date
+        setDueDate('');
         setShowActivitySelector(false);
         onAdd();
       } catch (error) {
