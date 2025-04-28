@@ -9,6 +9,7 @@ import {
   defaultActivityCategories,
 } from '@/lib/timer';
 import styles from './TaskItem.module.css';
+import { useData } from '@/providers/DataProvider';
 
 interface TaskItemProps {
   task: Task;
@@ -25,7 +26,8 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
   const [dueDate, setDueDate] = useState<string>(task.dueDate || ''); // Add due date state
   const [showActivitySelector, setShowActivitySelector] = useState(false);
   const [isFading, setIsFading] = useState(false);
-
+  const { updateTask: updateServerTask, deleteTask: deleteServerTask } =
+    useData();
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -89,37 +91,85 @@ export default function TaskItem({ task, onUpdate }: TaskItemProps) {
 
   const dueDateStatus = getDueDateStatus();
 
-  const handleToggleComplete = () => {
-    // If task is being marked as complete, trigger fade
-    if (!task.completed) {
-      setIsFading(true);
+  const handleToggleComplete = async () => {
+    try {
+      // If task is being marked as complete, trigger fade
+      if (!task.completed) {
+        setIsFading(true);
 
-      // After animation completes, update the task
-      setTimeout(() => {
-        const updatedTask = {
-          ...task,
-          completed: true,
-          completedAt: new Date().toISOString(),
-        };
-        updateTask(updatedTask);
-        onUpdate(); // This will trigger the parent to refresh the task lists
-      }, 1100); // Animation duration (800ms) + delay (300ms)
-    } else {
-      // If unchecking, update immediately
-      const updatedTask = {
-        ...task,
-        completed: false,
-        completedAt: undefined,
-      };
-      updateTask(updatedTask);
-      onUpdate();
+        // After animation completes, update the task
+        setTimeout(async () => {
+          try {
+            // First try to update in Supabase directly
+            await updateServerTask({
+              id: task.id,
+              completed: true,
+              completedAt: new Date().toISOString(),
+            });
+
+            // Then update the local task for UI
+            const updatedTask = {
+              ...task,
+              completed: true,
+              completedAt: new Date().toISOString(),
+            };
+
+            // Still call the local function as fallback
+            updateTask(updatedTask);
+
+            console.log('Task marked complete:', task.id);
+
+            onUpdate(); // This will trigger the parent to refresh the task lists
+          } catch (error) {
+            console.error('Error completing task:', error);
+            setIsFading(false);
+          }
+        }, 1100); // Animation duration (800ms) + delay (300ms)
+      } else {
+        // If unchecking, update immediately
+        try {
+          await updateServerTask({
+            id: task.id,
+            completed: false,
+            completedAt: undefined,
+          });
+
+          const updatedTask = {
+            ...task,
+            completed: false,
+            completedAt: undefined,
+          };
+
+          updateTask(updatedTask);
+          onUpdate();
+        } catch (error) {
+          console.error('Error uncompleting task:', error);
+        }
+      }
+    } catch (err) {
+      console.error('Toggle error:', err);
+      setIsFading(false);
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this task?')) {
-      deleteTask(task.id);
-      onUpdate();
+      try {
+        // Try to delete from Supabase first
+        await deleteServerTask(task.id);
+        console.log('Task deleted from server:', task.id);
+
+        // Also delete from localStorage as fallback
+        deleteTask(task.id);
+
+        onUpdate();
+      } catch (error) {
+        console.error('Error deleting task:', error);
+
+        // Fallback to localStorage only
+        deleteTask(task.id);
+        onUpdate();
+      }
     }
   };
 

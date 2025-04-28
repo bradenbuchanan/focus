@@ -77,6 +77,7 @@ interface DataContextType {
   saveTask: (task: TaskInput) => Promise<string>;
   updateTask: (task: TaskUpdateInput) => Promise<void>;
   getTasks: () => Promise<Task[]>;
+  deleteTask: (taskId: string) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -385,6 +386,36 @@ export function DataProvider({ children }: DataProviderProps) {
         return [];
       }
     }, [isAuthenticated]),
+
+    deleteTask: useCallback(
+      async (taskId: string) => {
+        console.log('deleteTask called with ID:', taskId);
+
+        try {
+          if (!isAuthenticated()) {
+            console.log('User not authenticated, falling back to localStorage');
+            // Handle localStorage deletion here
+            return;
+          }
+
+          const { error } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('id', taskId);
+
+          if (error) {
+            console.error('Supabase error deleting task:', error);
+            throw error;
+          }
+
+          console.log('Task successfully deleted from Supabase');
+        } catch (error) {
+          console.error('Error in deleteTask:', error);
+          // Fallback to localStorage
+        }
+      },
+      [isAuthenticated]
+    ),
   };
 
   return (

@@ -57,6 +57,24 @@ export async function saveTask(task: {
   }
 }
 
+export async function deleteTask(taskId: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', taskId);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error deleting task from Supabase:', error);
+    
+    // Fallback to localStorage
+    const tasks = getLocalTasks();
+    const updatedTasks = tasks.filter(t => t.id !== taskId);
+    localStorage.setItem('focusTasks', JSON.stringify(updatedTasks));
+  }
+}
+
 export async function updateTask(task: {
   id: string;
   goalId?: string;
