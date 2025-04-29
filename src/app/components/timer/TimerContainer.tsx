@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// Remove the unused imports completely
 import TimerSettings from './TimerSetting';
 import AccomplishmentRecorder from './AccomplishmentRecorder';
 import FreeTimer from './FreeTimer';
