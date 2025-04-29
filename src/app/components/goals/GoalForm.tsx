@@ -1,7 +1,7 @@
 // src/app/components/goals/GoalForm.tsx
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { defaultActivityCategories } from '@/lib/timer';
 import styles from './GoalForm.module.css';
 import { useData } from '@/providers/DataProvider';
@@ -17,6 +17,7 @@ export default function GoalForm({
   onCancel,
   activity,
 }: GoalFormProps) {
+  // State declarations
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<'time' | 'sessions'>('time');
@@ -27,21 +28,13 @@ export default function GoalForm({
   const [selectedActivity, setSelectedActivity] = useState<string>(
     activity || ''
   );
-  const [error, setError] = useState<string>(''); // Add error state
+  const [error, setError] = useState('');
 
   const { saveGoal } = useData();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    console.log('Submitting goal:', {
-      title,
-      description,
-      type,
-      target,
-      period,
-      selectedActivity,
-    });
 
     try {
       // Create the goal object
@@ -55,11 +48,8 @@ export default function GoalForm({
         startDate: new Date().toISOString(),
       };
 
-      console.log('Saving goal data:', goalData);
-
       // Wait for the goal to be saved
       const goalId = await saveGoal(goalData);
-      console.log('Goal saved with ID:', goalId);
 
       if (!goalId) {
         throw new Error('Failed to create goal');
@@ -75,6 +65,9 @@ export default function GoalForm({
   return (
     <div className={styles.goalForm}>
       <h2>Create New Goal</h2>
+
+      {error && <div className={styles.errorMessage}>{error}</div>}
+
       <form onSubmit={handleSubmit}>
         <div className={styles.formGroup}>
           <label htmlFor="title">Goal Title</label>
