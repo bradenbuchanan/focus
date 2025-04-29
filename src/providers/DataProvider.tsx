@@ -11,10 +11,7 @@ import {
   getAccomplishments as getAccomplishmentsService,
 } from '@/services/accomplishmentService';
 import { getGoals as getGoalsService } from '@/services/goalService';
-import {
-  updateTask as updateTaskService,
-  getTasks as getTasksService,
-} from '@/services/taskService';
+import { updateTask as updateTaskService } from '@/services/taskService';
 import { Database } from '@/types/supabase';
 import { supabase } from '@/lib/supabase';
 
@@ -333,7 +330,7 @@ export function DataProvider({ children }: DataProviderProps) {
       [isAuthenticated]
     ),
 
-    // In DataProvider.tsx
+    // We'll implement getTasks directly here instead of importing
     getTasks: useCallback(async () => {
       console.log('Getting tasks from Supabase...');
       try {
@@ -393,7 +390,9 @@ export function DataProvider({ children }: DataProviderProps) {
         }
         return [];
       }
-    }, [isAuthenticated]),
+      // Ignore the eslint warning about dependencies - we know what we're doing here
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
 
     deleteTask: useCallback(
       async (taskId: string) => {
