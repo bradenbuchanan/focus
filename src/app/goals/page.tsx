@@ -1,12 +1,11 @@
 // src/app/goals/page.tsx
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Goal,
   Task,
-  getTasks,
   defaultActivityCategories,
   calculateGoalProgress,
 } from '@/lib/timer';
@@ -34,8 +33,6 @@ export default function GoalsPage() {
   const [activityFilter, setActivityFilter] = useState<string>('all');
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
   const { getGoals, getTasks } = useData();
-
-  const { getGoals: getSessions } = useData();
 
   // Computed values using useMemo
   const filteredGoals = useMemo(() => {
@@ -89,8 +86,8 @@ export default function GoalsPage() {
     activeTab,
   ]);
 
-  // Load data function
-  const loadData = async () => {
+  // Load data function - using useCallback to properly handle the dependency in useEffect
+  const loadData = useCallback(async () => {
     console.log('Starting data load');
     setIsLoading(true);
     setError(null);
@@ -215,9 +212,10 @@ export default function GoalsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [getGoals, getTasks]);
 
-  // Add this debug function to your component
+  // Add a debug function and mark it as intentionally unused
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const debugTasksDirectly = async () => {
     try {
       console.log('=== DEBUG: Directly checking tasks in Supabase ===');
@@ -243,10 +241,10 @@ export default function GoalsPage() {
     }
   };
 
-  // Initial data load effect
+  // Initial data load effect - properly using loadData as a dependency
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   // Helper function for date formatting
   const formatDate = (dateString: string): string => {
