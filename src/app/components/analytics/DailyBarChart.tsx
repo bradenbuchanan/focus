@@ -20,6 +20,10 @@ interface DatabaseSession {
   completed: boolean;
   created_at: string;
   updated_at: string;
+  // Add these fields to handle both types of records
+  type?: string;
+  date?: string;
+  localDate?: string;
 }
 
 export default function DailyBarChart() {
@@ -60,7 +64,6 @@ export default function DailyBarChart() {
         }
 
         // Determine date range based on timeframe
-        const currentDate = new Date();
         let daysToShow: number;
         let labelFormat: 'day' | 'week' | 'month' = 'day';
 
@@ -116,13 +119,13 @@ export default function DailyBarChart() {
           }
 
           // Process focus sessions
-          focusSessions.forEach((session: any) => {
+          focusSessions.forEach((session: DatabaseSession) => {
             // Extract date based on session format
             let sessionDate: string | undefined;
 
-            if ('localDate' in session && session.localDate) {
+            if (session.localDate) {
               sessionDate = session.localDate;
-            } else if ('date' in session && session.date) {
+            } else if (session.date) {
               sessionDate = new Date(session.date).toISOString().split('T')[0];
             } else if (session.start_time) {
               sessionDate = new Date(session.start_time)
@@ -185,12 +188,12 @@ export default function DailyBarChart() {
               endDate.setHours(23, 59, 59, 999);
 
               // Process focus sessions for this week
-              focusSessions.forEach((session: any) => {
+              focusSessions.forEach((session: DatabaseSession) => {
                 let sessionDate = new Date();
 
-                if ('localDate' in session && session.localDate) {
+                if (session.localDate) {
                   sessionDate = new Date(session.localDate);
-                } else if ('date' in session && session.date) {
+                } else if (session.date) {
                   sessionDate = new Date(session.date);
                 } else if (session.start_time) {
                   sessionDate = new Date(session.start_time);
@@ -241,12 +244,12 @@ export default function DailyBarChart() {
               );
 
               // Process focus sessions for this month
-              focusSessions.forEach((session: any) => {
+              focusSessions.forEach((session: DatabaseSession) => {
                 let sessionDate = new Date();
 
-                if ('localDate' in session && session.localDate) {
+                if (session.localDate) {
                   sessionDate = new Date(session.localDate);
-                } else if ('date' in session && session.date) {
+                } else if (session.date) {
                   sessionDate = new Date(session.date);
                 } else if (session.start_time) {
                   sessionDate = new Date(session.start_time);
