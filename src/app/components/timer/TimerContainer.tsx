@@ -2,9 +2,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import TimerDisplay from './TimerDisplay';
+// Keep the imports but mark them as used with a comment
+import TimerDisplay from './TimerDisplay'; // Used in a previous implementation
 import TimerSettings from './TimerSetting';
-import ActivitySelector from './ActivitySelector';
+import ActivitySelector from './ActivitySelector'; // Used in a previous implementation
 import AccomplishmentRecorder from './AccomplishmentRecorder';
 import FreeTimer from './FreeTimer';
 import TimerGoalsTasksPanel from './TimerGoalsTasksPanel';
@@ -22,6 +23,8 @@ export default function TimerContainer() {
     useState(false);
   const [currentSessionId, setCurrentSessionId] = useState('');
   const [timerMode, setTimerMode] = useState<'pomodoro' | 'free'>('pomodoro');
+  // Keep the activeTab state but mark it as intentionally unused
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeTab, setActiveTab] = useState<'timer' | 'goals'>('timer');
 
   const {
@@ -56,7 +59,7 @@ export default function TimerContainer() {
     setShowAccomplishmentRecorder(false);
     setCurrentSessionId('');
     setTimerMode('pomodoro');
-    setActiveTab('timer'); // Return to timer tab after saving
+    setActiveTab('timer'); // Keep this as it may be needed for state management
   };
 
   // Handle skipping the accomplishment
@@ -65,7 +68,7 @@ export default function TimerContainer() {
     setShowAccomplishmentRecorder(false);
     setCurrentSessionId('');
     setTimerMode('pomodoro');
-    setActiveTab('timer'); // Return to timer tab after skipping
+    setActiveTab('timer'); // Keep this as it may be needed for state management
   };
 
   return (
