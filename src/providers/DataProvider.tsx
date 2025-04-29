@@ -2,13 +2,19 @@
 
 import { createContext, useContext, ReactNode, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { saveSession, getSessions } from '@/services/sessionService';
 import {
-  saveAccomplishment,
-  getAccomplishments,
+  saveSession as saveSessionService,
+  getSessions as getSessionsService,
+} from '@/services/sessionService';
+import {
+  saveAccomplishment as saveAccomplishmentService,
+  getAccomplishments as getAccomplishmentsService,
 } from '@/services/accomplishmentService';
-import { saveGoal, getGoals } from '@/services/goalService';
-import { saveTask, updateTask, getTasks } from '@/services/taskService';
+import { getGoals as getGoalsService } from '@/services/goalService';
+import {
+  updateTask as updateTaskService,
+  getTasks as getTasksService,
+} from '@/services/taskService';
 import { Database } from '@/types/supabase';
 import { supabase } from '@/lib/supabase';
 
@@ -124,7 +130,7 @@ export function DataProvider({ children }: DataProviderProps) {
         if (!isAuthenticated()) {
           return '';
         }
-        return await saveSession(session);
+        return await saveSessionService(session);
       },
       [isAuthenticated]
     ),
@@ -133,7 +139,7 @@ export function DataProvider({ children }: DataProviderProps) {
       if (!isAuthenticated()) {
         return [];
       }
-      return await getSessions();
+      return await getSessionsService();
     }, [isAuthenticated]),
 
     saveAccomplishment: useCallback(
@@ -141,7 +147,7 @@ export function DataProvider({ children }: DataProviderProps) {
         if (!isAuthenticated()) {
           return '';
         }
-        return await saveAccomplishment(data);
+        return await saveAccomplishmentService(data);
       },
       [isAuthenticated]
     ),
@@ -150,7 +156,7 @@ export function DataProvider({ children }: DataProviderProps) {
       if (!isAuthenticated()) {
         return [];
       }
-      return await getAccomplishments();
+      return await getAccomplishmentsService();
     }, [isAuthenticated]),
 
     saveGoal: useCallback(
@@ -210,7 +216,7 @@ export function DataProvider({ children }: DataProviderProps) {
       try {
         if (!isAuthenticated()) {
           console.log('User not authenticated, falling back to localStorage');
-          return getGoals();
+          return getGoalsService();
         }
 
         const { data: userData } = await supabase.auth.getUser();
@@ -249,7 +255,9 @@ export function DataProvider({ children }: DataProviderProps) {
             const localGoals = JSON.parse(
               localStorage.getItem('focusGoals') || '[]'
             );
-            const updatedGoals = localGoals.filter((g: any) => g.id !== goalId);
+            const updatedGoals = localGoals.filter(
+              (g: { id: string }) => g.id !== goalId
+            );
             localStorage.setItem('focusGoals', JSON.stringify(updatedGoals));
             return;
           } catch (error) {
@@ -320,7 +328,7 @@ export function DataProvider({ children }: DataProviderProps) {
         if (!isAuthenticated()) {
           return;
         }
-        await updateTask(task);
+        await updateTaskService(task);
       },
       [isAuthenticated]
     ),
