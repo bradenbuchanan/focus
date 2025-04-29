@@ -1,7 +1,6 @@
 // src/app/components/goals/TaskForm.tsx
 import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Task, saveTask, defaultActivityCategories } from '@/lib/timer';
+import { Task, defaultActivityCategories } from '@/lib/timer';
 import styles from './TaskForm.module.css';
 import { useData } from '@/providers/DataProvider';
 
