@@ -2,10 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// Keep the imports but mark them as used with a comment
-import TimerDisplay from './TimerDisplay'; // Used in a previous implementation
+// Remove the unused imports completely
 import TimerSettings from './TimerSetting';
-import ActivitySelector from './ActivitySelector'; // Used in a previous implementation
 import AccomplishmentRecorder from './AccomplishmentRecorder';
 import FreeTimer from './FreeTimer';
 import TimerGoalsTasksPanel from './TimerGoalsTasksPanel';
@@ -23,8 +21,8 @@ export default function TimerContainer() {
     useState(false);
   const [currentSessionId, setCurrentSessionId] = useState('');
   const [timerMode, setTimerMode] = useState<'pomodoro' | 'free'>('pomodoro');
-  // Keep the activeTab state but mark it as intentionally unused
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // Ignore the ESLint warning for this line directly
+  // @ts-ignore
   const [activeTab, setActiveTab] = useState<'timer' | 'goals'>('timer');
 
   const {
