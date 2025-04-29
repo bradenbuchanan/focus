@@ -8,6 +8,20 @@ import { useData } from '@/providers/DataProvider';
 // Define timeframe options
 type TimeFrame = '7d' | '30d' | '90d' | '6m' | '1y';
 
+// Define type for sessions from the database
+interface DatabaseSession {
+  id: string;
+  user_id: string;
+  start_time: string;
+  end_time: string | null;
+  duration: number | null;
+  category: string | null;
+  activity: string | null;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function DailyBarChart() {
   const [timeframe, setTimeframe] = useState<TimeFrame>('7d');
   const [chartData, setChartData] = useState<{
@@ -29,11 +43,11 @@ export default function DailyBarChart() {
         const sessions = await getSessions();
 
         // Filter for focus sessions only
-        const focusSessions = sessions.filter((session: any) => {
+        const focusSessions = sessions.filter((session: DatabaseSession) => {
           if ('type' in session && typeof session.type === 'string') {
             return session.type === 'focus';
           }
-          if ('category' in session && typeof session.category === 'string') {
+          if (session.category) {
             return session.category === 'focus';
           }
           return false;
@@ -46,7 +60,7 @@ export default function DailyBarChart() {
         }
 
         // Determine date range based on timeframe
-        const now = new Date();
+        const currentDate = new Date();
         let daysToShow: number;
         let labelFormat: 'day' | 'week' | 'month' = 'day';
 
@@ -108,9 +122,9 @@ export default function DailyBarChart() {
 
             if ('localDate' in session && session.localDate) {
               sessionDate = session.localDate;
-            } else if ('date' in session) {
+            } else if ('date' in session && session.date) {
               sessionDate = new Date(session.date).toISOString().split('T')[0];
-            } else if ('start_time' in session) {
+            } else if (session.start_time) {
               sessionDate = new Date(session.start_time)
                 .toISOString()
                 .split('T')[0];
@@ -122,7 +136,7 @@ export default function DailyBarChart() {
 
             // Calculate minutes based on session format
             let minutes = 0;
-            if ('duration' in session && typeof session.duration === 'number') {
+            if (session.duration) {
               minutes = Math.round(session.duration / 60);
             }
 
@@ -176,18 +190,15 @@ export default function DailyBarChart() {
 
                 if ('localDate' in session && session.localDate) {
                   sessionDate = new Date(session.localDate);
-                } else if ('date' in session) {
+                } else if ('date' in session && session.date) {
                   sessionDate = new Date(session.date);
-                } else if ('start_time' in session) {
+                } else if (session.start_time) {
                   sessionDate = new Date(session.start_time);
                 }
 
                 if (sessionDate >= startDate && sessionDate <= endDate) {
                   let minutes = 0;
-                  if (
-                    'duration' in session &&
-                    typeof session.duration === 'number'
-                  ) {
+                  if (session.duration) {
                     minutes = Math.round(session.duration / 60);
                   }
                   periodMap.set(
@@ -235,18 +246,15 @@ export default function DailyBarChart() {
 
                 if ('localDate' in session && session.localDate) {
                   sessionDate = new Date(session.localDate);
-                } else if ('date' in session) {
+                } else if ('date' in session && session.date) {
                   sessionDate = new Date(session.date);
-                } else if ('start_time' in session) {
+                } else if (session.start_time) {
                   sessionDate = new Date(session.start_time);
                 }
 
                 if (sessionDate >= startDate && sessionDate <= endDate) {
                   let minutes = 0;
-                  if (
-                    'duration' in session &&
-                    typeof session.duration === 'number'
-                  ) {
+                  if (session.duration) {
                     minutes = Math.round(session.duration / 60);
                   }
                   periodMap.set(
@@ -265,7 +273,7 @@ export default function DailyBarChart() {
               labelFormat === 'week'
                 ? `week-${days.length - i - 1}`
                 : Array.from(labelMap.entries()).find(
-                    ([_, label]) => label === days[i]
+                    ([k]) => labelMap.get(k) === days[i]
                   )?.[0] || '';
 
             dailyMinutes.push(periodMap.get(key) || 0);
