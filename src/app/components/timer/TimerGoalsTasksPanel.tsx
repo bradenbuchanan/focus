@@ -156,7 +156,7 @@ export default function TimerGoalsTasksPanel({
       });
 
       // Filter tasks - add detailed logging
-      let filteredTasks = convertedTasks.filter((task) => {
+      const filteredTasks = convertedTasks.filter((task) => {
         const taskActivity = task.activity?.trim();
         const currentActivity = activity?.trim();
 
