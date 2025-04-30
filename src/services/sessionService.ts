@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/supabase';
 import { TimerSession } from '@/lib/timer';
 
-// Add this interface definition
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface LocalSession {
   id: string;
   date: string;  // ISO string format
