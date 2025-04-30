@@ -40,8 +40,6 @@ export default function TimerDisplay({
     return Math.min(100, Math.max(0, progress));
   };
 
-  const progressValue = calculateProgress();
-
   // In TimerDisplay.tsx, update the return statement
   return (
     <div className={styles.timerDisplay}>
