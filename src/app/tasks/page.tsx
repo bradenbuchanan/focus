@@ -15,7 +15,6 @@ export default function TasksPage() {
   const [activeTasks, setActiveTasks] = useState<Task[]>([]);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
-  // Change: Remove the unused state or use it (I'll show an implementation below)
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
