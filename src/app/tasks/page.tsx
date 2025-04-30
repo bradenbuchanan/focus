@@ -1,7 +1,7 @@
 // src/app/tasks/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Task } from '@/lib/timer';
 import TaskItem from '@/app/components/goals/TaskItem';
@@ -15,7 +15,7 @@ export default function TasksPage() {
   const [activeTasks, setActiveTasks] = useState<Task[]>([]);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
-  const [activityFilter, setActivityFilter] = useState<string>('all');
+  // Change: Remove the unused state or use it (I'll show an implementation below)
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,7 +50,9 @@ export default function TasksPage() {
     }
   };
 
-  const loadTasks = async () => {
+  // Change: Use useCallback to memoize the loadTasks function
+  // This prevents it from being recreated on every render
+  const loadTasks = useCallback(async () => {
     try {
       setIsLoading(true);
       console.log('=== LOAD TASKS: Starting task load ===');
@@ -139,7 +141,7 @@ export default function TasksPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [getTasksFromDB]); // Add getTasksFromDB as a dependency
 
   useEffect(() => {
     // Load tasks initially
@@ -157,7 +159,7 @@ export default function TasksPage() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [loadTasks]); // Change: Add loadTasks to the dependency array
 
   // Get filtered tasks based on the selected filter
   const getFilteredTasks = () => {
@@ -174,6 +176,7 @@ export default function TasksPage() {
 
   const filteredTasks = getFilteredTasks();
 
+  // Option 1: Simply remove the unused activityFilter state
   return (
     <div className={styles.tasksPage}>
       <div className={styles.tasksHeader}>
@@ -225,11 +228,7 @@ export default function TasksPage() {
         Debug Tasks
       </button>
 
-      <TaskForm
-        onAdd={loadTasks}
-        onAddImmediate={handleAddImmediate}
-        activity={activityFilter !== 'all' ? activityFilter : undefined}
-      />
+      <TaskForm onAdd={loadTasks} onAddImmediate={handleAddImmediate} />
 
       {isLoading ? (
         <div className={styles.loadingState}>Loading tasks...</div>
