@@ -237,17 +237,21 @@ export default function TimerGoalsTasksPanel({
 
   return (
     <div className={styles.panelContainer}>
-      <div className={styles.debugButtons}>
-        <button onClick={debugTaskCreation} className={styles.secondaryButton}>
-          Create Test Task
-        </button>
-        <button onClick={debugAllTasks} className={styles.secondaryButton}>
-          List All Tasks
-        </button>
-        <button onClick={debugTasks} className={styles.secondaryButton}>
-          Debug Tasks
-        </button>
+      <div className={styles.debugButtonsContainer}>
+        <h4 className={styles.debugTitle}>Development Tools</h4>
+        <div className={styles.debugButtons}>
+          <button onClick={debugTaskCreation} className={styles.debugButton}>
+            Create Test Task
+          </button>
+          <button onClick={debugAllTasks} className={styles.debugButton}>
+            List All Tasks
+          </button>
+          <button onClick={debugTasks} className={styles.debugButton}>
+            Debug Tasks
+          </button>
+        </div>
       </div>
+
       <div className={styles.tasksSection}>
         <h3 className={styles.sectionTitle}>
           {activity ? `Tasks for ${activity}` : 'Current Tasks'}
@@ -344,9 +348,7 @@ export default function TimerGoalsTasksPanel({
         )}
       </div>
 
-      <button onClick={debugTaskCreation} className={styles.secondaryButton}>
-        Create Test Task
-      </button>
+      {/* Removed duplicate debug button at the bottom */}
     </div>
   );
 }
