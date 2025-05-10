@@ -1,3 +1,4 @@
+// src/context/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
@@ -72,23 +73,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('Signup successful, user data:', data);
 
-      // Create user profile
+      // Create user profile using upsert instead of insert
       if (data?.user) {
         console.log('Creating user profile for:', data.user.id);
+
+        // Using upsert instead of insert to handle potential duplicates
         const { error: profileError } = await supabase
           .from('user_profiles')
-          .insert({
-            id: data.user.id,
-            email,
-            name,
-          });
+          .upsert(
+            {
+              id: data.user.id,
+              email,
+              name,
+            },
+            {
+              // On conflict, do nothing or update only specific fields
+              onConflict: 'id',
+              ignoreDuplicates: false,
+            }
+          );
 
         if (profileError) {
-          console.error('Profile creation error:', profileError);
-          throw profileError;
+          // Log the error but don't throw - this way the auth still succeeds
+          console.warn('Profile creation warning:', profileError);
+          // We don't throw here since the authentication part was successful
+        } else {
+          console.log('User profile created successfully');
         }
-
-        console.log('User profile created successfully');
       }
     } catch (error) {
       console.error('Signup process error:', error);
