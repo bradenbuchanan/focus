@@ -21,21 +21,18 @@ export default function Register() {
     setError('');
 
     try {
-      await signUp(email, password, name);
-      setSuccess(true);
+      const result = await signUp(email, password, name);
+
+      if (result.success) {
+        setSuccess(true);
+      } else if (result.error) {
+        setError(result.error);
+      }
     } catch (error) {
       console.error('Registration error:', error);
-
-      // Handle specific known errors
-      if (error instanceof Error) {
-        if (error.message.includes('Email already registered')) {
-          setError('This email is already registered. Please sign in instead.');
-        } else {
-          setError(`Registration failed: ${error.message}`);
-        }
-      } else {
-        setError('Registration failed: Something went wrong');
-      }
+      setError(
+        'Registration failed: Something went wrong. Please try again later.'
+      );
     } finally {
       setIsLoading(false);
     }
