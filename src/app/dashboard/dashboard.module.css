@@ -110,6 +110,13 @@
 
 
 /* Action buttons */
+.actionsContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
 .actions {
   display: flex;
   gap: 1rem;
@@ -117,20 +124,23 @@
 }
 
 .actionButton {
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.5rem;
   border-radius: 0.75rem;
   font-weight: 600;
   font-size: 1rem;
   transition: all 0.2s ease;
   text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .actionButton {
   background-color: var(--foreground);
   color: var(--background);
   border: none;
-  flex: 1;
-  max-width: 230px;
 }
 
 .actionButton:hover {
@@ -141,6 +151,7 @@
 .actionButton.secondaryAction {
   background-color: var(--gray-alpha-200);
   color: var(--foreground);
+  border: 1px solid var(--gray-alpha-300, rgba(var(--gray-rgb), 0.2));
 }
 
 /* Make responsive adjustments */
