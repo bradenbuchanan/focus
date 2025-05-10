@@ -25,11 +25,17 @@ export default function Register() {
       setSuccess(true);
     } catch (error) {
       console.error('Registration error:', error);
-      setError(
-        `Registration failed: ${
-          error instanceof Error ? error.message : 'Something went wrong'
-        }`
-      );
+
+      // Handle specific known errors
+      if (error instanceof Error) {
+        if (error.message.includes('Email already registered')) {
+          setError('This email is already registered. Please sign in instead.');
+        } else {
+          setError(`Registration failed: ${error.message}`);
+        }
+      } else {
+        setError('Registration failed: Something went wrong');
+      }
     } finally {
       setIsLoading(false);
     }
