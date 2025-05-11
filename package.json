@@ -11,11 +11,10 @@
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
-    "@supabase/supabase-js": "^2.49.1",
+    "@supabase/supabase-js": "^2.49.4",
     "bcrypt": "^5.1.1",
     "chart.js": "^4.4.8",
     "next": "^15.2.2",
-    "next-auth": "^4.24.11",
     "prisma": "^6.5.0",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
@@ -25,7 +24,6 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@next-auth/prisma-adapter": "^1.0.7",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^19",
