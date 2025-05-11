@@ -5,8 +5,8 @@ export abstract class BaseRepository<T, LocalT> {
   constructor(
     protected tableName: string,
     protected localStorageKey: string,
-    protected modelToDb: (item: T, userId: string) => any,
-    protected dbToModel: (item: any) => T,
+    protected modelToDb: (item: T, userId: string) => Record<string, unknown>,
+    protected dbToModel: (item: Record<string, unknown>) => T,
     protected localToModel: (item: LocalT) => T,
     protected modelToLocal: (item: T) => LocalT
   ) {}
