@@ -2,7 +2,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useMemo } from 'react';
-import { useAuth } from '@/context/AuthContext';
+// Remove the useAuth import since we're not using it
 import { SessionRepository } from '@/repositories/SessionRepository';
 import { GoalRepository } from '@/repositories/GoalRepository';
 import { TaskRepository } from '@/repositories/TaskRepository';
@@ -81,7 +81,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: DataProviderProps) {
-  const { user } = useAuth();
+  // Remove the unused useAuth hook and user variable
 
   // Create repositories once using useMemo
   const sessionRepo = useMemo(() => new SessionRepository(), []);
