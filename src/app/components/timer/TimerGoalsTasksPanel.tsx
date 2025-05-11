@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Goal, Task, calculateGoalProgress } from '@/lib/timer';
-import { Database } from '@/types/supabase';
+// import { Database } from '@/types/supabase';
+import { Database } from '../../../types/supabase';
 import styles from './timerGoalsTasks.module.css';
 import { useData } from '@/providers/DataProvider';
 import { supabase } from '@/lib/supabase';
