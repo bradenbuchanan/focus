@@ -64,9 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
-      console.log('Attempting signup with:', { email, name });
-
-      // First check if the email already exists
+      // Check if the email already exists
       const { data: existingUsers, error: checkError } = await supabase
         .from('user_profiles')
         .select('email')
@@ -107,13 +105,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      console.log('Signup successful, user data:', data);
-
-      // Create user profile using upsert instead of insert
+      // Create user profile
       if (data?.user) {
-        console.log('Creating user profile for:', data.user.id);
-
-        // Using upsert instead of insert to handle potential duplicates
         const { error: profileError } = await supabase
           .from('user_profiles')
           .upsert(
@@ -123,17 +116,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               name,
             },
             {
-              // On conflict, do nothing or update only specific fields
               onConflict: 'id',
               ignoreDuplicates: false,
             }
           );
 
         if (profileError) {
-          // Log the error but don't throw - this way the auth still succeeds
           console.warn('Profile creation warning:', profileError);
-        } else {
-          console.log('User profile created successfully');
         }
       }
 
