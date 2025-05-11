@@ -2,13 +2,60 @@
 import { supabase } from '@/lib/supabase';
 import { Task } from '@/lib/timer';
 
+// Define a Supabase task interface
+interface SupabaseTask {
+  id: string;
+  user_id: string;
+  goal_id: string | null;
+  text: string;
+  completed: boolean;
+  activity: string | null;
+  priority: string | null;
+  due_date: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Define task input interfaces
+interface TaskInput {
+  goalId?: string;
+  text: string;
+  activity?: string;
+  priority?: 'low' | 'medium' | 'high';
+  dueDate?: string;
+}
+
+interface TaskUpdateInput {
+  id: string;
+  goalId?: string;
+  text?: string;
+  completed?: boolean;
+  activity?: string;
+  priority?: 'low' | 'medium' | 'high';
+  dueDate?: string;
+  completedAt?: string;
+}
+
 export class TaskRepository {
-  async getTasks(): Promise<any[]> {
+  async getTasks(): Promise<SupabaseTask[]> {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
       if (!userData?.user) {
-        return this.getLocalTasks();
+        return this.getLocalTasks().map(task => ({
+          id: task.id,
+          user_id: '',  // Empty for local data
+          goal_id: task.goalId || null,
+          text: task.text,
+          completed: task.completed,
+          activity: task.activity || null,
+          priority: task.priority || null,
+          due_date: task.dueDate || null,
+          completed_at: task.completedAt || null,
+          created_at: task.createdAt,
+          updated_at: task.createdAt,
+        }));
       }
       
       const { data, error } = await supabase
@@ -18,33 +65,27 @@ export class TaskRepository {
         
       if (error) throw error;
       
-      // Convert from database format to application format
-      return data?.map(task => ({
-        id: task.id,
-        user_id: task.user_id,
-        goal_id: task.goal_id,
-        text: task.text,
-        completed: task.completed,
-        activity: task.activity,
-        priority: task.priority,
-        due_date: task.due_date,
-        completed_at: task.completed_at,
-        created_at: task.created_at,
-        updated_at: task.updated_at,
-      })) || [];
+      return data || [];
     } catch (error) {
       console.error('Error fetching tasks from Supabase:', error);
-      return this.getLocalTasks();
+      
+      return this.getLocalTasks().map(task => ({
+        id: task.id,
+        user_id: '',  // Empty for local data
+        goal_id: task.goalId || null,
+        text: task.text,
+        completed: task.completed,
+        activity: task.activity || null,
+        priority: task.priority || null,
+        due_date: task.dueDate || null,
+        completed_at: task.completedAt || null,
+        created_at: task.createdAt,
+        updated_at: task.createdAt,
+      }));
     }
   }
   
-  async saveTask(task: {
-    goalId?: string;
-    text: string;
-    activity?: string;
-    priority?: 'low' | 'medium' | 'high';
-    dueDate?: string;
-  }): Promise<string> {
+  async saveTask(task: TaskInput): Promise<string> {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
@@ -80,16 +121,7 @@ export class TaskRepository {
     }
   }
   
-  async updateTask(task: {
-    id: string;
-    goalId?: string;
-    text?: string;
-    completed?: boolean;
-    activity?: string;
-    priority?: 'low' | 'medium' | 'high';
-    dueDate?: string;
-    completedAt?: string;
-  }): Promise<void> {
+  async updateTask(task: TaskUpdateInput): Promise<void> {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
@@ -98,8 +130,19 @@ export class TaskRepository {
         return;
       }
       
+      // Create update data with proper types
+      interface SupabaseUpdateData {
+        goal_id?: string | null;
+        text?: string;
+        completed?: boolean;
+        activity?: string | null;
+        priority?: string | null;
+        due_date?: string | null;
+        completed_at?: string | null;
+      }
+      
       // Create an empty update data object
-      const updateData: Record<string, any> = {};
+      const updateData: SupabaseUpdateData = {};
       
       // Only add defined properties
       if (task.goalId !== undefined) updateData.goal_id = task.goalId;
@@ -109,8 +152,6 @@ export class TaskRepository {
       if (task.priority !== undefined) updateData.priority = task.priority;
       if (task.dueDate !== undefined) updateData.due_date = task.dueDate;
       if (task.completedAt !== undefined) updateData.completed_at = task.completedAt;
-      
-      // No need to remove undefined values anymore
       
       const { error } = await supabase
         .from('tasks')
@@ -153,10 +194,10 @@ export class TaskRepository {
     return tasksData ? JSON.parse(tasksData) : [];
   }
   
-  private saveLocalTask(task: any): string {
+  private saveLocalTask(task: TaskInput): string {
     if (typeof window === 'undefined') return '';
     
-    const localTask = {
+    const localTask: Task = {
       id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
       goalId: task.goalId,
       text: task.text,
@@ -174,7 +215,7 @@ export class TaskRepository {
     return localTask.id;
   }
   
-  private updateLocalTask(updatedTask: any): void {
+  private updateLocalTask(updatedTask: TaskUpdateInput): void {
     if (typeof window === 'undefined') return;
     
     const tasks = this.getLocalTasks();
@@ -182,10 +223,11 @@ export class TaskRepository {
     
     if (index !== -1) {
       // Add completedAt timestamp when marking as complete
-      if (updatedTask.completed && !tasks[index].completed) {
+      if (updatedTask.completed === true && !tasks[index].completed) {
         updatedTask.completedAt = new Date().toISOString();
       }
       
+      // Create a new task object with the updated values
       tasks[index] = {
         ...tasks[index],
         ...updatedTask
