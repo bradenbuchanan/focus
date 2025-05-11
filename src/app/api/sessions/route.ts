@@ -1,15 +1,21 @@
 // src/app/api/sessions/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/ds';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from '@/lib/auth';
+import { createClient } from '@supabase/supabase-js';
 import { Prisma } from '@prisma/client';
+
+// Simple server-side Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+);
 
 export async function GET(req: NextRequest) {
   try {
-    // Authenticate user - use getServerSession instead of auth
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user?.id) {
+    // Authenticate user with Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -28,20 +34,16 @@ export async function GET(req: NextRequest) {
       dateFilter.lte = new Date(endDate);
     }
 
-    // Get sessions without accomplishments first - we'll fix this after the migration
+    // Get sessions
     const sessions = await prisma.focusSession.findMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         ...(startDate || endDate ? { startTime: dateFilter } : {}),
       },
       orderBy: {
         startTime: 'desc',
       },
       take: limit,
-      // We'll uncomment this after the migration is applied and Prisma client is regenerated
-      // include: {
-      //   accomplishments: true,
-      // },
     });
 
     return NextResponse.json({ sessions });
