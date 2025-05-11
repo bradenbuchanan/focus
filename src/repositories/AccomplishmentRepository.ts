@@ -10,13 +10,33 @@ interface LocalAccomplishment {
   categories?: string;
 }
 
+// Define a type for Supabase accomplishments
+interface SupabaseAccomplishment {
+  id: string;
+  user_id: string;
+  session_id: string | null;
+  text: string;
+  categories: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export class AccomplishmentRepository {
-  async getAccomplishments(): Promise<any[]> {
+  async getAccomplishments(): Promise<SupabaseAccomplishment[]> {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
       if (!userData?.user) {
-        return this.getLocalAccomplishments();
+        // Convert local accomplishments to the expected format
+        return this.getLocalAccomplishments().map(local => ({
+          id: local.id,
+          user_id: '',  // Empty for local data
+          session_id: local.sessionId || null,
+          text: local.text,
+          categories: local.categories || null,
+          created_at: local.date,
+          updated_at: local.date
+        }));
       }
       
       const { data, error } = await supabase
@@ -30,7 +50,17 @@ export class AccomplishmentRepository {
       return data || [];
     } catch (error) {
       console.error('Error fetching accomplishments from Supabase:', error);
-      return this.getLocalAccomplishments();
+      
+      // Convert local accomplishments to the expected format
+      return this.getLocalAccomplishments().map(local => ({
+        id: local.id,
+        user_id: '',  // Empty for local data
+        session_id: local.sessionId || null,
+        text: local.text,
+        categories: local.categories || null,
+        created_at: local.date,
+        updated_at: local.date
+      }));
     }
   }
   
@@ -133,6 +163,7 @@ export class AccomplishmentRepository {
     return localAccomplishment.id;
   }
   
+  // Define a specific interface for session properties
   private updateSessionWithAccomplishment(
     sessionId: string, 
     text: string, 
@@ -148,11 +179,11 @@ export class AccomplishmentRepository {
       id: string;
       accomplishment?: string;
       accomplishmentCategory?: string;
-      [key: string]: any; // Allow other properties
+      [key: string]: string | number | boolean | undefined;
     }
     
     const sessions = JSON.parse(sessionsData) as LocalTimerSession[];
-    const sessionIndex = sessions.findIndex((s: LocalTimerSession) => s.id === sessionId);
+    const sessionIndex = sessions.findIndex((s) => s.id === sessionId);
     
     if (sessionIndex !== -1) {
       sessions[sessionIndex].accomplishment = text;
