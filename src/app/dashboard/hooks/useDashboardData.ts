@@ -4,8 +4,7 @@
 import { useState, useEffect } from 'react';
 import { getLocalDateString, calculateGoalProgress } from '@/lib/timer';
 import { useData } from '../../../providers/DataProvider';
-import { 
-  Session, 
+import {  
   isFocusSession, 
   getSessionDateString, 
   getSessionMinutes 

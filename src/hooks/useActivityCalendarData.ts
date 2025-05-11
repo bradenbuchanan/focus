@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { getLocalDateString } from '@/lib/timer';
 import { useData } from '../providers/DataProvider';
 import { 
-  Session, 
   getSessionDateString, 
   getSessionMinutes, 
   isFocusSession 
