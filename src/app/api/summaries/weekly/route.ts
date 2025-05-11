@@ -1,15 +1,21 @@
 // src/app/api/summaries/weekly/route.ts
 import { NextResponse } from 'next/server';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from '@/lib/auth';
+import { createClient } from '@supabase/supabase-js';
 import { generateUserWeeklySummary } from '@/lib/aggregation-service';
 import { generateInsightsFromData } from '@/lib/llm-service';
 
+// Simple server-side Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+);
+
 export async function GET() {
   try {
-    // Authenticate user
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user?.id) {
+    // Authenticate user with Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
@@ -20,7 +26,7 @@ export async function GET() {
     }
     
     // Get user's weekly summary data
-    const weeklySummary = await generateUserWeeklySummary(session.user.id);
+    const weeklySummary = await generateUserWeeklySummary(user.id);
     
     if (!weeklySummary) {
       return NextResponse.json({ 
