@@ -26,11 +26,11 @@ export type ActivityData = {
   };
 };
 
-export function useMultiActivityData(refreshKey?: number) {
+// Remove the refreshKey parameter since it's not used
+export function useMultiActivityData() {
   const [activityDataSets, setActivityDataSets] = useState<ActivityData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { getSessions } = useData();
-  // Remove the unused lastUpdate state if it's not being used elsewhere
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -182,7 +182,23 @@ export function useMultiActivityData(refreshKey?: number) {
   return { activityDataSets, isLoading, refreshData };
 }
 
-// Update the signature of useActivityCalendarData to remove unused refreshKey parameter
+export function getCellColor(intensity: number): string {
+  switch (intensity) {
+    case 0:
+      return 'rgba(200, 200, 200, 0.1)';
+    case 1:
+      return 'rgba(0, 136, 204, 0.25)';
+    case 2:
+      return 'rgba(0, 136, 204, 0.5)';
+    case 3:
+      return 'rgba(0, 136, 204, 0.75)';
+    case 4:
+      return 'rgba(0, 136, 204, 1)';
+    default:
+      return 'rgba(200, 200, 200, 0.1)';
+  }
+}
+
 export function useActivityCalendarData(selectedActivity: string = 'all') {
   const [calendarData, setCalendarData] = useState<CalendarDay[]>([]);
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
@@ -211,8 +227,6 @@ export function useActivityCalendarData(selectedActivity: string = 'all') {
     isLoading 
   };
 }
-
-// Rest of your code remains the same...
 
 // Define the color scheme type
 type ColorScheme = {
@@ -349,16 +363,16 @@ export function getColorSchemeForActivity(activity: string): ColorScheme {
   };
 }
 
-// Listen for data update events
-
+// Since refreshKey is not being used, we can simplify this function to just use the data
 export function useActivityDataWithEventListeners(selectedActivity: string = 'all') {
-  const [refreshKey, setRefreshKey] = useState(0);
-  const data = useActivityCalendarData(selectedActivity); // Remove refreshKey parameter
+  // Remove the unnecessary refreshKey state
+  const data = useActivityCalendarData(selectedActivity);
   
   useEffect(() => {
     const handleDataUpdate = () => {
-      console.log('Data update event received, refreshing activity data...');
-      setRefreshKey(prev => prev + 1);
+      console.log('Data update event received');
+      // The data will automatically refresh due to the event listeners
+      // in useMultiActivityData, so we don't need to do anything here
     };
 
     // Import the event listener from utils
