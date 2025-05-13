@@ -28,7 +28,7 @@
   text-align: center;
 }
 
-/* Debug section */
+/* Debug section - Keep as it's specific to this component */
 .debugButtonsContainer {
   background-color: rgba(30, 30, 30, 0.7);
   border-radius: 0.5rem;
@@ -67,12 +67,13 @@
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Sections */
+/* Sections layout */
 .tasksSection,
 .goalsSection {
   margin-bottom: 2rem;
 }
 
+/* List containers - Keep for layout */
 .tasksList,
 .goalsList {
   display: flex;
@@ -80,7 +81,7 @@
   gap: 0.75rem;
 }
 
-/* Empty state */
+/* Empty state - Keep as it's specific to this component */
 .emptyState {
   text-align: center;
   padding: 2rem 1rem;
