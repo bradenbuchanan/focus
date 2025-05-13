@@ -1,10 +1,13 @@
+// src/app/components/timer/TimerGoalsTasksPanel.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Goal, Task, calculateGoalProgress } from '@/lib/timer';
-// import { Database } from '@/types/supabase';
 import { Database } from '../../../types/supabase';
+import { TaskItem } from '../../components/ui/TaskItem';
+import { GoalCard } from '../../components/ui/GoalCard';
+import { TaskList } from '../../components/ui/TaskList';
 import styles from './timerGoalsTasks.module.css';
 import { useData } from '@/providers/DataProvider';
 import { supabase } from '@/lib/supabase';
@@ -16,6 +19,9 @@ interface TimerGoalsTasksPanelProps {
   activity: string | undefined;
   onTaskComplete: (taskId: string) => Promise<void>;
 }
+
+// Define a type for a goal with progress
+type GoalWithProgress = Goal & { progress: number };
 
 // Helper function to convert Supabase task to local Task type
 const convertSupabaseTask = (task: SupabaseTask): Task => ({
@@ -50,15 +56,12 @@ export default function TimerGoalsTasksPanel({
 }: TimerGoalsTasksPanelProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [relevantTasks, setRelevantTasks] = useState<Task[]>([]);
-  const [relevantGoals, setRelevantGoals] = useState<
-    (Goal & { progress: number })[]
-  >([]);
-  const [completingTaskId, setCompletingTaskId] = useState<string | null>(null);
+  const [relevantGoals, setRelevantGoals] = useState<GoalWithProgress[]>([]);
   const { getTasks, getGoals, updateTask } = useData();
 
+  // Debug functions
   const debugTaskCreation = async () => {
     try {
-      // Create a test task directly with Supabase
       const { data: userData } = await supabase.auth.getUser();
       console.log('Debug - Creating test task for user:', userData?.user?.id);
 
@@ -89,7 +92,6 @@ export default function TimerGoalsTasksPanel({
 
   const debugAllTasks = async () => {
     try {
-      // Warning: This is only for debugging
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
@@ -144,19 +146,11 @@ export default function TimerGoalsTasksPanel({
         goals: dbGoals.length,
       });
 
-      // Log the tasks before conversion
-      console.log('Tasks before conversion:', dbTasks);
-
       // Convert Supabase data to local types
       const convertedTasks = dbTasks.map(convertSupabaseTask);
       const convertedGoals = dbGoals.map(convertSupabaseGoal);
 
-      console.log('After conversion:', {
-        tasks: convertedTasks.length,
-        goals: convertedGoals.length,
-      });
-
-      // Filter tasks - add detailed logging
+      // Filter tasks
       const filteredTasks = convertedTasks.filter((task) => {
         const taskActivity = task.activity?.trim();
         const currentActivity = activity?.trim();
@@ -168,14 +162,8 @@ export default function TimerGoalsTasksPanel({
             currentActivity === 'All Activities' ||
             !currentActivity);
 
-        console.log(
-          `Task "${task.text}": activity=${taskActivity}, currentFilter=${currentActivity}, include=${include}`
-        );
-
         return include;
       });
-
-      console.log('Filtered tasks count:', filteredTasks.length);
 
       // Filter and process goals
       const filteredGoals = convertedGoals
@@ -190,10 +178,13 @@ export default function TimerGoalsTasksPanel({
             !currentActivity
           );
         })
-        .map((goal) => ({
-          ...goal,
-          progress: calculateGoalProgress(goal).percentage,
-        }));
+        .map((goal): GoalWithProgress => {
+          const progress = calculateGoalProgress(goal);
+          return {
+            ...goal,
+            progress: progress.percentage,
+          };
+        });
 
       setRelevantTasks(filteredTasks);
       setRelevantGoals(filteredGoals);
@@ -206,10 +197,9 @@ export default function TimerGoalsTasksPanel({
 
   useEffect(() => {
     loadData();
-  }, [activity, loadData]);
+  }, [loadData]);
 
   const handleTaskComplete = async (taskId: string) => {
-    setCompletingTaskId(taskId);
     try {
       await onTaskComplete(taskId);
       await updateTask({
@@ -221,8 +211,6 @@ export default function TimerGoalsTasksPanel({
       await loadData();
     } catch (error) {
       console.error('Error completing task:', error);
-    } finally {
-      setCompletingTaskId(null);
     }
   };
 
@@ -261,44 +249,14 @@ export default function TimerGoalsTasksPanel({
         {relevantTasks.length > 0 ? (
           <div className={styles.tasksList}>
             {relevantTasks.map((task) => (
-              <div
+              <TaskItem
                 key={task.id}
-                className={`${styles.taskItem} ${
-                  completingTaskId === task.id ? styles.completing : ''
-                }`}
-              >
-                <div className={styles.taskCheckbox}>
-                  <input
-                    type="checkbox"
-                    onChange={() => handleTaskComplete(task.id)}
-                    disabled={completingTaskId === task.id}
-                  />
-                </div>
-                <div className={styles.taskContent}>
-                  <div className={styles.taskText}>{task.text}</div>
-                  <div className={styles.taskMeta}>
-                    {task.priority && (
-                      <span
-                        className={`${styles.priorityTag} ${
-                          styles[
-                            `priority${
-                              task.priority.charAt(0).toUpperCase() +
-                              task.priority.slice(1)
-                            }`
-                          ]
-                        }`}
-                      >
-                        {task.priority}
-                      </span>
-                    )}
-                    {task.dueDate && (
-                      <span className={styles.dueDate}>
-                        Due: {new Date(task.dueDate).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
+                task={task}
+                onToggleComplete={handleTaskComplete}
+                showActions={false}
+                showMeta={true}
+                isCompact={true}
+              />
             ))}
           </div>
         ) : (
@@ -319,24 +277,16 @@ export default function TimerGoalsTasksPanel({
         {relevantGoals.length > 0 ? (
           <div className={styles.goalsList}>
             {relevantGoals.map((goal) => (
-              <div key={goal.id} className={styles.goalItem}>
-                <div className={styles.goalHeader}>
-                  <h4>{goal.title}</h4>
-                  <span className={styles.goalProgress}>
-                    {Math.round(goal.progress)}%
-                  </span>
-                </div>
-                <div className={styles.progressBar}>
-                  <div
-                    className={styles.progressFill}
-                    style={{
-                      width: `${goal.progress}%`,
-                      backgroundColor:
-                        goal.progress >= 100 ? '#4CAF50' : '#3B82F6',
-                    }}
-                  />
-                </div>
-              </div>
+              <GoalCard
+                key={goal.id}
+                goal={goal}
+                progress={{
+                  current: calculateGoalProgress(goal).current,
+                  percentage: goal.progress,
+                }}
+                isCompact={true}
+                showActions={false}
+              />
             ))}
           </div>
         ) : (
@@ -348,8 +298,6 @@ export default function TimerGoalsTasksPanel({
           </div>
         )}
       </div>
-
-      {/* Removed duplicate debug button at the bottom */}
     </div>
   );
 }
