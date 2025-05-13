@@ -1,7 +1,8 @@
-// src/app/dashboard/components/ActiveGoals.tsx
+// src/app/components/dashboard/ActiveGoals.tsx
 'use client';
 
 import Link from 'next/link';
+import { GoalCard } from '../../components/ui/GoalCard';
 import styles from './dashboardActiveGoals.module.css';
 
 interface GoalsProps {
@@ -9,9 +10,13 @@ interface GoalsProps {
     goal: {
       id: string;
       title: string;
-      type: string;
-      period: string;
+      type: 'time' | 'sessions'; // Change from string to union type
+      period: 'daily' | 'weekly' | 'monthly' | 'yearly'; // Also update period to be more specific
       target: number;
+      startDate: string;
+      createdAt: string;
+      activity?: string;
+      description?: string;
     };
     progress: {
       current: number;
@@ -26,29 +31,13 @@ export default function ActiveGoals({ goals }: GoalsProps) {
       <h2 className={styles.sectionTitle}>Active Goals</h2>
       <div className={styles.goalCards}>
         {goals.map(({ goal, progress }) => (
-          <div key={goal.id} className={styles.goalOverviewCard}>
-            <h3>{goal.title}</h3>
-            <div className={styles.goalStats}>
-              <div className={styles.goalType}>
-                {goal.type === 'time' ? 'Focus Time' : 'Sessions'} •{' '}
-                {goal.period}
-              </div>
-              <div className={styles.goalValue}>
-                {progress.current} / {goal.target} ({progress.percentage}
-                %)
-              </div>
-            </div>
-            <div className={styles.goalProgressBar}>
-              <div
-                className={styles.goalProgress}
-                style={{
-                  width: `${progress.percentage}%`,
-                  backgroundColor:
-                    progress.percentage >= 100 ? '#4CAF50' : '#3B82F6',
-                }}
-              />
-            </div>
-          </div>
+          <GoalCard
+            key={goal.id}
+            goal={goal}
+            progress={progress}
+            isCompact={true}
+            showActions={false}
+          />
         ))}
         <Link href="/goals" className={styles.viewAllGoals}>
           View All Goals
