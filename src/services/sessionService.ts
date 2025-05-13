@@ -2,24 +2,13 @@
 import { supabase } from '@/lib/supabase';
 import {Database} from "../types/supabase"
 import { TimerSession } from '@/lib/timer';
-import { emitDataUpdate, emitSessionCompleted } from '@/utils/events';
+import { emitDataUpdate } from '@/utils/events';
 
-
-// Define proper types
-interface LocalSession {
-  id: string;
-  date: string;  // ISO string format
-  localDate?: string; // Local YYYY-MM-DD format
-  duration: number;  // in seconds
-  type: 'focus' | 'break';
-  completed: boolean;
-  activity?: string; // Activity category
-}
+// Remove the unused LocalSession interface and the unused import
 
 type FocusSession = Database['public']['Tables']['focus_sessions']['Row'];
 
 // Main save session function
-// src/services/sessionService.ts
 export async function saveSession(session: {
   startTime: Date;
   endTime?: Date | null;
