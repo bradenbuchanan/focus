@@ -1,4 +1,6 @@
-// src/app/goals/page.tsx
+// src/app/tasks/page.tsx
+'use client';
+
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -11,151 +13,133 @@ import {
 } from '@/lib/timer';
 import GoalCard from '@/app/components/goals/GoalCard';
 import GoalForm from '@/app/components/goals/GoalForm';
-import TaskItem from '@/app/components/goals/TaskItem';
+import { TaskItem } from '@/app/components/ui/TaskItem'; // Updated import
 import TaskForm from '@/app/components/goals/TaskForm';
-import styles from './goals.module.css';
+import styles from './goals.module.css'; // FIXED: Should be goals.module.css, not tasks.module.css
 import tasksStyles from '@/app/components/goals/TaskList.module.css';
 import { useData } from '@/providers/DataProvider';
 import { supabase } from '@/lib/supabase';
 
-type TabType = 'goals' | 'tasks' | 'completed';
-
-export default function GoalsPage() {
-  // State declarations
+export default function TasksPage() {
+  const { getTasks: getTasksFromDB, updateTask } = useData();
+  const [activeTasks, setActiveTasks] = useState<Task[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
+  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [completedGoals, setCompletedGoals] = useState<Goal[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
-  const [activeTab, setActiveTab] = useState<TabType>('goals');
-  const [showForm, setShowForm] = useState(false);
-  const [activityFilter, setActivityFilter] = useState<string>('all');
-  const [availableActivities, setAvailableActivities] = useState<string[]>([]);
-  const { getGoals, getTasks } = useData();
 
-  // Computed values using useMemo
-  const filteredGoals = useMemo(() => {
-    if (activityFilter === 'all') return goals;
-    return goals.filter((goal) => goal.activity === activityFilter);
-  }, [goals, activityFilter]);
+  const handleAddImmediate = (newTask: Task) => {
+    console.log('Adding task immediately to UI:', newTask);
+    setActiveTasks((prevTasks) => [newTask, ...prevTasks]);
+  };
 
-  const filteredCompletedGoals = useMemo(() => {
-    if (activityFilter === 'all') return completedGoals;
-    return completedGoals.filter((goal) => goal.activity === activityFilter);
-  }, [completedGoals, activityFilter]);
-
-  const filteredActiveTasks = useMemo(() => {
-    if (activityFilter === 'all') return tasks;
-    return tasks.filter((task) => task.activity === activityFilter);
-  }, [tasks, activityFilter]);
-
-  const filteredCompletedTasks = useMemo(() => {
-    if (activityFilter === 'all') return completedTasks;
-    return completedTasks.filter((task) => task.activity === activityFilter);
-  }, [completedTasks, activityFilter]);
-
-  // Debug logging effect
-  useEffect(() => {
-    console.log('Current state:', {
-      isLoading,
-      error,
-      goals: goals.length,
-      completedGoals: completedGoals.length,
-      tasks: tasks.length,
-      completedTasks: completedTasks.length,
-      filteredGoals: filteredGoals.length,
-      filteredCompletedGoals: filteredCompletedGoals.length,
-      filteredActiveTasks: filteredActiveTasks.length,
-      filteredCompletedTasks: filteredCompletedTasks.length,
-      activityFilter,
-      activeTab,
-    });
-  }, [
-    isLoading,
-    error,
-    goals,
-    completedGoals,
-    tasks,
-    completedTasks,
-    filteredGoals,
-    filteredCompletedGoals,
-    filteredActiveTasks,
-    filteredCompletedTasks,
-    activityFilter,
-    activeTab,
-  ]);
-
-  // Load data function - using useCallback to properly handle the dependency in useEffect
-  const loadData = useCallback(async () => {
-    console.log('Starting data load');
-    setIsLoading(true);
-    setError(null);
-
+  // Updated handler to work with unified TaskItem
+  const handleTaskToggle = async (taskId: string) => {
     try {
-      // Get goals from database
-      const dbGoals = await getGoals();
-      console.log('Received goals from database:', dbGoals);
+      // Find the task
+      const allTasks = [...activeTasks, ...completedTasks];
+      const task = allTasks.find((t) => t.id === taskId);
 
-      if (!dbGoals || !Array.isArray(dbGoals)) {
-        throw new Error('Invalid goals data received');
+      if (task) {
+        await updateTask({
+          id: taskId,
+          completed: !task.completed,
+          completedAt: !task.completed ? new Date().toISOString() : undefined,
+        });
+
+        // Reload the tasks
+        await loadTasks();
       }
+    } catch (error) {
+      console.error('Error toggling task:', error);
+    }
+  };
 
-      // Map database goals to application's Goal type
-      const allGoals = dbGoals.map((dbGoal) => ({
-        id: dbGoal.id,
-        title: dbGoal.title,
-        description: dbGoal.description || undefined,
-        type: dbGoal.type as 'time' | 'sessions',
-        target: dbGoal.target,
-        period: dbGoal.period as 'daily' | 'weekly' | 'monthly' | 'yearly',
-        startDate: dbGoal.start_date,
-        endDate: dbGoal.end_date || undefined,
-        createdAt: dbGoal.created_at,
-        activity: dbGoal.activity || undefined,
-      }));
+  const handleTaskEdit = async (task: Task) => {
+    // Implement edit functionality if needed
+    console.log('Edit task:', task);
+  };
 
-      console.log('Mapped goals:', allGoals);
+  const handleTaskDelete = async (taskId: string) => {
+    // Implement delete functionality if needed
+    console.log('Delete task:', taskId);
+    await loadTasks();
+  };
 
-      // Separate active and completed goals
-      const active: Goal[] = [];
-      const completed: Goal[] = [];
+  const debugTasks = async () => {
+    console.log('=== DEBUG: Directly checking tasks in Supabase ===');
+    try {
+      // Get the current user
+      const { data: userData } = await supabase.auth.getUser();
+      console.log('Current user:', userData?.user?.id);
 
-      allGoals.forEach((goal) => {
-        const progress = calculateGoalProgress(goal);
-        if (progress.percentage >= 100) {
-          completed.push(goal);
-        } else {
-          active.push(goal);
-        }
+      // Direct query to see all tasks for this user
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', userData?.user?.id);
+
+      console.log('Direct Supabase query result:', {
+        success: !error,
+        count: data?.length || 0,
+        tasks: data,
       });
 
-      // Load tasks from Supabase using the DataProvider
-      console.log('Loading tasks from DataProvider...');
-      const tasksFromDB = await getTasks();
-      console.log('Tasks from database:', tasksFromDB);
+      // Also try your loadTasks function
+      await loadTasks();
+    } catch (error) {
+      console.error('Debug error:', error);
+    }
+  };
 
-      // Convert Supabase tasks to app's Task format
-      const allTasks = tasksFromDB.map((task) => ({
+  // Change: Use useCallback to memoize the loadTasks function
+  // This prevents it from being recreated on every render
+  const loadTasks = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      console.log('=== LOAD TASKS: Starting task load ===');
+
+      // Get tasks from Supabase
+      const supabaseTasks = await getTasksFromDB();
+      console.log('LOAD TASKS: Raw tasks from database:', supabaseTasks);
+
+      if (!supabaseTasks || supabaseTasks.length === 0) {
+        console.log('LOAD TASKS: No tasks returned from database');
+        setActiveTasks([]);
+        setCompletedTasks([]);
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('LOAD TASKS: Processing tasks...');
+
+      // Convert Supabase tasks to your app's Task format
+      const convertedTasks = supabaseTasks.map((task) => ({
         id: task.id,
         goalId: task.goal_id || undefined,
         text: task.text,
         completed: task.completed,
-        createdAt: task.created_at,
+        createdAt: task.created_at, // Convert snake_case to camelCase
         dueDate: task.due_date || undefined,
         activity: task.activity || undefined,
         priority: (task.priority as 'low' | 'medium' | 'high') || 'medium',
         completedAt: task.completed_at || undefined,
       }));
 
-      console.log('Converted tasks:', allTasks);
+      console.log('LOAD TASKS: Converted tasks:', convertedTasks);
 
-      // Filter active and completed tasks
-      const activeTasks = allTasks.filter((task) => !task.completed);
-      const doneTasks = allTasks.filter((task) => task.completed);
+      // Separate active and completed tasks
+      const active = convertedTasks.filter((task) => !task.completed);
+      const completed = convertedTasks.filter((task) => task.completed);
+
+      console.log('LOAD TASKS: Separated tasks:', {
+        active: active.length,
+        completed: completed.length,
+      });
 
       // Sort active tasks by dueDate (if available) and then by creation date
-      activeTasks.sort((a, b) => {
+      active.sort((a, b) => {
+        // First sort by due date (if available)
         if (a.dueDate && b.dueDate) {
           return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
         } else if (a.dueDate) {
@@ -163,12 +147,15 @@ export default function GoalsPage() {
         } else if (b.dueDate) {
           return 1; // b has due date, a doesn't, b comes first
         }
+
+        // Then by creation date (newest first)
         return (
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
       });
 
-      doneTasks.sort((a, b) => {
+      // Sort completed tasks by completion date (newest first)
+      completed.sort((a, b) => {
         const dateA = a.completedAt
           ? new Date(a.completedAt)
           : new Date(a.createdAt);
@@ -178,295 +165,153 @@ export default function GoalsPage() {
         return dateB.getTime() - dateA.getTime();
       });
 
-      console.log('Sorted tasks:', {
-        active: activeTasks.length,
-        completed: doneTasks.length,
+      console.log('LOAD TASKS: Sorted tasks:', {
+        active: active.length,
+        completed: completed.length,
       });
 
-      // Extract unique activities
-      const activities = new Set<string>();
-      [...allGoals, ...allTasks].forEach((item) => {
-        if (item.activity) {
-          activities.add(item.activity);
-        }
-      });
-      defaultActivityCategories.forEach((activity) => activities.add(activity));
-
-      // Update all state at once
-      setGoals(active);
-      setCompletedGoals(completed);
-      setTasks(activeTasks);
-      setCompletedTasks(doneTasks);
-      setAvailableActivities(Array.from(activities));
-
-      console.log('Data load complete', {
-        activeGoals: active.length,
-        completedGoals: completed.length,
-        activeTasks: activeTasks.length,
-        completedTasks: doneTasks.length,
-        activities: Array.from(activities),
+      // Update state with the properly converted tasks
+      setActiveTasks(active);
+      setCompletedTasks(completed);
+      console.log('LOAD TASKS: State updated with tasks:', {
+        activeTasks: active.length,
+        completedTasks: completed.length,
       });
     } catch (error) {
-      console.error('Error loading data:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load data');
+      console.error('LOAD TASKS: Error loading tasks:', error);
+      setError('Failed to load tasks. Please try again.');
     } finally {
       setIsLoading(false);
     }
-  }, [getGoals, getTasks]);
+  }, [getTasksFromDB]); // Add getTasksFromDB as a dependency
 
-  // Add a debug function and mark it as intentionally unused
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const debugTasksDirectly = async () => {
-    try {
-      console.log('=== DEBUG: Directly checking tasks in Supabase ===');
-      const { data: userData } = await supabase.auth.getUser();
-      console.log('Current user:', userData?.user?.id);
+  useEffect(() => {
+    // Load tasks initially
+    loadTasks();
 
-      // Direct query to database
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', userData?.user?.id);
+    // Add visibility change listener
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadTasks();
+      }
+    };
 
-      console.log('Tasks directly from Supabase:', {
-        success: !error,
-        count: data?.length || 0,
-        tasks: data,
-      });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-      // Also reload data to see if the UI updates
-      await loadData();
-    } catch (error) {
-      console.error('Debug error:', error);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loadTasks]); // Change: Add loadTasks to the dependency array
+
+  // Get filtered tasks based on the selected filter
+  const getFilteredTasks = () => {
+    switch (filter) {
+      case 'active':
+        return activeTasks;
+      case 'completed':
+        return completedTasks;
+      case 'all':
+      default:
+        return [...activeTasks, ...completedTasks];
     }
   };
 
-  // Initial data load effect - properly using loadData as a dependency
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const filteredTasks = getFilteredTasks();
 
-  // Helper function for date formatting
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  // Return JSX
+  // Option 1: Simply remove the unused activityFilter state
   return (
-    <div className={styles.goalsPage}>
-      <div className={styles.goalsHeader}>
+    <div className={styles.tasksPage}>
+      <div className={styles.tasksHeader}>
         <div>
-          <h1>Focus Goals & Tasks</h1>
-          <p>Set objectives and track your progress</p>
+          <h1>Tasks</h1>
+          <p>Track and manage your specific action items</p>
         </div>
-        <div className={styles.tabsContainer}>
-          <button
-            className={`${styles.tabButton} ${
-              activeTab === 'goals' ? styles.activeTab : ''
-            }`}
-            onClick={() => setActiveTab('goals')}
-          >
-            Goals
-          </button>
-          <button
-            className={`${styles.tabButton} ${
-              activeTab === 'tasks' ? styles.activeTab : ''
-            }`}
-            onClick={() => setActiveTab('tasks')}
-          >
-            Tasks
-          </button>
-          <button
-            className={`${styles.tabButton} ${
-              activeTab === 'completed' ? styles.activeTab : ''
-            }`}
-            onClick={() => setActiveTab('completed')}
-          >
-            Completed
-          </button>
-        </div>
-        {activeTab === 'goals' && (
-          <button
-            className={styles.createButton}
-            onClick={() => setShowForm(true)}
-          >
-            Create New Goal
-          </button>
-        )}
       </div>
 
+      <div className={styles.taskFilters}>
+        <button
+          className={`${styles.filterButton} ${
+            filter === 'all' ? styles.active : ''
+          }`}
+          onClick={() => setFilter('all')}
+        >
+          All
+        </button>
+        <button
+          className={`${styles.filterButton} ${
+            filter === 'active' ? styles.active : ''
+          }`}
+          onClick={() => setFilter('active')}
+        >
+          Active
+        </button>
+        <button
+          className={`${styles.filterButton} ${
+            filter === 'completed' ? styles.active : ''
+          }`}
+          onClick={() => setFilter('completed')}
+        >
+          Completed
+        </button>
+      </div>
+
+      {/* Debug button moved here for better visibility */}
+      <button
+        onClick={debugTasks}
+        style={{
+          margin: '1rem 0',
+          padding: '0.5rem 1rem',
+          backgroundColor: '#333',
+          color: 'white',
+          border: 'none',
+          borderRadius: '0.25rem',
+        }}
+      >
+        Debug Tasks
+      </button>
+
+      <TaskForm onAdd={loadTasks} onAddImmediate={handleAddImmediate} />
+
       {isLoading ? (
-        <div className={styles.loadingState}>
-          <p>Loading goals...</p>
-        </div>
+        <div className={styles.loadingState}>Loading tasks...</div>
       ) : error ? (
         <div className={styles.errorState}>
           <p>{error}</p>
-          <button onClick={loadData} className={styles.retryButton}>
+          <button onClick={loadTasks} className={styles.retryButton}>
             Retry
           </button>
         </div>
       ) : (
-        <>
-          {availableActivities.length > 0 && (
-            <div className={styles.filterBar}>
-              <div className={styles.activityFilters}>
-                <span className={styles.filterLabel}>Filter by Activity:</span>
-                <div className={styles.activityButtons}>
-                  <button
-                    className={`${styles.activityButton} ${
-                      activityFilter === 'all' ? styles.active : ''
-                    }`}
-                    onClick={() => setActivityFilter('all')}
-                  >
-                    All Activities
-                  </button>
-                  {availableActivities.map((activity) => (
-                    <button
-                      key={activity}
-                      className={`${styles.activityButton} ${
-                        activityFilter === activity ? styles.active : ''
-                      }`}
-                      onClick={() => setActivityFilter(activity)}
-                    >
-                      {activity}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'goals' ? (
-            <>
-              {showForm ? (
-                <GoalForm
-                  onSave={() => {
-                    loadData();
-                    setShowForm(false);
-                  }}
-                  onCancel={() => setShowForm(false)}
-                  activity={
-                    activityFilter !== 'all' ? activityFilter : undefined
-                  }
-                />
-              ) : (
-                <>
-                  {filteredGoals.length > 0 ? (
-                    <div className={styles.goalsList}>
-                      {filteredGoals.map((goal) => (
-                        <GoalCard
-                          key={goal.id}
-                          goal={goal}
-                          onDelete={loadData}
-                          onEdit={loadData}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className={styles.emptyState}>
-                      <h3>
-                        No active goals{' '}
-                        {activityFilter !== 'all'
-                          ? `for ${activityFilter}`
-                          : ''}
-                      </h3>
-                      <p>
-                        Create your first productivity goal to track your
-                        progress
-                      </p>
-                      <button
-                        className={styles.createButton}
-                        onClick={() => setShowForm(true)}
-                      >
-                        Create Your First Goal
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-            </>
-          ) : activeTab === 'tasks' ? (
-            <div className={styles.tasksSection}>
-              <TaskForm
-                onAdd={loadData}
-                activity={activityFilter !== 'all' ? activityFilter : undefined}
+        <div className={styles.tasksList}>
+          {filteredTasks.length > 0 ? (
+            filteredTasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                onToggleComplete={handleTaskToggle}
+                onEdit={handleTaskEdit}
+                onDelete={handleTaskDelete}
+                showActions={true}
+                isCompact={false}
               />
-
-              <div className={tasksStyles.tasksList}>
-                {filteredActiveTasks.length > 0 ? (
-                  filteredActiveTasks.map((task) => (
-                    <TaskItem key={task.id} task={task} onUpdate={loadData} />
-                  ))
-                ) : (
-                  <div className={tasksStyles.noTasks}>
-                    {activityFilter === 'all'
-                      ? 'No active tasks. Add some tasks above to get started!'
-                      : `No active tasks for ${activityFilter}. Add one above!`}
-                  </div>
-                )}
-              </div>
-            </div>
+            ))
           ) : (
-            <div className={styles.completedSection}>
-              <div className={styles.completedGoals}>
-                <h3 className={styles.sectionTitle}>Completed Goals</h3>
-                {filteredCompletedGoals.length > 0 ? (
-                  <div className={styles.goalsList}>
-                    {filteredCompletedGoals.map((goal) => (
-                      <GoalCard
-                        key={goal.id}
-                        goal={goal}
-                        onDelete={loadData}
-                        onEdit={loadData}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className={styles.noItems}>
-                    {activityFilter === 'all'
-                      ? 'No completed goals yet. Keep working toward your objectives!'
-                      : `No completed goals for ${activityFilter} yet.`}
-                  </div>
-                )}
-              </div>
-
-              <div className={styles.completedTasks}>
-                <h3 className={styles.sectionTitle}>Completed Tasks</h3>
-                <div className={tasksStyles.tasksList}>
-                  {filteredCompletedTasks.length > 0 ? (
-                    filteredCompletedTasks.map((task) => (
-                      <div key={task.id} className={styles.completedTaskItem}>
-                        <TaskItem task={task} onUpdate={loadData} />
-                        <div className={styles.completionDate}>
-                          Completed:{' '}
-                          {formatDate(task.completedAt || task.createdAt)}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className={styles.noItems}>
-                      {activityFilter === 'all'
-                        ? 'No completed tasks yet.'
-                        : `No completed tasks for ${activityFilter} yet.`}
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div className={styles.noTasks}>
+              {filter === 'all'
+                ? 'No tasks yet. Add some tasks to get started!'
+                : filter === 'active'
+                ? 'No active tasks. All done!'
+                : 'No completed tasks yet.'}
             </div>
           )}
-
-          <div className={styles.timerLink}>
-            <Link href="/timer" className={styles.secondaryButton}>
-              Back to Timer
-            </Link>
-          </div>
-        </>
+        </div>
       )}
+
+      <div className={styles.linkBack}>
+        <Link href="/goals" className={styles.secondaryButton}>
+          Back to Goals
+        </Link>
+      </div>
     </div>
   );
 }
