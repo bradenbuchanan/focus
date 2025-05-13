@@ -1,23 +1,46 @@
 // src/app/components/dashboard/DashboardHeatmap.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styles from './dashboardHeatmap.module.css';
 import {
   ActivityData,
   useMultiActivityData,
 } from '@/hooks/useActivityCalendarData';
 import { CalendarGrid } from '../analytics/CalendarGrid';
+import {
+  listenForDataUpdates,
+  listenForSessionCompleted,
+} from '@/utils/events';
 
 export default function DashboardHeatmap() {
-  // Use the correct hook from your codebase
-  const { activityDataSets, isLoading } = useMultiActivityData();
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { activityDataSets, isLoading, refreshData } =
+    useMultiActivityData(refreshKey);
 
   const [selectedActivity, setSelectedActivity] =
     useState<string>('All Activities');
   const [currentActivityData, setCurrentActivityData] =
     useState<ActivityData | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+
+  // Set up event listeners for refresh
+  useEffect(() => {
+    const unsubscribeData = listenForDataUpdates(() => {
+      console.log('Dashboard: Data update event received');
+      setRefreshKey((prev) => prev + 1);
+    });
+
+    const unsubscribeSession = listenForSessionCompleted(() => {
+      console.log('Dashboard: Session completed event received');
+      setRefreshKey((prev) => prev + 1);
+    });
+
+    return () => {
+      unsubscribeData();
+      unsubscribeSession();
+    };
+  }, []);
 
   // Update current activity data when selection changes
   useEffect(() => {
@@ -45,6 +68,12 @@ export default function DashboardHeatmap() {
     }
   }, [activityDataSets, isLoading]);
 
+  // Add manual refresh button
+  const handleRefresh = useCallback(async () => {
+    await refreshData();
+    setRefreshKey((prev) => prev + 1);
+  }, [refreshData]);
+
   if (isLoading) {
     return (
       <div className={styles.heatmapCard}>
@@ -70,6 +99,13 @@ export default function DashboardHeatmap() {
               </option>
             ))}
           </select>
+          <button
+            className={styles.refreshButton}
+            onClick={handleRefresh}
+            title="Refresh data"
+          >
+            ↻ Refresh
+          </button>
           <span className={styles.lastUpdated}>
             Last updated: {lastUpdated.toLocaleTimeString()}
           </span>
