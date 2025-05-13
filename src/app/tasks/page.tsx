@@ -4,14 +4,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Task } from '@/lib/timer';
-import TaskItem from '@/app/components/goals/TaskItem';
+import { TaskItem } from '@/app/components/ui/TaskItem'; // Updated import
 import TaskForm from '@/app/components/goals/TaskForm';
 import styles from './tasks.module.css';
 import { useData } from '@/providers/DataProvider';
 import { supabase } from '@/lib/supabase';
 
 export default function TasksPage() {
-  const { getTasks: getTasksFromDB } = useData();
+  const { getTasks: getTasksFromDB, updateTask } = useData();
   const [activeTasks, setActiveTasks] = useState<Task[]>([]);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
@@ -21,6 +21,39 @@ export default function TasksPage() {
   const handleAddImmediate = (newTask: Task) => {
     console.log('Adding task immediately to UI:', newTask);
     setActiveTasks((prevTasks) => [newTask, ...prevTasks]);
+  };
+
+  // Updated handler to work with unified TaskItem
+  const handleTaskToggle = async (taskId: string) => {
+    try {
+      // Find the task
+      const allTasks = [...activeTasks, ...completedTasks];
+      const task = allTasks.find((t) => t.id === taskId);
+
+      if (task) {
+        await updateTask({
+          id: taskId,
+          completed: !task.completed,
+          completedAt: !task.completed ? new Date().toISOString() : undefined,
+        });
+
+        // Reload the tasks
+        await loadTasks();
+      }
+    } catch (error) {
+      console.error('Error toggling task:', error);
+    }
+  };
+
+  const handleTaskEdit = async (task: Task) => {
+    // Implement edit functionality if needed
+    console.log('Edit task:', task);
+  };
+
+  const handleTaskDelete = async (taskId: string) => {
+    // Implement delete functionality if needed
+    console.log('Delete task:', taskId);
+    await loadTasks();
   };
 
   const debugTasks = async () => {
@@ -242,7 +275,15 @@ export default function TasksPage() {
         <div className={styles.tasksList}>
           {filteredTasks.length > 0 ? (
             filteredTasks.map((task) => (
-              <TaskItem key={task.id} task={task} onUpdate={loadTasks} />
+              <TaskItem
+                key={task.id}
+                task={task}
+                onToggleComplete={handleTaskToggle}
+                onEdit={handleTaskEdit}
+                onDelete={handleTaskDelete}
+                showActions={true}
+                isCompact={false}
+              />
             ))
           ) : (
             <div className={styles.noTasks}>
