@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { TimerState, TimerSettings, TimerData, defaultSettings } from '@/lib/timer';
 import { useData } from '@/providers/DataProvider';
-import { emitDataUpdate } from '@/utils/events';
+import { emitDataUpdate, emitSessionCompleted } from '@/utils/events';
+
 
 export interface TimerHookResult {
   // Timer state
@@ -259,8 +260,13 @@ export function useTimer(selectedActivity: string): TimerHookResult {
         activity,
       });
       
-      // Emit update event after successful save
+      // Emit both events
       emitDataUpdate();
+      emitSessionCompleted({
+        type: sessionType,
+        activity,
+        duration: sessionDuration
+      });
       
       if (customDuration === undefined) {
         sessionStartTimeRef.current = null;
