@@ -1,0 +1,25 @@
+/* src/components/ui/ProgressBar.module.css */
+.progressContainer {
+    width: 100%;
+  }
+  
+  .progressLabel {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  
+  .progressBar {
+    background-color: var(--gray-alpha-200);
+    border-radius: 0.25rem;
+    overflow: hidden;
+    width: 100%;
+  }
+  
+  .progressFill {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 0.25rem;
+  }
