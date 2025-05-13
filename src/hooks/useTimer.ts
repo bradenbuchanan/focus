@@ -4,7 +4,6 @@ import { TimerState, TimerSettings, TimerData, defaultSettings } from '@/lib/tim
 import { useData } from '@/providers/DataProvider';
 import { emitDataUpdate, emitSessionCompleted } from '@/utils/events';
 
-
 export interface TimerHookResult {
   // Timer state
   timerData: TimerData;
@@ -25,6 +24,15 @@ export interface TimerHookResult {
   showAccomplishmentPrompt: boolean;
   saveAccomplishment: (text: string, sessionId?: string, category?: string) => Promise<boolean>;
   skipAccomplishment: () => boolean;
+}
+
+// Define the type for stored state
+interface StoredTimerState {
+  state: TimerState;
+  currentSession: number;
+  totalSessions: number;
+  activity: string;
+  sessionStartTime: number | null;
 }
 
 export function useTimer(selectedActivity: string): TimerHookResult {
@@ -53,107 +61,6 @@ export function useTimer(selectedActivity: string): TimerHookResult {
     return session % interval === 0;
   }, []);
   
-  // Start the timer
-  const startTimer = useCallback(() => {
-    if (timerData.state !== TimerState.RUNNING) {
-      if (!sessionStartTimeRef.current) {
-        sessionStartTimeRef.current = Date.now();
-      }
-      
-      setTimerData(prev => ({ ...prev, state: TimerState.RUNNING }));
-      
-      // Start the interval
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      
-      intervalRef.current = setInterval(() => {
-        setTimerData(prev => {
-          // Handle timer completion
-          if (prev.timeRemaining <= 1) {
-            clearInterval(intervalRef.current!);
-            intervalRef.current = null;
-            handleTimerCompletion();
-            return prev;
-          }
-          
-          // Otherwise just decrement
-          return { 
-            ...prev, 
-            timeRemaining: prev.timeRemaining - 1 
-          };
-        });
-      }, 1000);
-      
-      // Store timer state for background handling
-      storeTimerState();
-    }
-  }, [timerData.state]);
-  
-  // Pause the timer
-  const pauseTimer = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    
-    setTimerData(prev => ({ ...prev, state: TimerState.PAUSED }));
-    clearStoredTimer();
-  }, []);
-  
-  // Reset the timer
-  const resetTimer = useCallback(async () => {
-    // Clear interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    
-    // Record incomplete session if one is in progress
-    if (sessionStartTimeRef.current && 
-        (timerData.state === TimerState.RUNNING || timerData.state === TimerState.BREAK)) {
-      const sessionType = timerData.state === TimerState.BREAK ? 'break' : 'focus';
-      await recordSession(sessionType, selectedActivity, false);
-    }
-    
-    // Reset timer state
-    setTimerData(prev => ({
-      ...prev,
-      state: TimerState.IDLE,
-      timeRemaining: prev.settings.focusDuration * 60,
-      currentSession: 1,
-    }));
-    
-    setShowAccomplishmentPrompt(false);
-    clearStoredTimer();
-  }, [timerData.state, selectedActivity]);
-  
-  // Update timer settings
-  const updateSettings = useCallback((newSettings: TimerSettings) => {
-    setTimerData(prev => {
-      // Only update if settings have changed
-      if (JSON.stringify(prev.settings) === JSON.stringify(newSettings)) {
-        return prev;
-      }
-      
-      // Calculate correct time based on current state
-      let timeRemaining = prev.timeRemaining;
-      if (prev.state === TimerState.IDLE) {
-        timeRemaining = newSettings.focusDuration * 60;
-      } else if (prev.state === TimerState.BREAK) {
-        timeRemaining = (isLongBreak(prev.currentSession, newSettings.longBreakInterval)
-          ? newSettings.longBreakDuration 
-          : newSettings.breakDuration) * 60;
-      }
-      
-      return {
-        ...prev,
-        settings: newSettings,
-        timeRemaining,
-      };
-    });
-  }, [isLongBreak]);
-  
   // ======= BACKGROUND HANDLING =======
   // Store the timer state in localStorage
   const storeTimerState = useCallback(() => {
@@ -178,47 +85,6 @@ export function useTimer(selectedActivity: string): TimerHookResult {
     localStorage.removeItem('focus_timer_end_time');
     localStorage.removeItem('focus_timer_state');
   }, []);
-  
-  // Restore timer when tab becomes visible
-  const restoreTimerState = useCallback(() => {
-    const endTimeStr = localStorage.getItem('focus_timer_end_time');
-    const stateStr = localStorage.getItem('focus_timer_state');
-    
-    if (!endTimeStr || !stateStr) {
-      return;
-    }
-    
-    try {
-      const endTime = parseInt(endTimeStr, 10);
-      const storedState = JSON.parse(stateStr);
-      
-      // Calculate remaining time
-      const now = Date.now();
-      const timeRemaining = Math.max(0, Math.floor((endTime - now) / 1000));
-      
-      if (timeRemaining <= 0) {
-        // Timer completed while in background
-        handleTimerCompletion(storedState);
-        return;
-      }
-      
-      // Restore timer state
-      setTimerData(prev => ({
-        ...prev,
-        state: storedState.state,
-        timeRemaining,
-        currentSession: storedState.currentSession,
-        totalSessions: storedState.totalSessions,
-      }));
-      
-      sessionStartTimeRef.current = storedState.sessionStartTime;
-      
-      // Restart the timer
-      startTimer();
-    } catch (error) {
-      console.error('Error restoring timer state:', error);
-    }
-  }, [startTimer]);
   
   // ======= SESSION MANAGEMENT =======
   // Record a completed session
@@ -279,21 +145,12 @@ export function useTimer(selectedActivity: string): TimerHookResult {
     }
   }, [saveSession]);
   
-  // Record a free session
-  const recordFreeSession = useCallback(async (
-    duration: number,
-    activity: string
-  ): Promise<string> => {
-    const sessionId = await recordSession('focus', activity, true, duration);
-    setCurrentSessionId(sessionId);
-    setShowAccomplishmentPrompt(true);
-    return sessionId;
-  }, [recordSession]);
-  
   // Handle timer completion
-  const handleTimerCompletion = useCallback(async (storedState?: any) => {
+  const handleTimerCompletion = useCallback(async (storedState?: StoredTimerState) => {
     const state = storedState || {
       state: timerData.state,
+      currentSession: timerData.currentSession,
+      totalSessions: timerData.totalSessions,
       activity: selectedActivity,
       sessionStartTime: sessionStartTimeRef.current
     };
@@ -350,6 +207,159 @@ export function useTimer(selectedActivity: string): TimerHookResult {
       }
     });
   }, [timerData, selectedActivity, recordSession, clearStoredTimer, isLongBreak]);
+  
+  // Start the timer (moved after handleTimerCompletion)
+  const startTimer = useCallback(() => {
+    if (timerData.state !== TimerState.RUNNING) {
+      if (!sessionStartTimeRef.current) {
+        sessionStartTimeRef.current = Date.now();
+      }
+      
+      setTimerData(prev => ({ ...prev, state: TimerState.RUNNING }));
+      
+      // Start the interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      intervalRef.current = setInterval(() => {
+        setTimerData(prev => {
+          // Handle timer completion
+          if (prev.timeRemaining <= 1) {
+            clearInterval(intervalRef.current!);
+            intervalRef.current = null;
+            handleTimerCompletion();
+            return prev;
+          }
+          
+          // Otherwise just decrement
+          return { 
+            ...prev, 
+            timeRemaining: prev.timeRemaining - 1 
+          };
+        });
+      }, 1000);
+      
+      // Store timer state for background handling
+      storeTimerState();
+    }
+  }, [timerData.state, handleTimerCompletion, storeTimerState]);
+  
+  // Pause the timer
+  const pauseTimer = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    
+    setTimerData(prev => ({ ...prev, state: TimerState.PAUSED }));
+    clearStoredTimer();
+  }, [clearStoredTimer]);
+  
+  // Reset the timer
+  const resetTimer = useCallback(async () => {
+    // Clear interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    
+    // Record incomplete session if one is in progress
+    if (sessionStartTimeRef.current && 
+        (timerData.state === TimerState.RUNNING || timerData.state === TimerState.BREAK)) {
+      const sessionType = timerData.state === TimerState.BREAK ? 'break' : 'focus';
+      await recordSession(sessionType, selectedActivity, false);
+    }
+    
+    // Reset timer state
+    setTimerData(prev => ({
+      ...prev,
+      state: TimerState.IDLE,
+      timeRemaining: prev.settings.focusDuration * 60,
+      currentSession: 1,
+    }));
+    
+    setShowAccomplishmentPrompt(false);
+    clearStoredTimer();
+  }, [timerData.state, selectedActivity, recordSession, clearStoredTimer]);
+  
+  // Update timer settings
+  const updateSettings = useCallback((newSettings: TimerSettings) => {
+    setTimerData(prev => {
+      // Only update if settings have changed
+      if (JSON.stringify(prev.settings) === JSON.stringify(newSettings)) {
+        return prev;
+      }
+      
+      // Calculate correct time based on current state
+      let timeRemaining = prev.timeRemaining;
+      if (prev.state === TimerState.IDLE) {
+        timeRemaining = newSettings.focusDuration * 60;
+      } else if (prev.state === TimerState.BREAK) {
+        timeRemaining = (isLongBreak(prev.currentSession, newSettings.longBreakInterval)
+          ? newSettings.longBreakDuration 
+          : newSettings.breakDuration) * 60;
+      }
+      
+      return {
+        ...prev,
+        settings: newSettings,
+        timeRemaining,
+      };
+    });
+  }, [isLongBreak]);
+  
+  // Restore timer when tab becomes visible
+  const restoreTimerState = useCallback(() => {
+    const endTimeStr = localStorage.getItem('focus_timer_end_time');
+    const stateStr = localStorage.getItem('focus_timer_state');
+    
+    if (!endTimeStr || !stateStr) {
+      return;
+    }
+    
+    try {
+      const endTime = parseInt(endTimeStr, 10);
+      const storedState = JSON.parse(stateStr) as StoredTimerState;
+      
+      // Calculate remaining time
+      const now = Date.now();
+      const timeRemaining = Math.max(0, Math.floor((endTime - now) / 1000));
+      
+      if (timeRemaining <= 0) {
+        // Timer completed while in background
+        handleTimerCompletion(storedState);
+        return;
+      }
+      
+      // Restore timer state
+      setTimerData(prev => ({
+        ...prev,
+        state: storedState.state,
+        timeRemaining,
+        currentSession: storedState.currentSession,
+        totalSessions: storedState.totalSessions,
+      }));
+      
+      sessionStartTimeRef.current = storedState.sessionStartTime;
+      
+      // Restart the timer
+      startTimer();
+    } catch (error) {
+      console.error('Error restoring timer state:', error);
+    }
+  }, [startTimer, handleTimerCompletion]);
+  
+  // Record a free session
+  const recordFreeSession = useCallback(async (
+    duration: number,
+    activity: string
+  ): Promise<string> => {
+    const sessionId = await recordSession('focus', activity, true, duration);
+    setCurrentSessionId(sessionId);
+    setShowAccomplishmentPrompt(true);
+    return sessionId;
+  }, [recordSession]);
   
   // ======= ACCOMPLISHMENT MANAGEMENT =======
   // Save accomplishment
