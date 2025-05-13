@@ -8,7 +8,7 @@ import {
   isFocusSession,
   getSessionActivity
 } from '@/utils/dataConversion';
-import { listenForDataUpdates } from '@/utils/events';
+import { listenForDataUpdates, listenForSessionCompleted } from '@/utils/events';
 
 export type CalendarDay = {
   date: string;
@@ -30,6 +30,7 @@ export function useMultiActivityData(refreshKey?: number) {
   const [activityDataSets, setActivityDataSets] = useState<ActivityData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { getSessions } = useData();
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -49,15 +50,25 @@ export function useMultiActivityData(refreshKey?: number) {
       
       // Process sessions
       focusSessions.forEach((session) => {
-        // Get the activity from the session
         const activity = getSessionActivity(session);
         
         if (!activityMap.has(activity)) {
           activityMap.set(activity, new Map());
         }
         
-        // Get the date in local timezone
-        const dateStr = getSessionDateString(session);
+        // Get the date in local timezone - fix the date extraction
+        let dateStr: string;
+        
+        // Check if it's a Supabase session
+        if ('start_time' in session) {
+          // Convert UTC to local date string
+          const date = new Date(session.start_time);
+          dateStr = getLocalDateString(date);
+        } else {
+          // It's a local session
+          dateStr = getSessionDateString(session);
+        }
+        
         const minutes = getSessionMinutes(session);
         
         // Update "All Activities"
@@ -136,12 +147,33 @@ export function useMultiActivityData(refreshKey?: number) {
     fetchData();
   }, [fetchData]);
 
-  // Listen for refresh key changes
+  // Listen for data updates
   useEffect(() => {
-    if (refreshKey && refreshKey > 0) {
+    const unsubscribeData = listenForDataUpdates(() => {
+      console.log('Data update event received, refreshing activity data...');
       fetchData();
-    }
-  }, [fetchData, refreshKey]);
+    });
+    
+    const unsubscribeSession = listenForSessionCompleted(() => {
+      console.log('Session completed event received, refreshing activity data...');
+      fetchData();
+    });
+    
+    // Also listen for visibility changes
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchData();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      unsubscribeData();
+      unsubscribeSession();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchData]);
 
   const refreshData = useCallback(async () => {
     await fetchData();
