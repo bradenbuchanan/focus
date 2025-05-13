@@ -69,7 +69,7 @@ export function TaskList({
     setTasks(filteredTasks);
   }, [goalId, filter, activityFilter]);
 
-  const handleTaskToggle = async (taskId: string) => {
+  const handleTaskToggle = async (_taskId: string) => {
     // Update task completion
     // This would call your updateTask function
     if (onTaskUpdate) {
@@ -77,14 +77,14 @@ export function TaskList({
     }
   };
 
-  const handleTaskEdit = async (task: Task) => {
+  const handleTaskEdit = async (_task: Task) => {
     // Handle task editing
     if (onTaskUpdate) {
       onTaskUpdate();
     }
   };
 
-  const handleTaskDelete = async (taskId: string) => {
+  const handleTaskDelete = async (_taskId: string) => {
     // Handle task deletion
     if (onTaskUpdate) {
       onTaskUpdate();
