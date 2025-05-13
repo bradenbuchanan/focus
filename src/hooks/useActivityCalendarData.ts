@@ -1,12 +1,14 @@
 // src/hooks/useActivityCalendarData.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getLocalDateString } from '@/lib/timer';
 import { useData } from '../providers/DataProvider';
 import { 
   getSessionDateString, 
   getSessionMinutes, 
-  isFocusSession 
+  isFocusSession,
+  getSessionActivity
 } from '@/utils/dataConversion';
+import { listenForDataUpdates } from '@/utils/events';
 
 export type CalendarDay = {
   date: string;
@@ -24,129 +26,134 @@ export type ActivityData = {
   };
 };
 
-export function useMultiActivityData() {
+export function useMultiActivityData(refreshKey?: number) {
   const [activityDataSets, setActivityDataSets] = useState<ActivityData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { getSessions } = useData();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        // Get sessions from Supabase
-        const sessions = await getSessions();
-        
-        // Filter for focus sessions using the shared utility
-        const focusSessions = sessions.filter(isFocusSession);
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      console.log('Fetching activity data...');
+      const sessions = await getSessions();
+      
+      // Filter for focus sessions using the shared utility
+      const focusSessions = sessions.filter(isFocusSession);
+      console.log(`Found ${focusSessions.length} focus sessions`);
 
-        // Extract unique activities
-        const activityMap: Map<string, number[]> = new Map();
+      // Create a map to store activity data
+      const activityMap: Map<string, Map<string, number>> = new Map();
+      
+      // Initialize with "All Activities"
+      activityMap.set("All Activities", new Map());
+      
+      // Process sessions
+      focusSessions.forEach((session) => {
+        // Get the activity from the session
+        const activity = getSessionActivity(session);
         
-        // Add "All Activities" as a category
-        activityMap.set("All Activities", []);
+        if (!activityMap.has(activity)) {
+          activityMap.set(activity, new Map());
+        }
         
-        // Collect activities
-        focusSessions.forEach((session) => {
-          const activity = session.activity || 'Other';
-          if (!activityMap.has(activity)) {
-            activityMap.set(activity, []);
+        // Get the date in local timezone
+        const dateStr = getSessionDateString(session);
+        const minutes = getSessionMinutes(session);
+        
+        // Update "All Activities"
+        const allActivitiesMap = activityMap.get("All Activities")!;
+        allActivitiesMap.set(dateStr, (allActivitiesMap.get(dateStr) || 0) + minutes);
+        
+        // Update specific activity
+        const specificActivityMap = activityMap.get(activity)!;
+        specificActivityMap.set(dateStr, (specificActivityMap.get(dateStr) || 0) + minutes);
+      });
+
+      // Generate date range for the last year
+      const today = new Date();
+      const oneYearAgo = new Date();
+      oneYearAgo.setDate(today.getDate() - 365);
+
+      const allDates: string[] = [];
+      for (let d = new Date(oneYearAgo); d <= today; d.setDate(d.getDate() + 1)) {
+        allDates.push(getLocalDateString(d));
+      }
+
+      // Convert maps to activity data
+      const activityResults: ActivityData[] = [];
+      
+      activityMap.forEach((dateMap, activityName) => {
+        const dataArray: CalendarDay[] = [];
+        let max = 0;
+
+        allDates.forEach(date => {
+          const count = dateMap.get(date) || 0;
+          if (count > max) max = count;
+          dataArray.push({ date, count, intensity: 0 });
+        });
+
+        // Calculate intensity levels
+        dataArray.forEach((day) => {
+          if (day.count === 0) {
+            day.intensity = 0;
+          } else if (day.count <= max * 0.25) {
+            day.intensity = 1;
+          } else if (day.count <= max * 0.5) {
+            day.intensity = 2;
+          } else if (day.count <= max * 0.75) {
+            day.intensity = 3;
+          } else {
+            day.intensity = 4;
           }
         });
 
-        // Create a date map for the last year (365 days)
-        const today = new Date();
-        const oneYearAgo = new Date();
-        oneYearAgo.setDate(today.getDate() - 365);
-
-        // Generate all dates for the past year
-        const allDates: string[] = [];
-        for (let d = new Date(oneYearAgo); d <= today; d.setDate(d.getDate() + 1)) {
-          allDates.push(getLocalDateString(d));
-        }
-
-        // Process each activity
-        const activityResults: ActivityData[] = [];
-
-        for (const [activityName] of activityMap) {
-          const dateMap = new Map<string, number>();
-          
-          // Initialize all dates with 0
-          allDates.forEach(date => {
-            dateMap.set(date, 0);
-          });
-          
-          // Populate with actual data
-          const relevantSessions = activityName === "All Activities" 
-            ? focusSessions 
-            : focusSessions.filter(s => (s.activity || 'Other') === activityName);
-          
-          relevantSessions.forEach((session) => {
-            // Use shared helper to get date string
-            const dateStr = getSessionDateString(session);
-            
-            if (dateMap.has(dateStr)) {
-              // Use shared helper to get minutes
-              const minutes = getSessionMinutes(session);
-              dateMap.set(dateStr, (dateMap.get(dateStr) || 0) + minutes);
-            }
-          });
-
-          // Convert to array for rendering
-          const dataArray: CalendarDay[] = [];
-          let max = 0;
-
-          dateMap.forEach((count, date) => {
-            if (count > max) max = count;
-            dataArray.push({ date, count, intensity: 0 });
-          });
-
-          // Calculate intensity levels
-          dataArray.forEach((day) => {
-            if (day.count === 0) {
-              day.intensity = 0;
-            } else if (day.count <= max * 0.25) {
-              day.intensity = 1;
-            } else if (day.count <= max * 0.5) {
-              day.intensity = 2;
-            } else if (day.count <= max * 0.75) {
-              day.intensity = 3;
-            } else {
-              day.intensity = 4;
-            }
-          });
-
-          activityResults.push({
-            name: activityName,
-            data: dataArray,
-            maxCount: max,
-            colorScheme: getColorSchemeForActivity(activityName)
-          });
-        }
-
-        // Sort results - All Activities first, then alphabetically
-        activityResults.sort((a, b) => {
-          if (a.name === "All Activities") return -1;
-          if (b.name === "All Activities") return 1;
-          return a.name.localeCompare(b.name);
+        activityResults.push({
+          name: activityName,
+          data: dataArray,
+          maxCount: max,
+          colorScheme: getColorSchemeForActivity(activityName)
         });
+      });
 
-        setActivityDataSets(activityResults);
-      } catch (error) {
-        console.error('Error fetching activity data:', error);
-      } finally {
-        setIsLoading(false);
-      }
+      // Sort results
+      activityResults.sort((a, b) => {
+        if (a.name === "All Activities") return -1;
+        if (b.name === "All Activities") return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      console.log(`Generated ${activityResults.length} activity datasets`);
+      setActivityDataSets(activityResults);
+    } catch (error) {
+      console.error('Error fetching activity data:', error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    fetchData();
   }, [getSessions]);
 
-  return { activityDataSets, isLoading };
+  // Initial fetch
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Listen for refresh key changes
+  useEffect(() => {
+    if (refreshKey && refreshKey > 0) {
+      fetchData();
+    }
+  }, [fetchData, refreshKey]);
+
+  const refreshData = useCallback(async () => {
+    await fetchData();
+  }, [fetchData]);
+
+  return { activityDataSets, isLoading, refreshData };
 }
 
-export function getCellColor(intensity: number) {
+export function getCellColor(intensity: number): string {
   switch (intensity) {
     case 0:
-      return 'var(--gray-alpha-100)';
+      return 'rgba(200, 200, 200, 0.1)';
     case 1:
       return 'rgba(0, 136, 204, 0.25)';
     case 2:
@@ -156,14 +163,14 @@ export function getCellColor(intensity: number) {
     case 4:
       return 'rgba(0, 136, 204, 1)';
     default:
-      return 'var(--gray-alpha-100)';
+      return 'rgba(200, 200, 200, 0.1)';
   }
 }
 
-export function useActivityCalendarData(selectedActivity: string = 'all') {
+export function useActivityCalendarData(selectedActivity: string = 'all', refreshKey?: number) {
   const [calendarData, setCalendarData] = useState<CalendarDay[]>([]);
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
-  const { activityDataSets, isLoading } = useMultiActivityData();
+  const { activityDataSets, isLoading } = useMultiActivityData(refreshKey);
   
   useEffect(() => {
     if (!isLoading && activityDataSets.length > 0) {
@@ -211,7 +218,7 @@ const knownActivityColors: Record<KnownActivity, ColorScheme> = {
   "All Activities": {
     base: "rgb(54, 162, 235)", // Blue
     levels: [
-      'rgba(54, 162, 235, 0.05)', // Change this from var(--gray-alpha-100)
+      'rgba(54, 162, 235, 0.05)',
       'rgba(54, 162, 235, 0.25)',
       'rgba(54, 162, 235, 0.5)',
       'rgba(54, 162, 235, 0.75)',
@@ -315,11 +322,44 @@ export function getColorSchemeForActivity(activity: string): ColorScheme {
   return {
     base: baseColor,
     levels: [
-      `hsla(${h}, ${s}%, ${l}%, 0.05)`, // Change this from var(--gray-alpha-100)
+      `hsla(${h}, ${s}%, ${l}%, 0.05)`,
       `hsla(${h}, ${s}%, ${l}%, 0.25)`,
       `hsla(${h}, ${s}%, ${l}%, 0.5)`,
       `hsla(${h}, ${s}%, ${l}%, 0.75)`,
       `hsla(${h}, ${s}%, ${l}%, 1)`,
     ]
   };
+}
+
+// Listen for data update events
+
+export function useActivityDataWithEventListeners(selectedActivity: string = 'all') {
+  const [refreshKey, setRefreshKey] = useState(0);
+  const data = useActivityCalendarData(selectedActivity, refreshKey);
+
+  useEffect(() => {
+    const handleDataUpdate = () => {
+      console.log('Data update event received, refreshing activity data...');
+      setRefreshKey(prev => prev + 1);
+    };
+
+    // Import the event listener from utils
+    const unsubscribe = listenForDataUpdates(handleDataUpdate);
+    
+    // Also listen for visibility changes
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleDataUpdate();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  return data;
 }
