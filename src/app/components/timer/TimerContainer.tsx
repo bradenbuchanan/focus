@@ -6,7 +6,7 @@ import TimerSettings from './TimerSetting';
 import AccomplishmentRecorder from './AccomplishmentRecorder';
 import FreeTimer from './FreeTimer';
 import TimerGoalsTasksPanel from './TimerGoalsTasksPanel';
-import { useTimerLogic } from '@/hooks/timer/useTimerLogic';
+import { useTimer } from '@/hooks/useTimer'; // Replace with the unified hook
 import { defaultActivityCategories } from '@/lib/timer';
 import styles from './timer.module.css';
 import { formatTime, TimerState } from '@/lib/timer';
@@ -21,14 +21,7 @@ export default function TimerContainer() {
   const [currentSessionId, setCurrentSessionId] = useState('');
   const [timerMode, setTimerMode] = useState<'pomodoro' | 'free'>('pomodoro');
 
-  // Create a dummy function to store code that would normally use activeTab
-  function timerNavigation(tab: 'timer' | 'goals') {
-    // This function isn't actually called, but it exists to hold the code
-    // that would normally use activeTab, so we can retain it for future use
-    console.log(`Navigate to ${tab}`);
-    // No actual implementation needed
-  }
-
+  // Use the unified timer hook
   const {
     timerData,
     startTimer,
@@ -40,30 +33,25 @@ export default function TimerContainer() {
     skipAccomplishment,
     recordFreeSession,
     completeTask,
-  } = useTimerLogic(selectedActivity);
+  } = useTimer(selectedActivity);
 
   // Check if we should show the accomplishment recorder
   useEffect(() => {
     setShowAccomplishmentRecorder(showAccomplishmentPrompt);
   }, [showAccomplishmentPrompt]);
 
-  // Handle free session completion directly
+  // Handle free session completion
   const handleFreeSessionComplete = async (duration: number) => {
-    // Use await to resolve the Promise before setting state
     const sessionId = await recordFreeSession(duration, selectedActivity);
     setCurrentSessionId(sessionId);
-    // The showAccomplishmentRecorder will be set by the effect above
   };
 
-  // Handle saving an accomplishment with category support
+  // Handle saving an accomplishment
   const handleSaveAccomplishment = (text: string, category?: string) => {
     saveAccomplishment(text, currentSessionId, category);
     setShowAccomplishmentRecorder(false);
     setCurrentSessionId('');
     setTimerMode('pomodoro');
-    // Reference timerNavigation to show intent, but don't call it
-    // This prevents the "unused function" warning
-    if (false) timerNavigation('timer');
   };
 
   // Handle skipping the accomplishment
@@ -72,8 +60,6 @@ export default function TimerContainer() {
     setShowAccomplishmentRecorder(false);
     setCurrentSessionId('');
     setTimerMode('pomodoro');
-    // Reference timerNavigation to show intent, but don't call it
-    if (false) timerNavigation('timer');
   };
 
   return (
