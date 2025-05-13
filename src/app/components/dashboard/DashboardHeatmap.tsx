@@ -14,9 +14,8 @@ import {
 } from '@/utils/events';
 
 export default function DashboardHeatmap() {
-  const [refreshKey, setRefreshKey] = useState(0);
-  const { activityDataSets, isLoading, refreshData } =
-    useMultiActivityData(refreshKey);
+  // Remove the refreshKey parameter from useMultiActivityData
+  const { activityDataSets, isLoading, refreshData } = useMultiActivityData();
 
   const [selectedActivity, setSelectedActivity] =
     useState<string>('All Activities');
@@ -28,12 +27,12 @@ export default function DashboardHeatmap() {
   useEffect(() => {
     const unsubscribeData = listenForDataUpdates(() => {
       console.log('Dashboard: Data update event received');
-      setRefreshKey((prev) => prev + 1);
+      // The data will refresh automatically through the hook
     });
 
     const unsubscribeSession = listenForSessionCompleted(() => {
       console.log('Dashboard: Session completed event received');
-      setRefreshKey((prev) => prev + 1);
+      // The data will refresh automatically through the hook
     });
 
     return () => {
@@ -71,7 +70,6 @@ export default function DashboardHeatmap() {
   // Add manual refresh button
   const handleRefresh = useCallback(async () => {
     await refreshData();
-    setRefreshKey((prev) => prev + 1);
   }, [refreshData]);
 
   if (isLoading) {
