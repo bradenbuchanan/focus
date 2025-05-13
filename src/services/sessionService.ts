@@ -2,6 +2,8 @@
 import { supabase } from '@/lib/supabase';
 import {Database} from "../types/supabase"
 import { TimerSession } from '@/lib/timer';
+import { emitDataUpdate, emitSessionCompleted } from '@/utils/events';
+
 
 // Define proper types
 interface LocalSession {
@@ -17,6 +19,7 @@ interface LocalSession {
 type FocusSession = Database['public']['Tables']['focus_sessions']['Row'];
 
 // Main save session function
+// src/services/sessionService.ts
 export async function saveSession(session: {
   startTime: Date;
   endTime?: Date | null;
@@ -26,7 +29,6 @@ export async function saveSession(session: {
   activity?: string;
 }): Promise<string> {
   try {
-    // Get the current user
     const { data: userData, error: userError } = await supabase.auth.getUser();
     
     if (userError) throw userError;
@@ -44,7 +46,7 @@ export async function saveSession(session: {
         end_time: session.endTime?.toISOString() || null,
         duration: session.duration,
         category: session.type,  // 'focus' or 'break'
-        activity: session.activity || null,  // The actual activity (Reading, Writing, etc.)
+        activity: session.activity || null,
         completed: session.completed,
       })
       .select()
@@ -54,6 +56,9 @@ export async function saveSession(session: {
       console.error('Supabase insert error:', error);
       throw error;
     }
+    
+    // Emit update event after successful save
+    emitDataUpdate();
     
     return data.id;
   } catch (error) {
