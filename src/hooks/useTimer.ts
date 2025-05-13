@@ -1,7 +1,8 @@
 // src/hooks/useTimer.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TimerState, TimerSettings, TimerData, formatTime, defaultSettings } from '@/lib/timer';
+import { TimerState, TimerSettings, TimerData, defaultSettings } from '@/lib/timer';
 import { useData } from '@/providers/DataProvider';
+import { emitDataUpdate } from '@/utils/events';
 
 export interface TimerHookResult {
   // Timer state
@@ -53,7 +54,7 @@ export function useTimer(selectedActivity: string): TimerHookResult {
   
   // Start the timer
   const startTimer = useCallback(() => {
-    if (!isRunning) {
+    if (timerData.state !== TimerState.RUNNING) {
       if (!sessionStartTimeRef.current) {
         sessionStartTimeRef.current = Date.now();
       }
@@ -70,6 +71,7 @@ export function useTimer(selectedActivity: string): TimerHookResult {
           // Handle timer completion
           if (prev.timeRemaining <= 1) {
             clearInterval(intervalRef.current!);
+            intervalRef.current = null;
             handleTimerCompletion();
             return prev;
           }
@@ -85,7 +87,7 @@ export function useTimer(selectedActivity: string): TimerHookResult {
       // Store timer state for background handling
       storeTimerState();
     }
-  }, [timerData]);
+  }, [timerData.state]);
   
   // Pause the timer
   const pauseTimer = useCallback(() => {
@@ -229,23 +231,37 @@ export function useTimer(selectedActivity: string): TimerHookResult {
       return '';
     }
     
-    // Calculate duration
+    const sessionStartTime = sessionStartTimeRef.current || Date.now();
     const sessionDuration = customDuration !== undefined
       ? customDuration
-      : Math.floor((Date.now() - (sessionStartTimeRef.current || Date.now())) / 1000);
+      : Math.floor((Date.now() - sessionStartTime) / 1000);
     
     try {
-      // Save to Supabase via DataProvider
+      // Use the exact start time for the session
+      const startTime = new Date(sessionStartTime);
+      const endTime = new Date(sessionStartTime + (sessionDuration * 1000));
+      
+      console.log('Recording session:', {
+        type: sessionType,
+        activity,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        duration: sessionDuration,
+        completed
+      });
+      
       const sessionId = await saveSession({
-        startTime: new Date(sessionStartTimeRef.current || Date.now()),
-        endTime: new Date(),
+        startTime,
+        endTime,
         duration: sessionDuration,
         type: sessionType,
         completed,
         activity,
       });
       
-      // Reset session start time
+      // Emit update event after successful save
+      emitDataUpdate();
+      
       if (customDuration === undefined) {
         sessionStartTimeRef.current = null;
       }
@@ -253,10 +269,6 @@ export function useTimer(selectedActivity: string): TimerHookResult {
       return sessionId;
     } catch (error) {
       console.error('Failed to save session:', error);
-      
-      // Fallback to localStorage if needed
-      // This would be your local storage implementation
-      
       return '';
     }
   }, [saveSession]);
@@ -354,13 +366,14 @@ export function useTimer(selectedActivity: string): TimerHookResult {
         categories: category,
       });
       
+      // Emit update event
+      emitDataUpdate();
+      
       setShowAccomplishmentPrompt(false);
       setCurrentSessionId('');
       return true;
     } catch (error) {
       console.error('Failed to save accomplishment:', error);
-      
-      // Fallback to local storage would go here
       
       setShowAccomplishmentPrompt(false);
       setCurrentSessionId('');
@@ -383,6 +396,10 @@ export function useTimer(selectedActivity: string): TimerHookResult {
         completed: true,
         completedAt: new Date().toISOString()
       });
+      
+      // Emit update event
+      emitDataUpdate();
+      
       return true;
     } catch (error) {
       console.error('Failed to complete task:', error);

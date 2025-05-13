@@ -68,12 +68,22 @@ export interface SupabaseSession {
     }
   };
   
-  // Filter function for focus sessions
   export const isFocusSession = (session: Session): boolean => {
     if (isLocalStorageSession(session)) {
       return session.type === 'focus';
     } else if (isSupabaseSession(session)) {
-      return session.category === 'focus';
+      // Check both category and type fields for backward compatibility
+      return session.category === 'focus' || session.category === null;
     }
     return false;
+  };
+  
+  // Helper to get activity from a session
+  export const getSessionActivity = (session: Session): string => {
+    if (isLocalStorageSession(session)) {
+      return session.activity || 'Other';
+    } else if (isSupabaseSession(session)) {
+      return session.activity || 'Other';
+    }
+    return 'Other';
   };
