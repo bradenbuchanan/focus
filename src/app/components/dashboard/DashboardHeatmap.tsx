@@ -10,35 +10,40 @@ import {
 import { CalendarGrid } from '../analytics/CalendarGrid';
 
 export default function DashboardHeatmap() {
+  // Use the correct hook from your codebase
   const { activityDataSets, isLoading } = useMultiActivityData();
+
   const [selectedActivity, setSelectedActivity] =
     useState<string>('All Activities');
   const [currentActivityData, setCurrentActivityData] =
     useState<ActivityData | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  // Function to refresh data
-  const refreshData = () => {
-    setLastUpdated(new Date());
-  };
-
   // Update current activity data when selection changes
   useEffect(() => {
     if (!isLoading && activityDataSets.length > 0) {
       const selected =
-        activityDataSets.find((dataset) => dataset.name === selectedActivity) ||
-        activityDataSets[0];
+        activityDataSets.find(
+          (dataset: ActivityData) => dataset.name === selectedActivity
+        ) || activityDataSets[0];
       setCurrentActivityData(selected);
 
       // Default to "All Activities" if available
       if (
         !selectedActivity &&
-        activityDataSets.some((d) => d.name === 'All Activities')
+        activityDataSets.some((d: ActivityData) => d.name === 'All Activities')
       ) {
         setSelectedActivity('All Activities');
       }
     }
   }, [selectedActivity, activityDataSets, isLoading]);
+
+  // Update last updated time when data changes
+  useEffect(() => {
+    if (!isLoading) {
+      setLastUpdated(new Date());
+    }
+  }, [activityDataSets, isLoading]);
 
   if (isLoading) {
     return (
@@ -59,19 +64,15 @@ export default function DashboardHeatmap() {
             value={selectedActivity}
             onChange={(e) => setSelectedActivity(e.target.value)}
           >
-            {activityDataSets.map((dataset) => (
+            {activityDataSets.map((dataset: ActivityData) => (
               <option key={dataset.name} value={dataset.name}>
                 {dataset.name}
               </option>
             ))}
           </select>
-          <button
-            onClick={refreshData}
-            className={styles.refreshButton}
-            title={`Last updated: ${lastUpdated.toLocaleTimeString()}`}
-          >
-            ↻ Refresh
-          </button>
+          <span className={styles.lastUpdated}>
+            Last updated: {lastUpdated.toLocaleTimeString()}
+          </span>
         </div>
       </div>
 
