@@ -30,7 +30,7 @@ export function useMultiActivityData(refreshKey?: number) {
   const [activityDataSets, setActivityDataSets] = useState<ActivityData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { getSessions } = useData();
-  const [lastUpdate, setLastUpdate] = useState(Date.now());
+  // Remove the unused lastUpdate state if it's not being used elsewhere
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -182,27 +182,11 @@ export function useMultiActivityData(refreshKey?: number) {
   return { activityDataSets, isLoading, refreshData };
 }
 
-export function getCellColor(intensity: number): string {
-  switch (intensity) {
-    case 0:
-      return 'rgba(200, 200, 200, 0.1)';
-    case 1:
-      return 'rgba(0, 136, 204, 0.25)';
-    case 2:
-      return 'rgba(0, 136, 204, 0.5)';
-    case 3:
-      return 'rgba(0, 136, 204, 0.75)';
-    case 4:
-      return 'rgba(0, 136, 204, 1)';
-    default:
-      return 'rgba(200, 200, 200, 0.1)';
-  }
-}
-
-export function useActivityCalendarData(selectedActivity: string = 'all', refreshKey?: number) {
+// Update the signature of useActivityCalendarData to remove unused refreshKey parameter
+export function useActivityCalendarData(selectedActivity: string = 'all') {
   const [calendarData, setCalendarData] = useState<CalendarDay[]>([]);
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
-  const { activityDataSets, isLoading } = useMultiActivityData(refreshKey);
+  const { activityDataSets, isLoading } = useMultiActivityData();
   
   useEffect(() => {
     if (!isLoading && activityDataSets.length > 0) {
@@ -227,6 +211,8 @@ export function useActivityCalendarData(selectedActivity: string = 'all', refres
     isLoading 
   };
 }
+
+// Rest of your code remains the same...
 
 // Define the color scheme type
 type ColorScheme = {
@@ -367,8 +353,8 @@ export function getColorSchemeForActivity(activity: string): ColorScheme {
 
 export function useActivityDataWithEventListeners(selectedActivity: string = 'all') {
   const [refreshKey, setRefreshKey] = useState(0);
-  const data = useActivityCalendarData(selectedActivity, refreshKey);
-
+  const data = useActivityCalendarData(selectedActivity); // Remove refreshKey parameter
+  
   useEffect(() => {
     const handleDataUpdate = () => {
       console.log('Data update event received, refreshing activity data...');
