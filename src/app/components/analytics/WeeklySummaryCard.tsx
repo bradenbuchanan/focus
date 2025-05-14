@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import styles from './weeklySummary.module.css';
-import { TimerSession } from '@/lib/timer'; // Import the type
 import { useData } from '@/providers/DataProvider'; // Add this import
 import {
   isFocusSession,
