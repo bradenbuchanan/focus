@@ -2,26 +2,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTimer } from '@/hooks/useTimer';
+import { useData } from '@/providers/DataProvider';
+import { Task, Goal } from '@/lib/timer';
+import TimerDisplay from './TimerDisplay';
 import TimerSettings from './TimerSetting';
 import AccomplishmentRecorder from './AccomplishmentRecorder';
 import FreeTimer from './FreeTimer';
-import TimerGoalsTasksPanel from './TimerGoalsTasksPanel';
-import { useTimer } from '@/hooks/useTimer'; // Replace with the unified hook
+import { TaskList } from '@/app/components/ui/TaskList';
+import { GoalList } from '@/app/components/ui/GoalList';
+import ActivitySelector from './ActivitySelector';
 import { defaultActivityCategories } from '@/lib/timer';
 import styles from './timer.module.css';
-import { formatTime, TimerState } from '@/lib/timer';
 
 export default function TimerContainer() {
-  const [showSettings, setShowSettings] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(
     defaultActivityCategories[0]
   );
-  const [showAccomplishmentRecorder, setShowAccomplishmentRecorder] =
-    useState(false);
-  const [currentSessionId, setCurrentSessionId] = useState('');
   const [timerMode, setTimerMode] = useState<'pomodoro' | 'free'>('pomodoro');
+  const [showSettings, setShowSettings] = useState(false);
 
-  // Use the unified timer hook
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+
   const {
     timerData,
     startTimer,
@@ -32,194 +35,146 @@ export default function TimerContainer() {
     saveAccomplishment,
     skipAccomplishment,
     recordFreeSession,
-    completeTask,
   } = useTimer(selectedActivity);
 
-  // Check if we should show the accomplishment recorder
+  const { getTasks, getGoals } = useData();
+
   useEffect(() => {
-    setShowAccomplishmentRecorder(showAccomplishmentPrompt);
-  }, [showAccomplishmentPrompt]);
+    async function loadData() {
+      const allTasks = await getTasks();
+      const allGoals = await getGoals();
 
-  // Handle free session completion
+      const filteredTasks = allTasks
+        .filter(
+          (task) =>
+            !task.completed &&
+            (task.activity === selectedActivity || !task.activity)
+        )
+        .map((task) => ({
+          id: task.id,
+          goalId: task.goal_id || undefined,
+          text: task.text,
+          completed: task.completed,
+          createdAt: task.created_at,
+          dueDate: task.due_date || undefined,
+          activity: task.activity || undefined,
+          priority: (task.priority as 'low' | 'medium' | 'high') || undefined,
+          completedAt: task.completed_at || undefined,
+        }));
+
+      const filteredGoals = allGoals
+        .filter((goal) => goal.activity === selectedActivity || !goal.activity)
+        .map((goal) => ({
+          id: goal.id,
+          title: goal.title,
+          description: goal.description || undefined,
+          type: goal.type as 'time' | 'sessions',
+          target: goal.target,
+          period: goal.period as 'daily' | 'weekly' | 'monthly' | 'yearly',
+          startDate: goal.start_date,
+          endDate: goal.end_date || undefined,
+          createdAt: goal.created_at,
+          activity: goal.activity || undefined,
+        }));
+
+      setTasks(filteredTasks);
+      setGoals(filteredGoals);
+    }
+
+    loadData();
+  }, [selectedActivity, getTasks, getGoals]);
+
+  const handleSaveAccomplishment = async (text: string, category?: string) => {
+    await saveAccomplishment(text, undefined, category);
+  };
+
   const handleFreeSessionComplete = async (duration: number) => {
-    const sessionId = await recordFreeSession(duration, selectedActivity);
-    setCurrentSessionId(sessionId);
+    await recordFreeSession(duration, selectedActivity);
   };
 
-  // Handle saving an accomplishment
-  const handleSaveAccomplishment = (text: string, category?: string) => {
-    saveAccomplishment(text, currentSessionId, category);
-    setShowAccomplishmentRecorder(false);
-    setCurrentSessionId('');
-    setTimerMode('pomodoro');
-  };
+  if (showSettings) {
+    return (
+      <TimerSettings
+        settings={timerData.settings}
+        onSave={(settings) => {
+          updateSettings(settings);
+          setShowSettings(false);
+        }}
+        onCancel={() => setShowSettings(false)}
+      />
+    );
+  }
 
-  // Handle skipping the accomplishment
-  const handleSkipAccomplishment = () => {
-    skipAccomplishment();
-    setShowAccomplishmentRecorder(false);
-    setCurrentSessionId('');
-    setTimerMode('pomodoro');
-  };
+  if (showAccomplishmentPrompt) {
+    return (
+      <AccomplishmentRecorder
+        activity={selectedActivity}
+        onSave={handleSaveAccomplishment}
+        onSkip={skipAccomplishment}
+      />
+    );
+  }
 
   return (
-    <div className={styles.timerPageContainer}>
-      <div className={styles.timerWrapper}>
-        {showSettings ? (
-          <TimerSettings
-            settings={timerData.settings}
-            onSave={(settings) => {
-              updateSettings(settings);
-              setShowSettings(false);
-            }}
-            onCancel={() => setShowSettings(false)}
-          />
-        ) : showAccomplishmentRecorder ? (
-          <AccomplishmentRecorder
-            activity={selectedActivity}
-            onSave={handleSaveAccomplishment}
-            onSkip={handleSkipAccomplishment}
-          />
-        ) : (
-          <>
-            <div className={styles.timerCard}>
-              {/* Activity selector with improved styling */}
-              <div className={styles.activitySection}>
-                <h2 className={styles.sectionTitle}>
-                  What are you focusing on?
-                </h2>
-                <div className={styles.activityPills}>
-                  {defaultActivityCategories.map((activity) => (
-                    <button
-                      key={activity}
-                      className={`${styles.activityPill} ${
-                        selectedActivity === activity ? styles.pillSelected : ''
-                      }`}
-                      onClick={() => setSelectedActivity(activity)}
-                    >
-                      {activity}
-                    </button>
-                  ))}
-                  <button
-                    className={styles.activityPill}
-                    onClick={() => {
-                      /* Add custom activity logic */
-                    }}
-                  >
-                    Custom
-                  </button>
-                </div>
-              </div>
+    <div className={styles.timerContainer}>
+      <ActivitySelector
+        selectedActivity={selectedActivity}
+        onSelectActivity={setSelectedActivity}
+      />
 
-              {/* Timer mode selector */}
-              <div className={styles.modeTabsContainer}>
-                <div className={styles.modeTabs}>
-                  <button
-                    className={`${styles.modeTab} ${
-                      timerMode === 'pomodoro' ? styles.activeTab : ''
-                    }`}
-                    onClick={() => setTimerMode('pomodoro')}
-                  >
-                    Pomodoro Timer
-                  </button>
-                  <button
-                    className={`${styles.modeTab} ${
-                      timerMode === 'free' ? styles.activeTab : ''
-                    }`}
-                    onClick={() => setTimerMode('free')}
-                  >
-                    Free Timer
-                  </button>
-                </div>
-              </div>
+      <div className={styles.timerModeTabs}>
+        <button
+          className={`${styles.tab} ${
+            timerMode === 'pomodoro' ? styles.active : ''
+          }`}
+          onClick={() => setTimerMode('pomodoro')}
+        >
+          Pomodoro Timer
+        </button>
+        <button
+          className={`${styles.tab} ${
+            timerMode === 'free' ? styles.active : ''
+          }`}
+          onClick={() => setTimerMode('free')}
+        >
+          Free Timer
+        </button>
+      </div>
 
-              {/* Enhanced timer display */}
-              <div className={styles.timerDisplayWrapper}>
-                {/* Pomodoro timer */}
-                <div className={timerMode === 'pomodoro' ? '' : styles.hidden}>
-                  <div className={styles.timerCircle}>
-                    <div
-                      className={styles.timerCircleProgress}
-                      style={
-                        {
-                          '--progress-percent': `${
-                            ((timerData.settings.focusDuration * 60 -
-                              timerData.timeRemaining) /
-                              (timerData.settings.focusDuration * 60)) *
-                            100
-                          }%`,
-                        } as React.CSSProperties
-                      }
-                    ></div>
-                    <div className={styles.timerTime}>
-                      {formatTime(timerData.timeRemaining)}
-                    </div>
-                    <div className={styles.timerLabel}>
-                      {timerData.state === TimerState.BREAK
-                        ? 'Break Time'
-                        : 'Focus Time'}
-                    </div>
-                  </div>
+      {timerMode === 'pomodoro' ? (
+        <TimerDisplay
+          timerData={timerData}
+          onStart={startTimer}
+          onPause={pauseTimer}
+          onReset={resetTimer}
+          onOpenSettings={() => setShowSettings(true)}
+        />
+      ) : (
+        <FreeTimer
+          activity={selectedActivity}
+          onComplete={handleFreeSessionComplete}
+          onCancel={() => setTimerMode('pomodoro')}
+        />
+      )}
 
-                  <div className={styles.timerControls}>
-                    {timerData.state === TimerState.RUNNING ? (
-                      <button
-                        onClick={pauseTimer}
-                        className={styles.primaryButton}
-                      >
-                        Pause
-                      </button>
-                    ) : (
-                      <button
-                        onClick={startTimer}
-                        className={styles.primaryButton}
-                      >
-                        {timerData.state === TimerState.IDLE
-                          ? 'Start'
-                          : 'Resume'}
-                      </button>
-                    )}
-                    <button
-                      onClick={resetTimer}
-                      className={styles.secondaryButton}
-                    >
-                      Reset
-                    </button>
-                    <button
-                      onClick={() => setShowSettings(true)}
-                      className={styles.secondaryButton}
-                    >
-                      Settings
-                    </button>
-                  </div>
-                </div>
+      <div className={styles.timerContent}>
+        <div className={styles.section}>
+          <h3>Active Tasks</h3>
+          {tasks.length > 0 ? (
+            <TaskList tasks={tasks} isCompact={true} />
+          ) : (
+            <p className={styles.emptyState}>No tasks for {selectedActivity}</p>
+          )}
+        </div>
 
-                {/* Free timer */}
-                <div className={timerMode === 'free' ? '' : styles.hidden}>
-                  <FreeTimer
-                    activity={selectedActivity}
-                    onComplete={handleFreeSessionComplete}
-                    onCancel={() => setTimerMode('pomodoro')}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Tasks and goals section */}
-            <div className={styles.tasksCard}>
-              <TimerGoalsTasksPanel
-                activity={
-                  selectedActivity === 'All Activities'
-                    ? undefined
-                    : selectedActivity
-                }
-                onTaskComplete={async (taskId) => {
-                  await completeTask(taskId);
-                }}
-              />
-            </div>
-          </>
-        )}
+        <div className={styles.section}>
+          <h3>Active Goals</h3>
+          {goals.length > 0 ? (
+            <GoalList goals={goals} isCompact={true} />
+          ) : (
+            <p className={styles.emptyState}>No goals for {selectedActivity}</p>
+          )}
+        </div>
       </div>
     </div>
   );

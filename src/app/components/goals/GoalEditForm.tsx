@@ -2,7 +2,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Goal, updateGoal, defaultActivityCategories } from '@/lib/timer';
+import { Goal, defaultActivityCategories } from '@/lib/timer';
+import { useData } from '@/providers/DataProvider';
 import styles from './GoalEditForm.module.css';
 
 interface GoalEditFormProps {
@@ -24,27 +25,49 @@ export default function GoalEditForm({
     'daily' | 'weekly' | 'monthly' | 'yearly'
   >(goal.period);
   const [activity, setActivity] = useState<string>(goal.activity || '');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Get deleteGoal and saveGoal from DataProvider (since updateGoal doesn't exist)
+  const { deleteGoal, saveGoal } = useData();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
 
-    const updatedGoal: Goal = {
-      ...goal,
-      title,
-      description,
-      type,
-      target,
-      period,
-      activity: activity || undefined, // Only include if an activity is selected
-    };
+    try {
+      // Since updateGoal doesn't exist in your DataProvider,
+      // we'll delete and recreate as a workaround
+      await deleteGoal(goal.id);
 
-    updateGoal(updatedGoal);
-    onSave();
+      const updatedGoal = {
+        title,
+        description,
+        type,
+        target,
+        period,
+        activity: activity || undefined,
+        startDate: goal.startDate,
+        endDate: goal.endDate,
+      };
+
+      await saveGoal(updatedGoal);
+      onSave();
+    } catch (error) {
+      console.error('Error updating goal:', error);
+      setError('Failed to update goal. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className={styles.goalForm}>
       <h2>Edit Goal</h2>
+
+      {error && <div className={styles.errorMessage}>{error}</div>}
+
       <form onSubmit={handleSubmit}>
         <div className={styles.formGroup}>
           <label htmlFor="title">Goal Title</label>
@@ -55,6 +78,7 @@ export default function GoalEditForm({
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g., Read more books"
             required
+            disabled={isLoading}
           />
         </div>
 
@@ -65,6 +89,7 @@ export default function GoalEditForm({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Additional details about your goal"
+            disabled={isLoading}
           />
         </div>
 
@@ -75,6 +100,7 @@ export default function GoalEditForm({
               id="type"
               value={type}
               onChange={(e) => setType(e.target.value as 'time' | 'sessions')}
+              disabled={isLoading}
             >
               <option value="time">Focus Time</option>
               <option value="sessions">Number of Sessions</option>
@@ -92,6 +118,7 @@ export default function GoalEditForm({
               onChange={(e) => setTarget(parseInt(e.target.value))}
               min="1"
               required
+              disabled={isLoading}
             />
           </div>
         </div>
@@ -107,6 +134,7 @@ export default function GoalEditForm({
                   e.target.value as 'daily' | 'weekly' | 'monthly' | 'yearly'
                 )
               }
+              disabled={isLoading}
             >
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -121,6 +149,7 @@ export default function GoalEditForm({
               id="activity"
               value={activity}
               onChange={(e) => setActivity(e.target.value)}
+              disabled={isLoading}
             >
               <option value="">All Activities</option>
               {defaultActivityCategories.map((category) => (
@@ -133,13 +162,18 @@ export default function GoalEditForm({
         </div>
 
         <div className={styles.formActions}>
-          <button type="submit" className={styles.primaryButton}>
-            Save Changes
+          <button
+            type="submit"
+            className={styles.primaryButton}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Saving...' : 'Save Changes'}
           </button>
           <button
             type="button"
             className={styles.secondaryButton}
             onClick={onCancel}
+            disabled={isLoading}
           >
             Cancel
           </button>
