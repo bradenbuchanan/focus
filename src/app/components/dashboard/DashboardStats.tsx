@@ -2,7 +2,7 @@
 'use client';
 
 import styles from '../../dashboard/dashboard.module.css';
-import { formatTimeValue } from '../../dashboard/utils/format';
+import { formatTimeValue } from '@/utils/formatTime';
 
 interface StatsProps {
   stats: {
