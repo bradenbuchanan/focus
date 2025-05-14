@@ -6,6 +6,7 @@ import Link from 'next/link';
 import {
   Goal,
   Task,
+  TimerSession,
   defaultActivityCategories,
   calculateGoalProgress,
 } from '@/lib/timer';
@@ -30,7 +31,7 @@ export default function GoalsPage() {
   const [showForm, setShowForm] = useState(false);
   const [activityFilter, setActivityFilter] = useState<string>('all');
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
-  const { getGoals, getTasks } = useData();
+  const { getGoals, getTasks, getSessions } = useData();
 
   // Filtered data
   const filteredGoals =
@@ -60,13 +61,33 @@ export default function GoalsPage() {
     setError(null);
 
     try {
-      // Get goals from database
-      const dbGoals = await getGoals();
-      console.log('Received goals from database:', dbGoals);
+      // Get all data from database
+      const [dbGoals, tasksFromDB, dbSessions] = await Promise.all([
+        getGoals(),
+        getTasks(),
+        getSessions(),
+      ]);
+
+      console.log('Received data from database:', {
+        goals: dbGoals,
+        tasks: tasksFromDB,
+        sessions: dbSessions,
+      });
 
       if (!dbGoals || !Array.isArray(dbGoals)) {
         throw new Error('Invalid goals data received');
       }
+
+      // Convert database sessions to TimerSession format
+      const sessions: TimerSession[] = dbSessions.map((s) => ({
+        id: s.id,
+        date: s.start_time,
+        localDate: s.start_time.split('T')[0],
+        duration: s.duration || 0,
+        type: (s.category === 'focus' ? 'focus' : 'break') as 'focus' | 'break',
+        completed: s.completed,
+        activity: s.activity || undefined,
+      }));
 
       // Map database goals to application's Goal type
       const allGoals = dbGoals.map((dbGoal) => ({
@@ -89,18 +110,13 @@ export default function GoalsPage() {
       const completed: Goal[] = [];
 
       allGoals.forEach((goal) => {
-        const progress = calculateGoalProgress(goal);
+        const progress = calculateGoalProgress(goal, sessions); // Pass sessions here
         if (progress.percentage >= 100) {
           completed.push(goal);
         } else {
           active.push(goal);
         }
       });
-
-      // Load tasks from Supabase using the DataProvider
-      console.log('Loading tasks from DataProvider...');
-      const tasksFromDB = await getTasks();
-      console.log('Tasks from database:', tasksFromDB);
 
       // Convert Supabase tasks to app's Task format
       const allTasks = tasksFromDB.map((task) => ({
@@ -179,7 +195,7 @@ export default function GoalsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [getGoals, getTasks]);
+  }, [getGoals, getTasks, getSessions]);
 
   // Initial data load effect
   useEffect(() => {
@@ -195,7 +211,7 @@ export default function GoalsPage() {
     });
   };
 
-  // Continue with your existing JSX return...
+  // The rest of your component remains the same...
   return (
     <div className={styles.goalsPage}>
       {/* Your existing JSX content */}
@@ -240,6 +256,7 @@ export default function GoalsPage() {
         )}
       </div>
 
+      {/* Rest of your JSX remains the same */}
       {isLoading ? (
         <div className={styles.loadingState}>
           <p>Loading goals...</p>
