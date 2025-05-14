@@ -1,6 +1,7 @@
 // src/repositories/TaskRepository.ts
 import { supabase } from '@/lib/supabase';
 import { Task } from '@/lib/timer';
+import { emitDataUpdate } from '@/utils/events';
 
 // Define a Supabase task interface
 interface SupabaseTask {
@@ -38,54 +39,130 @@ interface TaskUpdateInput {
 }
 
 export class TaskRepository {
+  private cache: Map<string, SupabaseTask[]> = new Map();
+  private cacheExpiry: number = 60000; // 1 minute
+  private lastFetch: number = 0;
+  private retryCount = 0;
+  private maxRetries = 3;
+
   async getTasks(): Promise<SupabaseTask[]> {
+    const now = Date.now();
+    const cacheKey = 'all-tasks';
+    
+    // Check if cache is valid
+    if (this.cache.has(cacheKey) && (now - this.lastFetch) < this.cacheExpiry) {
+      return this.cache.get(cacheKey)!;
+    }
+
+    try {
+      const tasks = await this._getTasksWithRetry();
+      this.retryCount = 0; // Reset on success
+      
+      this.cache.set(cacheKey, tasks);
+      this.lastFetch = now;
+      
+      return tasks;
+    } catch (error) {
+      console.error('All attempts failed, falling back to localStorage:', error);
+      return this.getLocalTasksAsSupabaseTasks();
+    }
+  }
+
+  private async _getTasksWithRetry(): Promise<SupabaseTask[]> {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
       if (!userData?.user) {
-        return this.getLocalTasks().map(task => ({
-          id: task.id,
-          user_id: '',  // Empty for local data
-          goal_id: task.goalId || null,
-          text: task.text,
-          completed: task.completed,
-          activity: task.activity || null,
-          priority: task.priority || null,
-          due_date: task.dueDate || null,
-          completed_at: task.completedAt || null,
-          created_at: task.createdAt,
-          updated_at: task.createdAt,
-        }));
+        return this.getLocalTasksAsSupabaseTasks();
       }
       
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
-        .eq('user_id', userData.user.id);
+        .eq('user_id', userData.user.id)
+        .order('created_at', { ascending: false });
         
       if (error) throw error;
       
-      return data || [];
+      // Validate data before returning
+      const tasks = (data || []).filter(this.isValidTask);
+      return tasks;
     } catch (error) {
-      console.error('Error fetching tasks from Supabase:', error);
-      
-      return this.getLocalTasks().map(task => ({
-        id: task.id,
-        user_id: '',  // Empty for local data
-        goal_id: task.goalId || null,
-        text: task.text,
-        completed: task.completed,
-        activity: task.activity || null,
-        priority: task.priority || null,
-        due_date: task.dueDate || null,
-        completed_at: task.completedAt || null,
-        created_at: task.createdAt,
-        updated_at: task.createdAt,
-      }));
+      if (this.retryCount < this.maxRetries) {
+        this.retryCount++;
+        await new Promise(resolve => setTimeout(resolve, 1000 * this.retryCount));
+        return this._getTasksWithRetry();
+      }
+      throw error;
     }
+  }
+
+  async getTasksForActivity(activity?: string): Promise<SupabaseTask[]> {
+    const allTasks = await this.getTasks();
+    
+    if (!activity || activity === 'All Activities') {
+      return allTasks;
+    }
+    
+    return allTasks.filter(task => task.activity === activity);
+  }
+  
+  async getTasksForGoal(goalId: string): Promise<SupabaseTask[]> {
+    const allTasks = await this.getTasks();
+    return allTasks.filter(task => task.goal_id === goalId);
+  }
+  
+  async getActiveTasks(activity?: string): Promise<SupabaseTask[]> {
+    const tasks = activity 
+      ? await this.getTasksForActivity(activity)
+      : await this.getTasks();
+    
+    return tasks.filter(task => !task.completed);
+  }
+  
+  async getCompletedTasks(activity?: string): Promise<SupabaseTask[]> {
+    const tasks = activity 
+      ? await this.getTasksForActivity(activity)
+      : await this.getTasks();
+    
+    return tasks.filter(task => task.completed);
   }
   
   async saveTask(task: TaskInput): Promise<string> {
+    try {
+      const result = await this._saveTask(task);
+      this.invalidateCache();
+      emitDataUpdate();
+      return result;
+    } catch (error) {
+      console.error('Error saving task:', error);
+      throw error;
+    }
+  }
+  
+  async updateTask(task: TaskUpdateInput): Promise<void> {
+    try {
+      await this._updateTask(task);
+      this.invalidateCache();
+      emitDataUpdate();
+    } catch (error) {
+      console.error('Error updating task:', error);
+      throw error;
+    }
+  }
+  
+  async deleteTask(taskId: string): Promise<void> {
+    try {
+      await this._deleteTask(taskId);
+      this.invalidateCache();
+      emitDataUpdate();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      throw error;
+    }
+  }
+  
+  private async _saveTask(task: TaskInput): Promise<string> {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
@@ -121,7 +198,7 @@ export class TaskRepository {
     }
   }
   
-  async updateTask(task: TaskUpdateInput): Promise<void> {
+  private async _updateTask(task: TaskUpdateInput): Promise<void> {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
@@ -165,7 +242,7 @@ export class TaskRepository {
     }
   }
   
-  async deleteTask(taskId: string): Promise<void> {
+  private async _deleteTask(taskId: string): Promise<void> {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
@@ -186,12 +263,42 @@ export class TaskRepository {
     }
   }
   
+  private invalidateCache(): void {
+    this.cache.clear();
+    this.lastFetch = 0;
+  }
+  
+  private isValidTask(task: any): task is SupabaseTask {
+    return task 
+      && typeof task.id === 'string'
+      && typeof task.text === 'string'
+      && typeof task.completed === 'boolean';
+  }
+  
   // Local storage methods
   private getLocalTasks(): Task[] {
     if (typeof window === 'undefined') return [];
     
     const tasksData = localStorage.getItem('focusTasks');
     return tasksData ? JSON.parse(tasksData) : [];
+  }
+  
+  private getLocalTasksAsSupabaseTasks(): SupabaseTask[] {
+    const localTasks = this.getLocalTasks();
+    
+    return localTasks.map(task => ({
+      id: task.id,
+      user_id: '',  // Empty for local data
+      goal_id: task.goalId || null,
+      text: task.text,
+      completed: task.completed,
+      activity: task.activity || null,
+      priority: task.priority || null,
+      due_date: task.dueDate || null,
+      completed_at: task.completedAt || null,
+      created_at: task.createdAt || new Date().toISOString(),
+      updated_at: task.createdAt || new Date().toISOString(),
+    }));
   }
   
   private saveLocalTask(task: TaskInput): string {
