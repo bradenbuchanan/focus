@@ -15,7 +15,6 @@ import { TaskItem } from '@/app/components/ui/TaskItem';
 import TaskForm from '@/app/components/goals/TaskForm';
 import styles from './goals.module.css';
 import { useData } from '@/providers/DataProvider';
-import { supabase } from '@/lib/supabase';
 
 type TabType = 'goals' | 'tasks' | 'completed';
 
