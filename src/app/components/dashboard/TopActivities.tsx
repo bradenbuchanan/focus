@@ -2,7 +2,7 @@
 'use client';
 
 import styles from './dashboardTopActivities.module.css';
-import { formatTimeValue } from '../../dashboard/utils/format';
+import { formatTimeValue } from '@/utils/formatTime';
 
 interface TopActivitiesProps {
   activities: { name: string; minutes: number }[];
