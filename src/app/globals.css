@@ -6,18 +6,24 @@
   /* Light theme (default) */
   --background: #ffffff;
   --foreground: #171717;
+  --focus-color: #3b82f6;
+  --break-color: #10b981;
 }
 
 /* Dark theme */
 [data-theme="dark"] {
   --background: #0a0a0a;
   --foreground: #ededed;
+  --focus-color: #3b82f6;
+  --break-color: #10b981;
 }
 
 /* Very dark theme (your new color) */
 [data-theme="darker"] {
   --background: #2a2929;
   --foreground: #ededed;
+  --focus-color: #3b82f6;
+  --break-color: #10b981;
 }
 
 /* Apply system preference if no theme is selected */
@@ -25,6 +31,8 @@
   :root:not([data-theme]) {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --focus-color: #3b82f6;
+    --break-color: #10b981;
   }
 }
 
