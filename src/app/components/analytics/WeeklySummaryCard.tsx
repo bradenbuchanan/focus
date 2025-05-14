@@ -3,7 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import styles from './weeklySummary.module.css';
-import { getSessions } from '@/lib/timer'; // Import localStorage function
+import { TimerSession } from '@/lib/timer'; // Import the type
+import { useData } from '@/providers/DataProvider'; // Add this import
+import {
+  isFocusSession,
+  getSessionDateString,
+  getSessionMinutes,
+  getSessionActivity,
+} from '@/utils/dataConversion'; // Import data conversion utilities
 
 interface WeeklySummary {
   startDate: string;
@@ -33,6 +40,20 @@ interface GeminiResponse {
   }[];
 }
 
+// Interface for Supabase session structure
+interface SupabaseSession {
+  id: string;
+  user_id: string;
+  start_time: string;
+  end_time: string | null;
+  duration: number | null;
+  category: string | null;
+  activity: string | null;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function WeeklySummaryCard() {
   // ====================================================
   // NOTE: This is a temporary implementation that uses localStorage data
@@ -58,39 +79,46 @@ export default function WeeklySummaryCard() {
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [availableActivities, setAvailableActivities] = useState<string[]>([]);
 
+  // Get the data provider
+  const { getSessions } = useData();
+
   // Load available activities on component mount
   useEffect(() => {
-    const sessions = getSessions();
-    const activities = new Set<string>();
+    async function loadActivities() {
+      const sessions = await getSessions();
+      const activities = new Set<string>();
 
-    sessions.forEach((session) => {
-      if (session.activity) {
-        activities.add(session.activity);
+      sessions.forEach((session: SupabaseSession) => {
+        if (session.activity) {
+          activities.add(session.activity);
+        }
+      });
+
+      setAvailableActivities(Array.from(activities));
+
+      // Set default date ranges
+      const today = new Date();
+
+      // Set default week
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const endOfWeek = new Date(today);
+      if (today.getDay() === 0) {
+        // If today is Sunday
+        endOfWeek.setHours(23, 59, 59, 999);
+      } else {
+        endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
+        endOfWeek.setHours(23, 59, 59, 999);
       }
-    });
 
-    setAvailableActivities(Array.from(activities));
-
-    // Set default date ranges
-    const today = new Date();
-
-    // Set default week
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    const endOfWeek = new Date(today);
-    if (today.getDay() === 0) {
-      // If today is Sunday
-      endOfWeek.setHours(23, 59, 59, 999);
-    } else {
-      endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
-      endOfWeek.setHours(23, 59, 59, 999);
+      setStartDate(startOfWeek.toISOString().split('T')[0]);
+      setEndDate(endOfWeek.toISOString().split('T')[0]);
     }
 
-    setStartDate(startOfWeek.toISOString().split('T')[0]);
-    setEndDate(endOfWeek.toISOString().split('T')[0]);
-  }, []);
+    loadActivities();
+  }, [getSessions]);
 
   const handleActivityToggle = (activity: string) => {
     setSelectedActivities((prev) => {
@@ -281,21 +309,21 @@ Make your response personal, specific to the data, and limited to 2-3 paragraphs
         end.setHours(23, 59, 59, 999);
       }
 
-      // TEMPORARY: Use localStorage data to create a summary
-      const localSessions = getSessions();
+      // Get sessions from DataProvider
+      const supabaseSessions = await getSessions();
 
       // Filter for focus sessions within the date range
-      let filteredSessions = localSessions.filter((session) => {
-        const sessionDate = new Date(session.date);
-        return (
-          sessionDate >= start && sessionDate <= end && session.type === 'focus'
-        );
+      let filteredSessions = supabaseSessions.filter((session) => {
+        if (!isFocusSession(session)) return false;
+
+        const sessionDate = new Date(session.start_time);
+        return sessionDate >= start && sessionDate <= end;
       });
 
       // Apply activity filter if any activities are selected
       if (selectedActivities.length > 0) {
         filteredSessions = filteredSessions.filter((session) =>
-          selectedActivities.includes(session.activity || 'Other')
+          selectedActivities.includes(getSessionActivity(session))
         );
       }
 
@@ -307,10 +335,10 @@ Make your response personal, specific to the data, and limited to 2-3 paragraphs
         return;
       }
 
-      // TEMPORARY: Generate a basic summary from localStorage data
+      // Generate a basic summary from the sessions
       const totalFocusTime = Math.round(
         filteredSessions.reduce(
-          (sum, session) => sum + session.duration / 60,
+          (sum: number, session) => sum + getSessionMinutes(session),
           0
         )
       );
@@ -319,8 +347,8 @@ Make your response personal, specific to the data, and limited to 2-3 paragraphs
       // Group by day to find most productive day
       const dayMap = new Map<string, number>();
       filteredSessions.forEach((session) => {
-        const dateStr = session.localDate || session.date.split('T')[0];
-        const minutes = session.duration / 60;
+        const dateStr = getSessionDateString(session);
+        const minutes = getSessionMinutes(session);
         dayMap.set(dateStr, (dayMap.get(dateStr) || 0) + minutes);
       });
 
@@ -338,8 +366,8 @@ Make your response personal, specific to the data, and limited to 2-3 paragraphs
       // Group activities to find top categories
       const categoryMap = new Map<string, number>();
       filteredSessions.forEach((session) => {
-        const category = session.activity || 'Other';
-        const minutes = session.duration / 60;
+        const category = getSessionActivity(session);
+        const minutes = getSessionMinutes(session);
         categoryMap.set(category, (categoryMap.get(category) || 0) + minutes);
       });
 
@@ -351,20 +379,16 @@ Make your response personal, specific to the data, and limited to 2-3 paragraphs
         .sort((a, b) => b.minutes - a.minutes)
         .slice(0, 3);
 
-      // Get accomplishments if any
-      const accomplishments = filteredSessions
-        .filter((session) => session.accomplishment)
-        .map((session) => ({
-          text: session.accomplishment || '',
-          category: session.accomplishmentCategory || null,
-        }));
+      // Get accomplishments if any (Note: this won't work with Supabase sessions as accomplishments are separate)
+      const accomplishments: Array<{ text: string; category: string | null }> =
+        [];
 
       // Create daily summaries
       const dailySummaries = Array.from(dayMap).map(([day, minutes]) => ({
         date: day,
         totalMinutes: Math.round(minutes),
         sessions: filteredSessions.filter(
-          (s) => (s.localDate || s.date.split('T')[0]) === day
+          (s) => getSessionDateString(s) === day
         ).length,
         topCategory: 'Various',
       }));
