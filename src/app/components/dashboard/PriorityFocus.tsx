@@ -3,21 +3,21 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Task, Goal, calculateGoalProgress } from '@/lib/timer';
+import { Task, Goal } from '@/lib/timer';
 import styles from './priorityFocus.module.css';
 import { useData } from '@/providers/DataProvider';
+
+interface GoalWithTasks {
+  goal: Goal;
+  progress: number;
+  tasks: Task[];
+}
 
 export default function PriorityFocus() {
   const { getTasks, getGoals, updateTask } = useData();
 
   const [highPriorityTasks, setHighPriorityTasks] = useState<Task[]>([]);
-  const [goalsWithTasks, setGoalsWithTasks] = useState<
-    Array<{
-      goal: Goal;
-      progress: number;
-      tasks: Task[];
-    }>
-  >([]);
+  const [goalsWithTasks, setGoalsWithTasks] = useState<GoalWithTasks[]>([]);
   const [completingTask, setCompletingTask] = useState<string | null>(null);
 
   // Helper function to get urgent tasks from all sources
@@ -27,8 +27,8 @@ export default function PriorityFocus() {
 
     // Urgent tasks from goals
     const goalUrgent = goalsWithTasks
-      .flatMap(({ tasks }) => tasks)
-      .filter((task) => task.priority === 'high');
+      .flatMap(({ tasks }: GoalWithTasks) => tasks)
+      .filter((task: Task) => task.priority === 'high');
 
     // Combine and limit to 3 total
     return [...standaloneUrgent, ...goalUrgent].slice(0, 3);
@@ -47,11 +47,13 @@ export default function PriorityFocus() {
       });
 
       // Update the UI immediately
-      setHighPriorityTasks((prev) => prev.filter((t) => t.id !== taskId));
-      setGoalsWithTasks((prev) =>
-        prev.map((goalWithTasks) => ({
+      setHighPriorityTasks((prev: Task[]) =>
+        prev.filter((t: Task) => t.id !== taskId)
+      );
+      setGoalsWithTasks((prev: GoalWithTasks[]) =>
+        prev.map((goalWithTasks: GoalWithTasks) => ({
           ...goalWithTasks,
-          tasks: goalWithTasks.tasks.filter((t) => t.id !== taskId),
+          tasks: goalWithTasks.tasks.filter((t: Task) => t.id !== taskId),
         }))
       );
     } catch (error) {
@@ -118,29 +120,31 @@ export default function PriorityFocus() {
           .slice(0, 2); // Only show top 2
 
         // For each goal, find associated tasks
-        const goalsWithTheirTasks = needAttentionGoals.map((goal) => {
-          const goalTasks = allTasks
-            .filter((task) => task.goalId === goal.id && !task.completed)
-            .sort((a, b) => {
-              if (a.priority !== b.priority) {
-                if (a.priority === 'high') return -1;
-                if (b.priority === 'high') return 1;
-                if (a.priority === 'medium') return -1;
-                return 1;
-              }
-              return (
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
-              );
-            })
-            .slice(0, 2); // Limit to 2 tasks per goal
+        const goalsWithTheirTasks: GoalWithTasks[] = needAttentionGoals.map(
+          (goal) => {
+            const goalTasks = allTasks
+              .filter((task) => task.goalId === goal.id && !task.completed)
+              .sort((a, b) => {
+                if (a.priority !== b.priority) {
+                  if (a.priority === 'high') return -1;
+                  if (b.priority === 'high') return 1;
+                  if (a.priority === 'medium') return -1;
+                  return 1;
+                }
+                return (
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+                );
+              })
+              .slice(0, 2); // Limit to 2 tasks per goal
 
-          return {
-            goal,
-            progress: 0, // We'll set this to 0 for now since we need sessions to calculate
-            tasks: goalTasks,
-          };
-        });
+            return {
+              goal,
+              progress: 0, // We'll set this to 0 for now since we need sessions to calculate
+              tasks: goalTasks,
+            };
+          }
+        );
 
         setGoalsWithTasks(goalsWithTheirTasks);
       } catch (error) {
@@ -163,7 +167,7 @@ export default function PriorityFocus() {
               Urgent Tasks ({urgentTasks.length})
             </h3>
             <ul className={styles.priorityList}>
-              {urgentTasks.map((task) => (
+              {urgentTasks.map((task: Task) => (
                 <li key={task.id} className={styles.priorityItem}>
                   <div className={styles.taskCheckbox}>
                     <input
@@ -198,7 +202,7 @@ export default function PriorityFocus() {
             Goals Needing Attention ({goalsWithTasks.length})
           </h3>
           <ul className={styles.priorityList}>
-            {goalsWithTasks.map(({ goal, progress, tasks }) => (
+            {goalsWithTasks.map(({ goal, progress, tasks }: GoalWithTasks) => (
               <li key={goal.id} className={styles.goalItem}>
                 <div className={styles.goalHeader}>
                   <div className={styles.goalProgress}>
@@ -213,7 +217,7 @@ export default function PriorityFocus() {
 
                 {tasks.length > 0 ? (
                   <ul className={styles.goalTasks}>
-                    {tasks.map((task) => (
+                    {tasks.map((task: Task) => (
                       <li key={task.id} className={styles.goalTask}>
                         <div className={styles.taskCheckbox}>
                           <input
