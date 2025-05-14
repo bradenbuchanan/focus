@@ -1,4 +1,7 @@
 // src/lib/timer.ts
+
+// ===================== TYPE DEFINITIONS =====================
+
 export interface TimerSettings {
   focusDuration: number;  // in minutes
   breakDuration: number;  // in minutes
@@ -81,8 +84,9 @@ export interface TimerData {
   showAccomplishmentRecorder?: boolean;
 }
 
-// Helper function to format time as MM:SS
-// src/lib/timer.ts
+// ===================== UTILITY FUNCTIONS =====================
+
+// Helper function to format date to local string (YYYY-MM-DD)
 export const getLocalDateString = (date: Date | string): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   // Create date in local timezone to avoid UTC conversion issues
@@ -92,102 +96,32 @@ export const getLocalDateString = (date: Date | string): string => {
   return `${year}-${month}-${day}`;
 };
 
-// When saving a session, use local date format
-export const saveSession = (session: TimerSession): string => {
-  if (typeof window === 'undefined') return '';
-  
-  // Make sure an ID is assigned
-  if (!session.id) {
-    session.id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
-  }
-  
-  // Ensure the date is stored in the user's local timezone
-  if (!session.localDate) {
-    session.localDate = getLocalDateString(session.date);
-  }
-  
-  const sessions = getSessions();
-  sessions.push(session);
-  localStorage.setItem('timerSessions', JSON.stringify(sessions));
-  
-  return session.id; // Return the ID for reference
-};
-
+// Helper function to format time as MM:SS
 export const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-// Get all timer sessions from local storage
-export const getSessions = (): TimerSession[] => {
-  if (typeof window === 'undefined') return [];
-  
-  const sessionsData = localStorage.getItem('timerSessions');
-  return sessionsData ? JSON.parse(sessionsData) : [];
-};
+// Calculate goal progress (pure function - no data access)
+// src/lib/timer.ts
 
-// Save timer settings to local storage
-export const saveSettings = (settings: TimerSettings): void => {
-  if (typeof window === 'undefined') return;
-  
-  localStorage.setItem('timerSettings', JSON.stringify(settings));
-};
+// src/lib/timer.ts
 
-// Get timer settings from local storage
-export const getSettings = (): TimerSettings => {
-  if (typeof window === 'undefined') return defaultSettings;
-  
-  const settingsData = localStorage.getItem('timerSettings');
-  return settingsData ? JSON.parse(settingsData) : defaultSettings;
-};
-
-
-// Get all goals from localStorage
-export const getGoals = (): Goal[] => {
-  if (typeof window === 'undefined') return [];
-  
-  const goalsData = localStorage.getItem('focusGoals');
-  return goalsData ? JSON.parse(goalsData) : [];
-};
-
-// Save a new goal
-export const saveGoal = (goal: Goal): void => {
-  if (typeof window === 'undefined') return;
-  
-  const goals = getGoals();
-  goals.push(goal);
-  localStorage.setItem('focusGoals', JSON.stringify(goals));
-};
-
-// Update an existing goal
-export const updateGoal = (updatedGoal: Goal): void => {
-  if (typeof window === 'undefined') return;
-  
-  const goals = getGoals();
-  const index = goals.findIndex(g => g.id === updatedGoal.id);
-  if (index !== -1) {
-    goals[index] = updatedGoal;
-    localStorage.setItem('focusGoals', JSON.stringify(goals));
-  }
-};
-
-// Delete a goal
-export const deleteGoal = (goalId: string): void => {
-  if (typeof window === 'undefined') return;
-  
-  const goals = getGoals();
-  const updatedGoals = goals.filter(g => g.id !== goalId);
-  localStorage.setItem('focusGoals', JSON.stringify(updatedGoals));
-};
-
-
-export const calculateGoalProgress = (goal: Goal): {
+export const calculateGoalProgress = (
+  goal: Goal, 
+  sessions?: TimerSession[]  // Make sessions optional
+): {
   current: number;
   percentage: number;
 } => {
-  const sessions = getSessions();
-  const focusSessions = sessions.filter(s => s.type === 'focus');
+  // Since getSessions is not available in this cleaned up file,
+  // we need to make sessions required or handle it differently
+  if (!sessions) {
+    throw new Error('Sessions must be provided to calculateGoalProgress');
+  }
+  
+  const focusSessions = sessions.filter((s: TimerSession) => s.type === 'focus');
   
   // Determine date range based on goal period
   const now = new Date();
@@ -213,7 +147,7 @@ export const calculateGoalProgress = (goal: Goal): {
   }
   
   // Filter sessions within the time period and matching the activity if specified
-  const relevantSessions = focusSessions.filter(session => {
+  const relevantSessions = focusSessions.filter((session: TimerSession) => {
     const sessionDate = new Date(session.date);
     
     // Check if it's within the date range
@@ -229,7 +163,7 @@ export const calculateGoalProgress = (goal: Goal): {
   
   if (goal.type === 'time') {
     // Sum up minutes
-    current = Math.round(relevantSessions.reduce((total, s) => total + s.duration / 60, 0));
+    current = Math.round(relevantSessions.reduce((total: number, s: TimerSession) => total + s.duration / 60, 0));
   } else {
     // Count sessions
     current = relevantSessions.length;
@@ -241,50 +175,11 @@ export const calculateGoalProgress = (goal: Goal): {
   return { current, percentage };
 };
 
-
-// Functions to manage tasks
-export const getTasks = (): Task[] => {
-  if (typeof window === 'undefined') return [];
-  
-  const tasksData = localStorage.getItem('focusTasks');
-  return tasksData ? JSON.parse(tasksData) : [];
-};
-
-export const saveTask = (task: Task): void => {
-  if (typeof window === 'undefined') return;
-  
-  const tasks = getTasks();
-  tasks.push(task);
-  localStorage.setItem('focusTasks', JSON.stringify(tasks));
-};
-
-// Update the updateTask function to handle completion timestamps
-export const updateTask = (task: Task): void => {
-  if (typeof window === 'undefined') return;
-  
-  const tasks = getTasks();
-  const index = tasks.findIndex(t => t.id === task.id);
-  
-  if (index !== -1) {
-    // Add completedAt timestamp when marking as complete
-    if (task.completed && !tasks[index].completed) {
-      task.completedAt = new Date().toISOString();
-    }
-    tasks[index] = task;
-    localStorage.setItem('focusTasks', JSON.stringify(tasks));
-  }
-};
-
-export const deleteTask = (taskId: string): void => {
-  if (typeof window === 'undefined') return;
-  
-  const tasks = getTasks();
-  const updatedTasks = tasks.filter(t => t.id !== taskId);
-  localStorage.setItem('focusTasks', JSON.stringify(updatedTasks));
-};
-
-// Get tasks for a specific goal
-export const getTasksForGoal = (goalId: string): Task[] => {
-  const tasks = getTasks();
-  return tasks.filter(task => task.goalId === goalId);
-};
+// ===================== DATA OPERATIONS REMOVED =====================
+// All data operations have been moved to repository classes:
+// - SessionRepository
+// - GoalRepository 
+// - TaskRepository
+// - AccomplishmentRepository
+//
+// Use the DataProvider to access these operations instead of direct localStorage calls
