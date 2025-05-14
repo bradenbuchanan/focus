@@ -113,13 +113,13 @@ export class GoalRepository {
     }
   }
   
-  async updateGoal(goal: Goal): Promise<boolean> {
+  async updateGoal(goal: Goal): Promise<void> {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
       if (!userData?.user) {
         this.updateLocalGoal(goal);
-        return true;
+        return;
       }
       
       const { error } = await supabase
@@ -137,12 +137,10 @@ export class GoalRepository {
         .eq('id', goal.id);
         
       if (error) throw error;
-      
-      return true;
     } catch (error) {
       console.error('Error updating goal in Supabase:', error);
       this.updateLocalGoal(goal);
-      return false;
+      throw error;
     }
   }
   
