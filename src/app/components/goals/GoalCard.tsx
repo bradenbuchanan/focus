@@ -1,11 +1,12 @@
 // src/app/components/goals/GoalCard.tsx
 'use client';
 
-import { useState } from 'react';
-import { Goal, calculateGoalProgress } from '@/lib/timer';
+import { useState, useEffect } from 'react';
+import { Goal, TimerSession, calculateGoalProgress } from '@/lib/timer';
 import { GoalCard as UnifiedGoalCard } from '../../components/ui/GoalCard';
 import { TaskList } from '../../components/ui/TaskList';
 import GoalEditForm from './GoalEditForm';
+import { useData } from '@/providers/DataProvider';
 
 interface GoalCardProps {
   goal: Goal;
@@ -16,7 +17,42 @@ interface GoalCardProps {
 export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
-  const progress = calculateGoalProgress(goal);
+  const [sessions, setSessions] = useState<TimerSession[]>([]);
+
+  const { getSessions } = useData();
+
+  // Load sessions when component mounts
+  useEffect(() => {
+    async function loadSessions() {
+      try {
+        const dbSessions = await getSessions();
+        // Convert database sessions to TimerSession format
+        const timerSessions: TimerSession[] = dbSessions.map((s) => ({
+          id: s.id,
+          date: s.start_time,
+          localDate: s.start_time.split('T')[0], // Extract date part
+          duration: s.duration || 0,
+          type: (s.category === 'focus' ? 'focus' : 'break') as
+            | 'focus'
+            | 'break',
+          completed: s.completed,
+          activity: s.activity || undefined,
+        }));
+        setSessions(timerSessions);
+      } catch (error) {
+        console.error('Error loading sessions:', error);
+        setSessions([]);
+      }
+    }
+
+    loadSessions();
+  }, [getSessions]);
+
+  // Calculate progress with loaded sessions
+  const progress =
+    sessions.length > 0
+      ? calculateGoalProgress(goal, sessions)
+      : { current: 0, percentage: 0 };
 
   if (isEditing) {
     return (
@@ -41,7 +77,12 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
         onGoalClick={() => setShowTasks(!showTasks)}
       />
 
-      {showTasks && <TaskList goalId={goal.id} className="mt-4" />}
+      {showTasks && (
+        <div className="mt-4">
+          <h4>Tasks for this goal:</h4>
+          <TaskList tasks={[]} isCompact={true} />
+        </div>
+      )}
     </>
   );
 }
