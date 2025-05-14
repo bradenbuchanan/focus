@@ -7,7 +7,6 @@ import { Goal, Task, calculateGoalProgress } from '@/lib/timer';
 import { Database } from '../../../types/supabase';
 import { TaskItem } from '../../components/ui/TaskItem';
 import { GoalCard } from '../../components/ui/GoalCard';
-import { TaskList } from '../../components/ui/TaskList';
 import styles from './timerGoalsTasks.module.css';
 import { useData } from '@/providers/DataProvider';
 import { supabase } from '@/lib/supabase';
