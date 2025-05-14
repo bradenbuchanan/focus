@@ -13,7 +13,8 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { useState, useEffect } from 'react';
-import { getSessions } from '@/lib/timer';
+import { TimerSession } from '@/lib/timer';
+import { useData } from '@/providers/DataProvider';
 import styles from './analytics.module.css';
 
 ChartJS.register(
@@ -49,116 +50,143 @@ export default function ProductivityTrends() {
     ],
   });
 
+  const { getSessions } = useData();
+
   useEffect(() => {
-    const sessions = getSessions();
-    const focusSessions = sessions.filter((s) => s.type === 'focus');
+    async function loadData() {
+      try {
+        const dbSessions = await getSessions();
 
-    // Configure based on timeframe
-    let periodCount: number;
-    let periodName: string;
-    let daysPerPeriod: number;
+        // Convert database sessions to TimerSession format
+        const sessions: TimerSession[] = dbSessions.map((s) => ({
+          id: s.id,
+          date: s.start_time,
+          localDate: s.start_time.split('T')[0],
+          duration: s.duration || 0,
+          type: (s.category === 'focus' ? 'focus' : 'break') as
+            | 'focus'
+            | 'break',
+          completed: s.completed,
+          activity: s.activity || undefined,
+        }));
 
-    switch (timeframe) {
-      case '3m':
-        periodCount = 12; // 12 weeks
-        periodName = 'Week';
-        daysPerPeriod = 7;
-        break;
-      case '6m':
-        periodCount = 6; // 6 months
-        periodName = 'Month';
-        daysPerPeriod = 30;
-        break;
-      case '1y':
-        periodCount = 12; // 12 months
-        periodName = 'Month';
-        daysPerPeriod = 30;
-        break;
-      default: // '4w'
-        periodCount = 4; // 4 weeks
-        periodName = 'Week';
-        daysPerPeriod = 7;
-        break;
-    }
+        const focusSessions = sessions.filter(
+          (s: TimerSession) => s.type === 'focus'
+        );
 
-    const now = new Date();
-    const periods: string[] = [];
-    const avgSessionLengths: number[] = [];
-    const sessionsPerPeriod: number[] = [];
+        // Configure based on timeframe
+        let periodCount: number;
+        let periodName: string;
+        let daysPerPeriod: number;
 
-    for (let i = periodCount - 1; i >= 0; i--) {
-      const startDate = new Date();
-      const periodOffset = i * daysPerPeriod;
-      startDate.setDate(now.getDate() - (periodOffset + daysPerPeriod - 1));
+        switch (timeframe) {
+          case '3m':
+            periodCount = 12; // 12 weeks
+            periodName = 'Week';
+            daysPerPeriod = 7;
+            break;
+          case '6m':
+            periodCount = 6; // 6 months
+            periodName = 'Month';
+            daysPerPeriod = 30;
+            break;
+          case '1y':
+            periodCount = 12; // 12 months
+            periodName = 'Month';
+            daysPerPeriod = 30;
+            break;
+          default: // '4w'
+            periodCount = 4; // 4 weeks
+            periodName = 'Week';
+            daysPerPeriod = 7;
+            break;
+        }
 
-      const endDate = new Date();
-      endDate.setDate(now.getDate() - periodOffset);
+        const now = new Date();
+        const periods: string[] = [];
+        const avgSessionLengths: number[] = [];
+        const sessionsPerPeriod: number[] = [];
 
-      // Generate period label
-      let periodLabel: string;
+        for (let i = periodCount - 1; i >= 0; i--) {
+          const startDate = new Date();
+          const periodOffset = i * daysPerPeriod;
+          startDate.setDate(now.getDate() - (periodOffset + daysPerPeriod - 1));
 
-      if (periodName === 'Week') {
-        periodLabel = `${periodName} ${periodCount - i}`;
-      } else {
-        // For months, use month names
-        const monthNames = [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ];
-        periodLabel = monthNames[endDate.getMonth()];
+          const endDate = new Date();
+          endDate.setDate(now.getDate() - periodOffset);
+
+          // Generate period label
+          let periodLabel: string;
+
+          if (periodName === 'Week') {
+            periodLabel = `${periodName} ${periodCount - i}`;
+          } else {
+            // For months, use month names
+            const monthNames = [
+              'Jan',
+              'Feb',
+              'Mar',
+              'Apr',
+              'May',
+              'Jun',
+              'Jul',
+              'Aug',
+              'Sep',
+              'Oct',
+              'Nov',
+              'Dec',
+            ];
+            periodLabel = monthNames[endDate.getMonth()];
+          }
+
+          periods.push(periodLabel);
+
+          // Filter sessions in this period
+          const periodSessions = focusSessions.filter((s: TimerSession) => {
+            // Use localDate if available
+            const dateStr = s.localDate || s.date.split('T')[0];
+            const sessionDate = new Date(dateStr);
+            return sessionDate >= startDate && sessionDate <= endDate;
+          });
+
+          // Calculate average session length
+          const totalMinutes = periodSessions.reduce(
+            (total: number, session: TimerSession) =>
+              total + session.duration / 60,
+            0
+          );
+          const avgLength = periodSessions.length
+            ? Math.round(totalMinutes / periodSessions.length)
+            : 0;
+
+          avgSessionLengths.push(avgLength);
+          sessionsPerPeriod.push(periodSessions.length);
+        }
+
+        setChartData({
+          labels: periods,
+          datasets: [
+            {
+              label: 'Average Session Length (min)',
+              data: avgSessionLengths,
+              borderColor: 'rgb(75, 192, 192)',
+              backgroundColor: 'rgba(75, 192, 192, 0.5)',
+            },
+            {
+              label: 'Number of Sessions',
+              data: sessionsPerPeriod,
+              borderColor: 'rgb(255, 99, 132)',
+              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            },
+          ],
+        });
+      } catch (error) {
+        console.error('Error loading productivity trends:', error);
       }
-
-      periods.push(periodLabel);
-
-      // Filter sessions in this period
-      const periodSessions = focusSessions.filter((s) => {
-        // Use localDate if available
-        const dateStr = s.localDate || s.date.split('T')[0];
-        const sessionDate = new Date(dateStr);
-        return sessionDate >= startDate && sessionDate <= endDate;
-      });
-
-      // Calculate average session length
-      const totalMinutes = periodSessions.reduce(
-        (total, session) => total + session.duration / 60,
-        0
-      );
-      const avgLength = periodSessions.length
-        ? Math.round(totalMinutes / periodSessions.length)
-        : 0;
-
-      avgSessionLengths.push(avgLength);
-      sessionsPerPeriod.push(periodSessions.length);
     }
 
-    setChartData({
-      labels: periods,
-      datasets: [
-        {
-          label: 'Average Session Length (min)',
-          data: avgSessionLengths,
-          borderColor: 'rgb(75, 192, 192)',
-          backgroundColor: 'rgba(75, 192, 192, 0.5)',
-        },
-        {
-          label: 'Number of Sessions',
-          data: sessionsPerPeriod,
-          borderColor: 'rgb(255, 99, 132)',
-          backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        },
-      ],
-    });
-  }, [timeframe]);
+    loadData();
+  }, [timeframe, getSessions]);
 
   const options = {
     responsive: true,
