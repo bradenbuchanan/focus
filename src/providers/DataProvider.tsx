@@ -2,17 +2,17 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useMemo } from 'react';
-// Remove the useAuth import since we're not using it
 import { SessionRepository } from '@/repositories/SessionRepository';
 import { GoalRepository } from '@/repositories/GoalRepository';
 import { TaskRepository } from '@/repositories/TaskRepository';
 import { AccomplishmentRepository } from '@/repositories/AccomplishmentRepository';
 import { Database } from '@/types/supabase';
+import { Goal } from '@/lib/timer';
 
 // Keep all your EXISTING type definitions from your old DataProvider
 type Session = Database['public']['Tables']['focus_sessions']['Row'];
 type Accomplishment = Database['public']['Tables']['accomplishments']['Row'];
-type Goal = Database['public']['Tables']['goals']['Row'];
+type SupabaseGoal = Database['public']['Tables']['goals']['Row'];
 type Task = Database['public']['Tables']['tasks']['Row'];
 
 interface SessionInput {
@@ -70,19 +70,18 @@ interface DataContextType {
   saveAccomplishment: (data: AccomplishmentInput) => Promise<string>;
   getAccomplishments: () => Promise<Accomplishment[]>;
   saveGoal: (goal: GoalInput) => Promise<string>;
-  getGoals: () => Promise<Goal[]>;
+  getGoals: () => Promise<SupabaseGoal[]>;
   deleteGoal: (goalId: string) => Promise<void>;
   saveTask: (task: TaskInput) => Promise<string>;
   updateTask: (task: TaskUpdateInput) => Promise<void>;
   getTasks: () => Promise<Task[]>;
   deleteTask: (taskId: string) => Promise<void>;
+  updateGoal: (goal: Goal) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: DataProviderProps) {
-  // Remove the unused useAuth hook and user variable
-
   // Create repositories once using useMemo
   const sessionRepo = useMemo(() => new SessionRepository(), []);
   const goalRepo = useMemo(() => new GoalRepository(), []);
@@ -104,6 +103,11 @@ export function DataProvider({ children }: DataProviderProps) {
       updateTask: (task: TaskUpdateInput) => taskRepo.updateTask(task),
       getTasks: () => taskRepo.getTasks(),
       deleteTask: (taskId: string) => taskRepo.deleteTask(taskId),
+      updateGoal: async (goal: Goal): Promise<void> => {
+        const result = await goalRepo.updateGoal(goal);
+        // Just ignore the boolean result to match the void return type
+        return;
+      },
     }),
     [sessionRepo, goalRepo, taskRepo, accomplishmentRepo]
   );
