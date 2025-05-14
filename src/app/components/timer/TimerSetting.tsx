@@ -1,22 +1,29 @@
+// src/app/components/timer/TimerSetting.tsx
 'use client';
 
-// src/components/timer/TimerSettings.tsx
 import { useState } from 'react';
-import { TimerSettings as TimerSettingsType, saveSettings } from '@/lib/timer';
+import type { TimerSettings } from '@/lib/timer';
 import styles from './timer.module.css';
 
-interface TimerSettingsProps {
-  settings: TimerSettingsType;
-  onSave: (settings: TimerSettingsType) => void;
+// Local function to save settings to localStorage
+const saveTimerSettings = (settings: TimerSettings): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('timerSettings', JSON.stringify(settings));
+  }
+};
+
+interface TimerSettingsComponentProps {
+  settings: TimerSettings;
+  onSave: (settings: TimerSettings) => void;
   onCancel: () => void;
 }
 
-export default function TimerSettings({
+export default function TimerSetting({
   settings,
   onSave,
   onCancel,
-}: TimerSettingsProps) {
-  const [editSettings, setEditSettings] = useState<TimerSettingsType>({
+}: TimerSettingsComponentProps) {
+  const [editSettings, setEditSettings] = useState<TimerSettings>({
     ...settings,
   });
 
@@ -31,7 +38,9 @@ export default function TimerSettings({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveSettings(editSettings);
+    // Save to localStorage
+    saveTimerSettings(editSettings);
+    // Notify parent component
     onSave(editSettings);
   };
 
