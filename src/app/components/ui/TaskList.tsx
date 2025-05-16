@@ -4,6 +4,7 @@
 import { Task } from '@/lib/timer';
 import { TaskItem } from './TaskItem';
 import styles from './TaskList.module.css';
+import listStyles from '@/app/styles/shared/lists.module.css';
 
 interface TaskListProps {
   tasks: Task[];
@@ -23,7 +24,7 @@ export function TaskList({
   }
 
   return (
-    <div className={`${styles.taskList} ${className}`}>
+    <div className={`${listStyles.listContainer} ${className}`}>
       {tasks.map((task) => (
         <TaskItem
           key={task.id}
