@@ -4,6 +4,7 @@
 import { Goal } from '@/lib/timer';
 import { ProgressBar } from './ProgressBar';
 import styles from './GoalCard.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
 
 interface GoalCardProps {
   goal: Goal;
@@ -47,14 +48,14 @@ export function GoalCard({
 
   return (
     <div
-      className={`${styles.goalCard} ${
-        isCompact ? styles.compact : ''
+      className={`${cardStyles.card} ${
+        isCompact ? cardStyles.compactCard : ''
       } ${className}`}
       onClick={handleCardClick}
       style={{ cursor: onGoalClick ? 'pointer' : 'default' }}
     >
-      <div className={styles.goalHeader}>
-        <h3>{goal.title}</h3>
+      <div className={cardStyles.cardHeader}>
+        <h3 className={cardStyles.cardTitle}>{goal.title}</h3>
         {showActions && (onEdit || onDelete) && (
           <div className={styles.goalActions}>
             {onEdit && (
