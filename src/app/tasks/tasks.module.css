@@ -1,191 +1,52 @@
 /* Task styles */
-.tasksContainer {
-    margin-top: 1rem;
-    border-top: 1px solid var(--gray-alpha-100);
-    padding-top: 1rem;
-  }
-  
-  .tasksHeader {
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .taskForm {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-  
-  .taskInput {
-    flex: 1;
-    padding: 0.6rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--gray-alpha-200);
-    background-color: var(--background);
-  }
-  
-  .taskAddButton {
-    background-color: var(--foreground);
-    color: var(--background);
-    border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    cursor: pointer;
-  }
-  
-  .tasksList {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .taskItem {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    background-color: var(--gray-alpha-100);
-    transition: background-color 0.2s ease;
-  }
-  
-  .taskItem:hover {
-    background-color: var(--gray-alpha-200);
-  }
-  
-  .taskCompleted .taskText {
-    text-decoration: line-through;
-    opacity: 0.7;
-  }
-  
-  .taskCheckbox {
-    margin-right: 0.75rem;
-  }
-  
-  .taskText {
-    flex: 1;
-  }
-  
-  .taskActions {
-    display: flex;
-    gap: 0.5rem;
-  }
-  
-  .taskEditButton,
-  .taskDeleteButton {
-    background: none;
-    border: none;
-    padding: 0.25rem;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-  }
-  
-  .taskEditButton:hover,
-  .taskDeleteButton:hover {
-    opacity: 1;
-  }
-  
-  .taskToggle {
-    margin-top: 1rem;
-    text-align: center;
-  }
-  
-  .taskToggleButton {
-    background: none;
-    border: none;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: var(--foreground);
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    margin: 0 auto;
-  }
-  
-  .taskToggleButton:hover {
-    opacity: 1;
-  }
-  
-  .taskToggleIcon {
-    font-size: 0.7rem;
-  }
-  
-  .taskEditForm {
-    background-color: var(--gray-alpha-100);
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-  }
-  
-  .taskEditForm input {
-    width: 100%;
-    padding: 0.6rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--gray-alpha-200);
-    background-color: var(--background);
-    margin-bottom: 0.5rem;
-  }
-  
-  .taskEditActions {
-    display: flex;
-    gap: 0.5rem;
-  }
-  
-  .taskSaveButton,
-  .taskCancelButton {
-    padding: 0.4rem 0.75rem;
-    border-radius: 0.5rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-  }
-  
-  .taskSaveButton {
-    background-color: var(--foreground);
-    color: var(--background);
-    border: none;
-  }
-  
-  .taskCancelButton {
-    background-color: var(--gray-alpha-200);
-    color: var(--foreground);
-    border: none;
-  }
-  
-  .noTasks {
-    text-align: center;
-    padding: 1rem;
-    color: var(--foreground);
-    opacity: 0.7;
-    font-style: italic;
-  }
-  
-  /* For standalone tasks page */
+.tasksPage {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.tasksHeader {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.tasksHeader h1 {
+  margin-bottom: 0.5rem;
+}
+
+.tasksHeader p {
+  opacity: 0.7;
+  margin-bottom: 0.5rem;
+}
+
+/* This represents the new structure of the CSS file with duplicated styles removed */
+.loadingState {
+  text-align: center;
+  padding: 3rem;
+  background-color: var(--gray-alpha-100);
+  border-radius: 1rem;
+  margin: 2rem 0;
+}
+
+.errorState {
+  text-align: center;
+  padding: 2rem;
+  background-color: rgba(255, 0, 0, 0.1);
+  border-radius: 1rem;
+  margin: 2rem 0;
+}
+
+.linkBack {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.retryButton {
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
   .tasksPage {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 0 1.5rem;
+    padding: 1rem;
   }
-  
-  .taskFilters {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
-  }
-  
-  .filterButton {
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--gray-alpha-200);
-    background-color: var(--background);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .filterButton.active {
-    background-color: var(--foreground);
-    color: var(--background);
-    border-color: var(--foreground);
-  }
+}

@@ -1,4 +1,4 @@
-/* src/app/goals/goals.module.css - Reduced version */
+/* src/app/goals/goals.module.css */
 
 /* Page container */
 .goalsPage {
@@ -26,86 +26,9 @@
   margin: 0 auto 1.5rem auto;
 }
 
-/* Tab navigation */
-.tabsContainer {
-  display: flex;
-  margin-bottom: 2rem;
-  background-color: rgba(var(--gray-rgb), 0.1);
-  border-radius: 0.75rem;
-  padding: 0.4rem;
-  width: 100%;
-  max-width: 450px;
-  margin: 0 auto 2rem auto;
-}
-
-.tabButton {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: none;
-  background: transparent;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  color: var(--foreground);
-  opacity: 0.75;
-}
-
-.tabButton:hover:not(.activeTab) {
-  opacity: 0.9;
-  background-color: rgba(var(--gray-rgb), 0.05);
-}
-
-.activeTab {
-  background-color: var(--background);
-  box-shadow: 0 2px 8px rgba(var(--gray-rgb), 0.15);
-  opacity: 1;
-  font-weight: 600;
-}
-
-/* Create button */
-.createButton {
-  background-color: var(--foreground);
-  color: var(--background);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-/* Lists of goals */
-.goalsList {
-  margin-bottom: 2rem;
-}
-
-/* Empty state */
-.emptyState {
-  background-color: var(--gray-alpha-100);
-  border-radius: 1rem;
-  padding: 3rem 2rem;
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.emptyState h3 {
-  margin-bottom: 0.5rem;
-}
-
-.emptyState p {
-  margin-bottom: 1.5rem;
-  opacity: 0.7;
-}
-
 /* Tasks section wrapper */
 .tasksSection {
-  background-color: var(--background);
-  border-radius: 1rem;
-  padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 8px var(--gray-alpha-100);
-  border: 1px solid var(--gray-alpha-200);
 }
 
 /* Completed section */
@@ -117,10 +40,7 @@
 
 .completedGoals, 
 .completedTasks {
-  background-color: var(--background);
-  padding: 1.5rem;
-  border-radius: 1rem;
-  border: 1px solid var(--gray-alpha-200);
+  margin-bottom: 2rem;
 }
 
 .completedTaskItem {
@@ -136,71 +56,13 @@
   padding-right: 0.5rem;
 }
 
-.sectionTitle {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--gray-alpha-200);
-}
-
 /* Navigation link back to timer */
 .timerLink {
   text-align: center;
   margin-top: 2rem;
 }
 
-/* No items indicator */
-.noItems {
-  text-align: center;
-  padding: 2rem 1rem;
-  color: var(--foreground);
-  opacity: 0.7;
-  font-style: italic;
-  background-color: var(--gray-alpha-100);
-  border-radius: 0.5rem;
-}
-
-/* Activity filtering */
-.filterBar {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: var(--gray-alpha-100);
-  border-radius: 0.5rem;
-}
-
-.activityFilters {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filterLabel {
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.activityButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.activityButton {
-  padding: 0.4rem 0.8rem;
-  border-radius: 1rem;
-  border: 1px solid var(--gray-alpha-200);
-  background-color: var(--background);
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.activityButton.active {
-  background-color: var(--foreground);
-  color: var(--background);
-  border-color: var(--foreground);
-}
-
+/* Loading and error states */
 .loadingState {
   text-align: center;
   padding: 3rem;
@@ -217,48 +79,11 @@
   margin: 2rem 0;
 }
 
-.retryButton {
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  background-color: var(--foreground);
-  color: var(--background);
-  border: none;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.retryButton:hover {
-  opacity: 0.9;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .goalsHeader {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-  }
-  
-  .activityFilters {
-    flex-direction: column;
-  }
-  
-  .activityButtons {
-    flex-wrap: wrap;
-  }
-  
-  .activityButton {
-    font-size: 0.8rem;
-    padding: 0.3rem 0.6rem;
-  }
-  
-  .tabsContainer {
-    padding: 0.3rem;
-  }
-  
-  .tabButton {
-    padding: 0.6rem 0.5rem;
-    font-size: 0.9rem;
   }
 }
