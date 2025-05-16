@@ -11,6 +11,7 @@ import TopActivities from '../components/dashboard/TopActivities';
 import DashboardActions from '../components/dashboard/DashboardActions';
 import PriorityFocus from '../components/dashboard/PriorityFocus';
 import { useDashboardData } from './hooks/useDashboardData';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
 
 export default function Dashboard() {
   const { user } = useAuth();
