@@ -14,6 +14,8 @@ import { GoalList } from '@/app/components/ui/GoalList';
 import ActivitySelector from './ActivitySelector';
 import { defaultActivityCategories } from '@/lib/timer';
 import styles from './timer.module.css';
+import filterStyles from '@/app/styles/shared/filters.module.css';
+import listStyles from '@/app/styles/shared/lists.module.css';
 
 export default function TimerContainer() {
   const [selectedActivity, setSelectedActivity] = useState(
@@ -44,6 +46,7 @@ export default function TimerContainer() {
       const allTasks = await getTasks();
       const allGoals = await getGoals();
 
+      // Filter and convert task data
       const filteredTasks = allTasks
         .filter(
           (task) =>
@@ -62,6 +65,7 @@ export default function TimerContainer() {
           completedAt: task.completed_at || undefined,
         }));
 
+      // Filter and convert goal data
       const filteredGoals = allGoals
         .filter((goal) => goal.activity === selectedActivity || !goal.activity)
         .map((goal) => ({
@@ -122,18 +126,18 @@ export default function TimerContainer() {
         onSelectActivity={setSelectedActivity}
       />
 
-      <div className={styles.timerModeTabs}>
+      <div className={filterStyles.filterTabs}>
         <button
-          className={`${styles.tab} ${
-            timerMode === 'pomodoro' ? styles.active : ''
+          className={`${filterStyles.filterTab} ${
+            timerMode === 'pomodoro' ? filterStyles.activeTab : ''
           }`}
           onClick={() => setTimerMode('pomodoro')}
         >
           Pomodoro Timer
         </button>
         <button
-          className={`${styles.tab} ${
-            timerMode === 'free' ? styles.active : ''
+          className={`${filterStyles.filterTab} ${
+            timerMode === 'free' ? filterStyles.activeTab : ''
           }`}
           onClick={() => setTimerMode('free')}
         >
@@ -159,20 +163,24 @@ export default function TimerContainer() {
 
       <div className={styles.timerContent}>
         <div className={styles.section}>
-          <h3>Active Tasks</h3>
+          <h3 className={listStyles.listTitle}>Active Tasks</h3>
           {tasks.length > 0 ? (
             <TaskList tasks={tasks} isCompact={true} />
           ) : (
-            <p className={styles.emptyState}>No tasks for {selectedActivity}</p>
+            <p className={listStyles.emptyState}>
+              No tasks for {selectedActivity}
+            </p>
           )}
         </div>
 
         <div className={styles.section}>
-          <h3>Active Goals</h3>
+          <h3 className={listStyles.listTitle}>Active Goals</h3>
           {goals.length > 0 ? (
             <GoalList goals={goals} isCompact={true} />
           ) : (
-            <p className={styles.emptyState}>No goals for {selectedActivity}</p>
+            <p className={listStyles.emptyState}>
+              No goals for {selectedActivity}
+            </p>
           )}
         </div>
       </div>
