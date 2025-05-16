@@ -160,47 +160,12 @@
   font-weight: 500;
 }
 
-/* Button styling */
+/* Button layout styling */
 .timerControls {
   display: flex;
   justify-content: center;
   gap: 1rem;
   margin-top: 0.5rem;
-}
-
-.primaryButton {
-  background-color: var(--foreground);
-  color: var(--background);
-  padding: 0.75rem 2rem;
-  border-radius: 2rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 110px;
-  text-align: center;
-  border: none;
-}
-
-.primaryButton:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.secondaryButton {
-  background-color: var(--gray-alpha-200);
-  color: var(--foreground);
-  padding: 0.75rem 1.25rem;
-  border-radius: 2rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-}
-
-.secondaryButton:hover {
-  background-color: var(--gray-alpha-300, var(--gray-alpha-200));
-  opacity: 0.9;
 }
 
 /* Tasks section styling */
@@ -283,7 +248,7 @@
     flex-wrap: wrap;
   }
   
-  .primaryButton, .secondaryButton {
+  .timerControls button {
     flex: 1;
     min-width: 0;
   }
