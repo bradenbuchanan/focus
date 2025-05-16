@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { TimerData, TimerState, formatTime } from '@/lib/timer';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
 import styles from './TimerDisplay.module.css';
 
 interface TimerDisplayProps {
@@ -63,18 +64,21 @@ export default function TimerDisplay({
 
       <div className={styles.timerControls}>
         {isRunning ? (
-          <button onClick={onPause} className={styles.primaryButton}>
+          <button onClick={onPause} className={buttonStyles.primaryButton}>
             Pause
           </button>
         ) : (
-          <button onClick={onStart} className={styles.primaryButton}>
+          <button onClick={onStart} className={buttonStyles.primaryButton}>
             {timerData.state === TimerState.IDLE ? 'Start' : 'Resume'}
           </button>
         )}
-        <button onClick={onReset} className={styles.secondaryButton}>
+        <button onClick={onReset} className={buttonStyles.secondaryButton}>
           Reset
         </button>
-        <button onClick={onOpenSettings} className={styles.secondaryButton}>
+        <button
+          onClick={onOpenSettings}
+          className={buttonStyles.secondaryButton}
+        >
           Settings
         </button>
       </div>
