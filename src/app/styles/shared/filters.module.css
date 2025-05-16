@@ -1,0 +1,103 @@
+/* src/app/styles/shared/filters.module.css */
+.filterContainer {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--gray-alpha-100);
+    border-radius: 0.5rem;
+  }
+  
+  .filterLabel {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  
+  /* Activity buttons and pills */
+  .activityButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .activityButton {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    border: 1px solid var(--gray-alpha-200);
+    background-color: var(--background);
+    color: var(--foreground);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .activityButton:hover:not(.activeButton) {
+    background-color: var(--gray-alpha-100);
+    transform: translateY(-2px);
+  }
+  
+  .activeButton {
+    background-color: var(--foreground);
+    color: var(--background);
+    border-color: var(--foreground);
+  }
+  
+  .compactButton {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Filter tabs */
+  .filterTabs {
+    display: flex;
+    background-color: var(--gray-alpha-200);
+    border-radius: 2rem;
+    padding: 0.3rem;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 1.5rem auto;
+  }
+  
+  .filterTab {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 1.75rem;
+    border: none;
+    background-color: transparent;
+    color: var(--foreground);
+    opacity: 0.7;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+  
+  .activeTab {
+    background-color: var(--foreground);
+    color: var(--background);
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .filterContainer {
+      padding: 0.75rem;
+    }
+    
+    .activityButton {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+    }
+    
+    .compactButton {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+    }
+    
+    .filterTab {
+      padding: 0.6rem 0.5rem;
+      font-size: 0.85rem;
+    }
+  }
