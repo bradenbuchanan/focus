@@ -3,6 +3,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import styles from './analytics.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
 import WeeklySummaryCard from '@/app/components/analytics/WeeklySummaryCard';
 
 // Import custom hook
@@ -13,7 +14,6 @@ import SummaryCard from '@/app/components/analytics/SummaryCard';
 import CalendarSection from '@/app/components/analytics/CalendarSection';
 import FocusDistributionSection from '../../app/components/analytics/FocusDistributionSection';
 import ProductivityPatternsSection from '../../app/components/analytics/ProductivityPatternsSection';
-// Remove the WeeklyPatternSection import
 
 export default function AnalyticsPage() {
   const { user } = useAuth();
@@ -34,7 +34,6 @@ export default function AnalyticsPage() {
         <CalendarSection />
         <FocusDistributionSection />
         <ProductivityPatternsSection />
-        {/* Remove the WeeklyPatternSection component */}
       </div>
     </div>
   );
