@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import styles from './ActivitySelector.module.css';
+import filterStyles from '@/app/styles/shared/filters.module.css';
 import { defaultActivityCategories } from '@/lib/timer';
 
 interface ActivitySelectorProps {
@@ -39,12 +40,12 @@ export default function ActivitySelector({
     <div className={styles.activitySelector}>
       <h3>What are you focusing on?</h3>
 
-      <div className={styles.activityOptions}>
+      <div className={filterStyles.activityButtons}>
         {defaultActivityCategories.map((activity) => (
           <button
             key={activity}
-            className={`${styles.activityButton} ${
-              activity === selectedActivity ? styles.activityButtonSelected : ''
+            className={`${filterStyles.activityButton} ${
+              activity === selectedActivity ? filterStyles.activeButton : ''
             }`}
             onClick={() => handleActivitySelect(activity)}
           >
@@ -52,7 +53,7 @@ export default function ActivitySelector({
           </button>
         ))}
         <button
-          className={`${styles.activityButton}`}
+          className={filterStyles.activityButton}
           onClick={() => handleActivitySelect('Custom')}
         >
           Custom
