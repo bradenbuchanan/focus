@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { defaultActivityCategories } from '@/lib/timer';
 import styles from './GoalForm.module.css';
 import { useData } from '@/providers/DataProvider';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
 
 interface GoalFormProps {
   onSave: () => void;
@@ -156,12 +157,12 @@ export default function GoalForm({
         </div>
 
         <div className={styles.formActions}>
-          <button type="submit" className={styles.primaryButton}>
+          <button type="submit" className={buttonStyles.primaryButton}>
             Create Goal
           </button>
           <button
             type="button"
-            className={styles.secondaryButton}
+            className={buttonStyles.secondaryButton}
             onClick={onCancel}
           >
             Cancel
