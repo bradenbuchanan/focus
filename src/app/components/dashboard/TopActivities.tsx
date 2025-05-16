@@ -2,6 +2,7 @@
 'use client';
 
 import styles from './dashboardTopActivities.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
 import { formatTimeValue } from '@/utils/formatTime';
 
 interface TopActivitiesProps {
@@ -10,8 +11,8 @@ interface TopActivitiesProps {
 
 export default function TopActivities({ activities }: TopActivitiesProps) {
   return (
-    <div className={styles.topActivitiesCard}>
-      <h3>Top Activities</h3>
+    <div className={`${cardStyles.card} ${styles.topActivitiesCard}`}>
+      <h3 className={cardStyles.cardTitle}>Top Activities</h3>
       {activities.length > 0 ? (
         <ul className={styles.topActivitiesList}>
           {activities.map((activity, index) => (
