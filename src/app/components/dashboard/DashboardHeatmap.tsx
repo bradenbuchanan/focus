@@ -3,6 +3,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import styles from './dashboardHeatmap.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
+import filterStyles from '@/app/styles/shared/filters.module.css';
 import {
   ActivityData,
   useMultiActivityData,
@@ -14,7 +17,6 @@ import {
 } from '@/utils/events';
 
 export default function DashboardHeatmap() {
-  // Remove the refreshKey parameter from useMultiActivityData
   const { activityDataSets, isLoading, refreshData } = useMultiActivityData();
 
   const [selectedActivity, setSelectedActivity] =
@@ -23,16 +25,14 @@ export default function DashboardHeatmap() {
     useState<ActivityData | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  // Set up event listeners for refresh
+  // Event listeners setup remains the same
   useEffect(() => {
     const unsubscribeData = listenForDataUpdates(() => {
       console.log('Dashboard: Data update event received');
-      // The data will refresh automatically through the hook
     });
 
     const unsubscribeSession = listenForSessionCompleted(() => {
       console.log('Dashboard: Session completed event received');
-      // The data will refresh automatically through the hook
     });
 
     return () => {
@@ -41,7 +41,7 @@ export default function DashboardHeatmap() {
     };
   }, []);
 
-  // Update current activity data when selection changes
+  // Activity data handling remains the same
   useEffect(() => {
     if (!isLoading && activityDataSets.length > 0) {
       const selected =
@@ -50,7 +50,6 @@ export default function DashboardHeatmap() {
         ) || activityDataSets[0];
       setCurrentActivityData(selected);
 
-      // Default to "All Activities" if available
       if (
         !selectedActivity &&
         activityDataSets.some((d: ActivityData) => d.name === 'All Activities')
@@ -60,31 +59,32 @@ export default function DashboardHeatmap() {
     }
   }, [selectedActivity, activityDataSets, isLoading]);
 
-  // Update last updated time when data changes
+  // Last updated time handling remains the same
   useEffect(() => {
     if (!isLoading) {
       setLastUpdated(new Date());
     }
   }, [activityDataSets, isLoading]);
 
-  // Add manual refresh button
   const handleRefresh = useCallback(async () => {
     await refreshData();
   }, [refreshData]);
 
   if (isLoading) {
     return (
-      <div className={styles.heatmapCard}>
-        <h3>Recent Activity</h3>
+      <div className={`${cardStyles.card} ${styles.heatmapCard}`}>
+        <div className={cardStyles.cardHeader}>
+          <h3 className={cardStyles.cardTitle}>Recent Activity</h3>
+        </div>
         <div className={styles.loadingIndicator}>Loading activity data...</div>
       </div>
     );
   }
 
   return (
-    <div className={styles.heatmapCard}>
+    <div className={`${cardStyles.card} ${styles.heatmapCard}`}>
       <div className={styles.heatmapHeader}>
-        <h3>Recent Activity</h3>
+        <h3 className={cardStyles.cardTitle}>Recent Activity</h3>
         <div className={styles.controlsRow}>
           <select
             className={styles.activitySelector}
@@ -98,7 +98,7 @@ export default function DashboardHeatmap() {
             ))}
           </select>
           <button
-            className={styles.refreshButton}
+            className={`${buttonStyles.secondaryButton} ${buttonStyles.compactButton} ${styles.refreshButton}`}
             onClick={handleRefresh}
             title="Refresh data"
           >

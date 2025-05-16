@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Task, Goal } from '@/lib/timer';
 import styles from './priorityFocus.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
+import listStyles from '@/app/styles/shared/lists.module.css';
 import { useData } from '@/providers/DataProvider';
 
 interface GoalWithTasks {
@@ -20,33 +22,25 @@ export default function PriorityFocus() {
   const [goalsWithTasks, setGoalsWithTasks] = useState<GoalWithTasks[]>([]);
   const [completingTask, setCompletingTask] = useState<string | null>(null);
 
-  // Helper function to get urgent tasks from all sources
+  // Helper functions and data fetching remain the same
   const getUrgentTasksFromAllSources = () => {
-    // Standalone urgent tasks
     const standaloneUrgent = highPriorityTasks;
-
-    // Urgent tasks from goals
     const goalUrgent = goalsWithTasks
       .flatMap(({ tasks }: GoalWithTasks) => tasks)
       .filter((task: Task) => task.priority === 'high');
-
-    // Combine and limit to 3 total
     return [...standaloneUrgent, ...goalUrgent].slice(0, 3);
   };
 
-  // Handle completing a task
   const handleCompleteTask = async (taskId: string) => {
     setCompletingTask(taskId);
 
     try {
-      // Update the task using the data provider
       await updateTask({
         id: taskId,
         completed: true,
         completedAt: new Date().toISOString(),
       });
 
-      // Update the UI immediately
       setHighPriorityTasks((prev: Task[]) =>
         prev.filter((t: Task) => t.id !== taskId)
       );
@@ -63,6 +57,7 @@ export default function PriorityFocus() {
     }
   };
 
+  // Data fetching useEffect remains the same
   useEffect(() => {
     async function loadData() {
       try {
@@ -156,19 +151,26 @@ export default function PriorityFocus() {
   }, [getTasks, getGoals]);
 
   return (
-    <div className={styles.priorityContainer}>
+    <div className={`${cardStyles.card} ${styles.priorityContainer}`}>
       <h2 className={styles.priorityTitle}>Priority Focus</h2>
 
       {(() => {
         const urgentTasks = getUrgentTasksFromAllSources();
         return urgentTasks.length > 0 ? (
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>
+            <h3 className={`${listStyles.listTitle} ${styles.sectionTitle}`}>
               Urgent Tasks ({urgentTasks.length})
             </h3>
-            <ul className={styles.priorityList}>
+            <ul
+              className={`${listStyles.listContainer} ${styles.priorityList}`}
+            >
               {urgentTasks.map((task: Task) => (
-                <li key={task.id} className={styles.priorityItem}>
+                <li
+                  key={task.id}
+                  className={`${listStyles.listItem} ${styles.priorityItem} ${
+                    completingTask === task.id ? styles.completing : ''
+                  }`}
+                >
                   <div className={styles.taskCheckbox}>
                     <input
                       type="checkbox"
@@ -177,7 +179,11 @@ export default function PriorityFocus() {
                     />
                   </div>
                   <span className={styles.priorityBadge}>High</span>
-                  <span className={styles.priorityText}>{task.text}</span>
+                  <span
+                    className={`${listStyles.listItemText} ${styles.priorityText}`}
+                  >
+                    {task.text}
+                  </span>
                   {task.activity && (
                     <span className={styles.activityTag}>{task.activity}</span>
                   )}
@@ -190,7 +196,9 @@ export default function PriorityFocus() {
           </div>
         ) : (
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Urgent Tasks</h3>
+            <h3 className={`${listStyles.listTitle} ${styles.sectionTitle}`}>
+              Urgent Tasks
+            </h3>
             <p>No high priority tasks found</p>
           </div>
         );
@@ -198,12 +206,15 @@ export default function PriorityFocus() {
 
       {goalsWithTasks.length > 0 ? (
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>
+          <h3 className={`${listStyles.listTitle} ${styles.sectionTitle}`}>
             Goals Needing Attention ({goalsWithTasks.length})
           </h3>
-          <ul className={styles.priorityList}>
+          <ul className={`${listStyles.listContainer} ${styles.priorityList}`}>
             {goalsWithTasks.map(({ goal, progress, tasks }: GoalWithTasks) => (
-              <li key={goal.id} className={styles.goalItem}>
+              <li
+                key={goal.id}
+                className={`${cardStyles.card} ${cardStyles.compactCard} ${styles.goalItem}`}
+              >
                 <div className={styles.goalHeader}>
                   <div className={styles.goalProgress}>
                     <div
@@ -216,9 +227,18 @@ export default function PriorityFocus() {
                 </div>
 
                 {tasks.length > 0 ? (
-                  <ul className={styles.goalTasks}>
+                  <ul
+                    className={`${listStyles.listContainer} ${styles.goalTasks}`}
+                  >
                     {tasks.map((task: Task) => (
-                      <li key={task.id} className={styles.goalTask}>
+                      <li
+                        key={task.id}
+                        className={`${listStyles.listItem} ${
+                          listStyles.compactListItem
+                        } ${styles.goalTask} ${
+                          completingTask === task.id ? styles.completing : ''
+                        }`}
+                      >
                         <div className={styles.taskCheckbox}>
                           <input
                             type="checkbox"
@@ -229,7 +249,11 @@ export default function PriorityFocus() {
                         {task.priority === 'high' && (
                           <span className={styles.taskPriority}>High</span>
                         )}
-                        <span className={styles.taskText}>{task.text}</span>
+                        <span
+                          className={`${listStyles.listItemText} ${styles.taskText}`}
+                        >
+                          {task.text}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -245,7 +269,9 @@ export default function PriorityFocus() {
         </div>
       ) : (
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Goals Needing Attention</h3>
+          <h3 className={`${listStyles.listTitle} ${styles.sectionTitle}`}>
+            Goals Needing Attention
+          </h3>
           <p>No goals with low progress found</p>
         </div>
       )}
