@@ -5,7 +5,8 @@ import { useState } from 'react';
 import { Goal, defaultActivityCategories } from '@/lib/timer';
 import { useData } from '@/providers/DataProvider';
 import styles from './GoalEditForm.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css'; // Import shared button styles
+import formStyles from '@/app/styles/shared/forms.module.css';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
 
 interface GoalEditFormProps {
   goal: Goal;
@@ -67,10 +68,10 @@ export default function GoalEditForm({
     <div className={styles.goalForm}>
       <h2>Edit Goal</h2>
 
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {error && <div className={formStyles.error}>{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        <div className={styles.formGroup}>
+        <div className={formStyles.formGroup}>
           <label htmlFor="title">Goal Title</label>
           <input
             type="text"
@@ -80,10 +81,11 @@ export default function GoalEditForm({
             placeholder="e.g., Read more books"
             required
             disabled={isLoading}
+            className={formStyles.input}
           />
         </div>
 
-        <div className={styles.formGroup}>
+        <div className={formStyles.formGroup}>
           <label htmlFor="description">Description (Optional)</label>
           <textarea
             id="description"
@@ -91,24 +93,26 @@ export default function GoalEditForm({
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Additional details about your goal"
             disabled={isLoading}
+            className={formStyles.textarea}
           />
         </div>
 
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
+        <div className={formStyles.formRow}>
+          <div className={formStyles.formGroup}>
             <label htmlFor="type">Goal Type</label>
             <select
               id="type"
               value={type}
               onChange={(e) => setType(e.target.value as 'time' | 'sessions')}
               disabled={isLoading}
+              className={formStyles.select}
             >
               <option value="time">Focus Time</option>
               <option value="sessions">Number of Sessions</option>
             </select>
           </div>
 
-          <div className={styles.formGroup}>
+          <div className={formStyles.formGroup}>
             <label htmlFor="target">
               Target {type === 'time' ? 'Minutes' : 'Sessions'}
             </label>
@@ -120,12 +124,13 @@ export default function GoalEditForm({
               min="1"
               required
               disabled={isLoading}
+              className={formStyles.input}
             />
           </div>
         </div>
 
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
+        <div className={formStyles.formRow}>
+          <div className={formStyles.formGroup}>
             <label htmlFor="period">Time Period</label>
             <select
               id="period"
@@ -136,6 +141,7 @@ export default function GoalEditForm({
                 )
               }
               disabled={isLoading}
+              className={formStyles.select}
             >
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -144,13 +150,14 @@ export default function GoalEditForm({
             </select>
           </div>
 
-          <div className={styles.formGroup}>
+          <div className={formStyles.formGroup}>
             <label htmlFor="activity">Activity (Optional)</label>
             <select
               id="activity"
               value={activity}
               onChange={(e) => setActivity(e.target.value)}
               disabled={isLoading}
+              className={formStyles.select}
             >
               <option value="">All Activities</option>
               {defaultActivityCategories.map((category) => (
@@ -162,17 +169,17 @@ export default function GoalEditForm({
           </div>
         </div>
 
-        <div className={styles.formActions}>
+        <div className={formStyles.formActions}>
           <button
             type="submit"
-            className={buttonStyles.primaryButton} // Use shared button style
+            className={buttonStyles.primaryButton}
             disabled={isLoading}
           >
             {isLoading ? 'Saving...' : 'Save Changes'}
           </button>
           <button
             type="button"
-            className={buttonStyles.secondaryButton} // Use shared button style
+            className={buttonStyles.secondaryButton}
             onClick={onCancel}
             disabled={isLoading}
           >

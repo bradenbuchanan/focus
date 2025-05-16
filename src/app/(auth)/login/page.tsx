@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../auth.module.css';
+import formStyles from '@/app/styles/shared/forms.module.css';
 import buttonStyles from '@/app/styles/shared/buttons.module.css';
 import { useAuth } from '@/context/AuthContext';
 
@@ -42,10 +43,10 @@ export default function Login() {
         <h1>Login</h1>
         <p>Welcome back! Sign in to continue your focus journey.</p>
 
-        {error && <div className={styles.error}>{error}</div>}
+        {error && <div className={formStyles.error}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
+          <div className={formStyles.formGroup}>
             <label htmlFor="email">Email</label>
             <input
               type="email"
@@ -53,10 +54,11 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className={formStyles.input}
             />
           </div>
 
-          <div className={styles.formGroup}>
+          <div className={formStyles.formGroup}>
             <label htmlFor="password">Password</label>
             <input
               type="password"
@@ -64,16 +66,19 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className={formStyles.input}
             />
           </div>
 
-          <button
-            type="submit"
-            className={buttonStyles.primaryButton} // Use shared button style
-            disabled={isLoading}
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </button>
+          <div className={formStyles.formActions}>
+            <button
+              type="submit"
+              className={buttonStyles.primaryButton}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </div>
         </form>
 
         <div className={styles.authLinks}>

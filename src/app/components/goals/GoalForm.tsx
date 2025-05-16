@@ -4,8 +4,9 @@
 import React, { useState } from 'react';
 import { defaultActivityCategories } from '@/lib/timer';
 import styles from './GoalForm.module.css';
-import { useData } from '@/providers/DataProvider';
+import formStyles from '@/app/styles/shared/forms.module.css';
 import buttonStyles from '@/app/styles/shared/buttons.module.css';
+import { useData } from '@/providers/DataProvider';
 
 interface GoalFormProps {
   onSave: () => void;
@@ -67,10 +68,10 @@ export default function GoalForm({
     <div className={styles.goalForm}>
       <h2>Create New Goal</h2>
 
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {error && <div className={formStyles.error}>{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        <div className={styles.formGroup}>
+        <div className={formStyles.formGroup}>
           <label htmlFor="title">Goal Title</label>
           <input
             type="text"
@@ -79,33 +80,36 @@ export default function GoalForm({
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g., Read more books"
             required
+            className={formStyles.input}
           />
         </div>
 
-        <div className={styles.formGroup}>
+        <div className={formStyles.formGroup}>
           <label htmlFor="description">Description (Optional)</label>
           <textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Additional details about your goal"
+            className={formStyles.textarea}
           />
         </div>
 
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
+        <div className={formStyles.formRow}>
+          <div className={formStyles.formGroup}>
             <label htmlFor="type">Goal Type</label>
             <select
               id="type"
               value={type}
               onChange={(e) => setType(e.target.value as 'time' | 'sessions')}
+              className={formStyles.select}
             >
               <option value="time">Focus Time</option>
               <option value="sessions">Number of Sessions</option>
             </select>
           </div>
 
-          <div className={styles.formGroup}>
+          <div className={formStyles.formGroup}>
             <label htmlFor="target">
               Target {type === 'time' ? 'Minutes' : 'Sessions'}
             </label>
@@ -116,12 +120,13 @@ export default function GoalForm({
               onChange={(e) => setTarget(parseInt(e.target.value))}
               min="1"
               required
+              className={formStyles.input}
             />
           </div>
         </div>
 
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
+        <div className={formStyles.formRow}>
+          <div className={formStyles.formGroup}>
             <label htmlFor="period">Time Period</label>
             <select
               id="period"
@@ -131,6 +136,7 @@ export default function GoalForm({
                   e.target.value as 'daily' | 'weekly' | 'monthly' | 'yearly'
                 )
               }
+              className={formStyles.select}
             >
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -139,12 +145,13 @@ export default function GoalForm({
             </select>
           </div>
 
-          <div className={styles.formGroup}>
+          <div className={formStyles.formGroup}>
             <label htmlFor="activity">Activity (Optional)</label>
             <select
               id="activity"
               value={selectedActivity}
               onChange={(e) => setSelectedActivity(e.target.value)}
+              className={formStyles.select}
             >
               <option value="">All Activities</option>
               {defaultActivityCategories.map((category) => (
@@ -156,7 +163,7 @@ export default function GoalForm({
           </div>
         </div>
 
-        <div className={styles.formActions}>
+        <div className={formStyles.formActions}>
           <button type="submit" className={buttonStyles.primaryButton}>
             Create Goal
           </button>

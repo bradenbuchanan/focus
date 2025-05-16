@@ -4,6 +4,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import styles from '../auth.module.css';
+import formStyles from '@/app/styles/shared/forms.module.css';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Register() {
@@ -57,10 +59,10 @@ export default function Register() {
               Join thousands of users improving their productivity with Focus.
             </p>
 
-            {error && <div className={styles.error}>{error}</div>}
+            {error && <div className={formStyles.error}>{error}</div>}
 
             <form onSubmit={handleSubmit}>
-              <div className={styles.formGroup}>
+              <div className={formStyles.formGroup}>
                 <label htmlFor="name">Name</label>
                 <input
                   type="text"
@@ -68,10 +70,11 @@ export default function Register() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  className={formStyles.input}
                 />
               </div>
 
-              <div className={styles.formGroup}>
+              <div className={formStyles.formGroup}>
                 <label htmlFor="email">Email</label>
                 <input
                   type="email"
@@ -79,10 +82,11 @@ export default function Register() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className={formStyles.input}
                 />
               </div>
 
-              <div className={styles.formGroup}>
+              <div className={formStyles.formGroup}>
                 <label htmlFor="password">Password</label>
                 <input
                   type="password"
@@ -91,16 +95,19 @@ export default function Register() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={8}
+                  className={formStyles.input}
                 />
               </div>
 
-              <button
-                type="submit"
-                className={styles.submitButton}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Creating account...' : 'Create Account'}
-              </button>
+              <div className={formStyles.formActions}>
+                <button
+                  type="submit"
+                  className={buttonStyles.primaryButton}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Creating account...' : 'Create Account'}
+                </button>
+              </div>
             </form>
 
             <div className={styles.authLinks}>
