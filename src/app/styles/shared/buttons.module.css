@@ -1,0 +1,32 @@
+.primaryButton {
+    background-color: var(--foreground);
+    color: var(--background);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 100px;
+    transition: opacity 0.2s;
+  }
+  
+  .secondaryButton {
+    background-color: var(--gray-alpha-200);
+    color: var(--foreground);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  
+  .primaryButton:hover,
+  .secondaryButton:hover {
+    opacity: 0.9;
+  }
+  
+  .compactButton {
+    padding: 0.5rem 1rem;
+    min-width: 80px;
+  }
