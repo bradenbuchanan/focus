@@ -2,6 +2,7 @@
 'use client';
 
 import styles from '../../dashboard/dashboard.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
 import { formatTimeValue } from '@/utils/formatTime';
 
 interface StatsProps {
@@ -15,19 +16,19 @@ interface StatsProps {
 export default function DashboardStats({ stats }: StatsProps) {
   return (
     <div className={styles.stats}>
-      <div className={styles.statCard}>
+      <div className={`${cardStyles.card} ${cardStyles.statsCard}`}>
         <h3>Today&apos;s Focus Time</h3>
-        <p className={styles.statValue}>
+        <p className={cardStyles.statsValue}>
           {formatTimeValue(stats.focusTimeToday)}
         </p>
       </div>
-      <div className={styles.statCard}>
+      <div className={`${cardStyles.card} ${cardStyles.statsCard}`}>
         <h3>Sessions Completed</h3>
-        <p className={styles.statValue}>{stats.sessionsCompleted}</p>
+        <p className={cardStyles.statsValue}>{stats.sessionsCompleted}</p>
       </div>
-      <div className={styles.statCard}>
+      <div className={`${cardStyles.card} ${cardStyles.statsCard}`}>
         <h3>Current Streak</h3>
-        <p className={styles.statValue}>{stats.currentStreak} days</p>
+        <p className={cardStyles.statsValue}>{stats.currentStreak} days</p>
       </div>
     </div>
   );
