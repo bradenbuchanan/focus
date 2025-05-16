@@ -2,6 +2,7 @@
 import { AnalyticsSummary } from '@/hooks/useAnalyticsSummary';
 import { formatTimeValue } from '@/utils/formatTime';
 import styles from '../../analytics/analytics.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
 
 interface SummaryCardProps {
   summary: AnalyticsSummary;
@@ -9,8 +10,10 @@ interface SummaryCardProps {
 
 export default function SummaryCard({ summary }: SummaryCardProps) {
   return (
-    <div className={styles.summaryCard}>
-      <h2 className={styles.summaryTitle}>Performance Summary</h2>
+    <div className={`${cardStyles.card} ${styles.summaryCard}`}>
+      <h2 className={`${cardStyles.cardTitle} ${styles.summaryTitle}`}>
+        Performance Summary
+      </h2>
       <ul className={styles.summaryList}>
         <li className={styles.summaryItem}>
           <span className={styles.summaryLabel}>Total Focus Time</span>

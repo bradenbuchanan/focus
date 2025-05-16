@@ -3,12 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import styles from './analytics.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
+import filterStyles from '@/app/styles/shared/filters.module.css';
 import { useData } from '@/providers/DataProvider';
+import listStyles from '@/app/styles/shared/lists.module.css';
 
-// Define timeframe options
+// Type definitions remain the same
 type TimeFrame = '7d' | '30d' | '90d' | '6m' | '1y';
 
-// Define type for sessions from the database
 interface DatabaseSession {
   id: string;
   user_id: string;
@@ -20,7 +22,6 @@ interface DatabaseSession {
   completed: boolean;
   created_at: string;
   updated_at: string;
-  // Add these fields to handle both types of records
   type?: string;
   date?: string;
   localDate?: string;
@@ -39,6 +40,7 @@ export default function DailyBarChart() {
   const { getSessions } = useData();
   const [isLoading, setIsLoading] = useState(true);
 
+  // Data loading logic remains the same
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
@@ -320,44 +322,44 @@ export default function DailyBarChart() {
   const maxValue = Math.max(...chartData.values, 1); // Use at least 1 to avoid division by zero
 
   return (
-    <div className={styles.chartContainer}>
+    <div className={`${cardStyles.card} ${styles.chartContainer}`}>
       <div className={styles.chartControls}>
-        <div className={styles.timeframeSelector}>
+        <div className={filterStyles.filterTabs}>
           <button
-            className={`${styles.timeframeButton} ${
-              timeframe === '7d' ? styles.active : ''
+            className={`${filterStyles.filterTab} ${
+              timeframe === '7d' ? filterStyles.activeTab : ''
             }`}
             onClick={() => setTimeframe('7d')}
           >
             7 Days
           </button>
           <button
-            className={`${styles.timeframeButton} ${
-              timeframe === '30d' ? styles.active : ''
+            className={`${filterStyles.filterTab} ${
+              timeframe === '30d' ? filterStyles.activeTab : ''
             }`}
             onClick={() => setTimeframe('30d')}
           >
             30 Days
           </button>
           <button
-            className={`${styles.timeframeButton} ${
-              timeframe === '90d' ? styles.active : ''
+            className={`${filterStyles.filterTab} ${
+              timeframe === '90d' ? filterStyles.activeTab : ''
             }`}
             onClick={() => setTimeframe('90d')}
           >
             90 Days
           </button>
           <button
-            className={`${styles.timeframeButton} ${
-              timeframe === '6m' ? styles.active : ''
+            className={`${filterStyles.filterTab} ${
+              timeframe === '6m' ? filterStyles.activeTab : ''
             }`}
             onClick={() => setTimeframe('6m')}
           >
             6 Months
           </button>
           <button
-            className={`${styles.timeframeButton} ${
-              timeframe === '1y' ? styles.active : ''
+            className={`${filterStyles.filterTab} ${
+              timeframe === '1y' ? filterStyles.activeTab : ''
             }`}
             onClick={() => setTimeframe('1y')}
           >
@@ -366,17 +368,19 @@ export default function DailyBarChart() {
         </div>
       </div>
 
-      <h3>{getChartTitle(timeframe)}</h3>
+      <h3 className={cardStyles.cardTitle}>{getChartTitle(timeframe)}</h3>
 
       {isLoading ? (
         <div className={styles.loadingIndicator}>Loading data...</div>
       ) : chartData.values.length === 0 ? (
-        <div className={styles.noDataMessage}>
+        <div className={listStyles.emptyState}>
           <p>No focus sessions found for this time period.</p>
           <p>Complete some focus sessions to see your data here.</p>
         </div>
       ) : (
-        <>
+        // The rest of the chart rendering logic remains the same
+        // ...
+        <div>
           {/* Custom chart implementation */}
           <div
             style={{
@@ -474,7 +478,7 @@ export default function DailyBarChart() {
               ))}
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

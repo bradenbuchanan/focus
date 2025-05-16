@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { TimerSession } from '@/lib/timer';
 import { useData } from '@/providers/DataProvider';
 import styles from './analytics.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -33,6 +34,7 @@ export default function ActivityPieChart() {
 
   const { getSessions } = useData();
 
+  // Data loading logic remains the same
   useEffect(() => {
     async function loadData() {
       try {
@@ -117,8 +119,8 @@ export default function ActivityPieChart() {
   };
 
   return (
-    <div className={styles.chartContainer}>
-      <h3>Time by Activity</h3>
+    <div className={`${cardStyles.card} ${styles.chartContainer}`}>
+      <h3 className={cardStyles.cardTitle}>Time by Activity</h3>
       <div
         style={{
           height: '350px',

@@ -3,9 +3,10 @@
 
 import { useState } from 'react';
 import styles from './analytics.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
 import {
   useActivityCalendarData,
-  getColorSchemeForActivity, // Add this import
+  getColorSchemeForActivity,
 } from '@/hooks/useActivityCalendarData';
 import { ActivitySelector } from './ActivitySelector';
 import { CalendarGrid } from './CalendarGrid';
@@ -20,8 +21,8 @@ export default function ActivityCalendar() {
   );
 
   return (
-    <div className={styles.calendarContainer}>
-      <h3>
+    <div className={`${cardStyles.card} ${styles.calendarContainer}`}>
+      <h3 className={cardStyles.cardTitle}>
         Activity Calendar
         {selectedActivity !== 'all' && ` - ${selectedActivity}`}
       </h3>

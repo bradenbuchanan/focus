@@ -2,6 +2,7 @@
 'use client';
 
 import styles from './analytics.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
 import { useMultiActivityData } from '@/hooks/useActivityCalendarData';
 import { CalendarGrid } from './CalendarGrid';
 
@@ -16,7 +17,10 @@ export default function MultiActivityHeatmap() {
   return (
     <div className={styles.multiCalendarContainer}>
       {activityDataSets.map((activityData) => (
-        <div key={activityData.name} className={styles.activityHeatmapSection}>
+        <div
+          key={activityData.name}
+          className={`${cardStyles.card} ${styles.activityHeatmapSection}`}
+        >
           <div className={styles.activityTitle}>
             <h3 style={{ color: activityData.colorScheme.base }}>
               {activityData.name}

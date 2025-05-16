@@ -16,6 +16,8 @@ import { useState, useEffect } from 'react';
 import { TimerSession } from '@/lib/timer';
 import { useData } from '@/providers/DataProvider';
 import styles from './analytics.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
+import filterStyles from '@/app/styles/shared/filters.module.css';
 
 ChartJS.register(
   CategoryScale,
@@ -217,36 +219,36 @@ export default function ProductivityTrends() {
   }
 
   return (
-    <div className={styles.chartContainer}>
+    <div className={`${cardStyles.card} ${styles.chartContainer}`}>
       <div className={styles.chartControls}>
-        <div className={styles.timeframeSelector}>
+        <div className={filterStyles.activityButtons}>
           <button
-            className={`${styles.timeframeButton} ${
-              timeframe === '4w' ? styles.active : ''
+            className={`${filterStyles.activityButton} ${
+              timeframe === '4w' ? filterStyles.activeButton : ''
             }`}
             onClick={() => setTimeframe('4w')}
           >
             4 Weeks
           </button>
           <button
-            className={`${styles.timeframeButton} ${
-              timeframe === '3m' ? styles.active : ''
+            className={`${filterStyles.activityButton} ${
+              timeframe === '3m' ? filterStyles.activeButton : ''
             }`}
             onClick={() => setTimeframe('3m')}
           >
             3 Months
           </button>
           <button
-            className={`${styles.timeframeButton} ${
-              timeframe === '6m' ? styles.active : ''
+            className={`${filterStyles.activityButton} ${
+              timeframe === '6m' ? filterStyles.activeButton : ''
             }`}
             onClick={() => setTimeframe('6m')}
           >
             6 Months
           </button>
           <button
-            className={`${styles.timeframeButton} ${
-              timeframe === '1y' ? styles.active : ''
+            className={`${filterStyles.activityButton} ${
+              timeframe === '1y' ? filterStyles.activeButton : ''
             }`}
             onClick={() => setTimeframe('1y')}
           >
