@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { migrateLocalData } from './actions';
 import styles from './migration.module.css';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
 
 // Define a specific type for the migration result
 interface MigrationResult {
@@ -40,15 +41,14 @@ export default function MigrationForm() {
       setResult(migrationResult);
 
       // If successful, optionally clear localStorage
-      if (migrationResult.success) {
-        if (
-          confirm(
-            'Data migrated successfully! Do you want to clear localStorage data now?'
-          )
-        ) {
-          localStorage.removeItem('timerSessions');
-          localStorage.removeItem('focusAccomplishments');
-        }
+      if (
+        migrationResult.success &&
+        confirm(
+          'Data migrated successfully! Do you want to clear localStorage data now?'
+        )
+      ) {
+        localStorage.removeItem('timerSessions');
+        localStorage.removeItem('focusAccomplishments');
       }
     } catch (error) {
       console.error('Migration error:', error);
@@ -70,7 +70,7 @@ export default function MigrationForm() {
       </p>
 
       <button
-        className={styles.primaryButton}
+        className={buttonStyles.primaryButton} // Use shared button style
         onClick={handleMigrate}
         disabled={isLoading}
       >

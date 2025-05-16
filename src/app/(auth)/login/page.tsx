@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../auth.module.css';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Login() {
@@ -68,7 +69,7 @@ export default function Login() {
 
           <button
             type="submit"
-            className={styles.submitButton}
+            className={buttonStyles.primaryButton} // Use shared button style
             disabled={isLoading}
           >
             {isLoading ? 'Signing in...' : 'Sign In'}

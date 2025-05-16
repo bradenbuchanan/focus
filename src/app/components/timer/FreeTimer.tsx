@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { formatTime } from '@/lib/timer';
 import styles from './FreeTimer.module.css';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
 
 interface FreeTimerProps {
   activity: string;
@@ -51,15 +52,24 @@ export default function FreeTimer({ onComplete, onCancel }: FreeTimerProps) {
       </div>
 
       <div className={styles.controls}>
-        <button className={styles.primaryButton} onClick={handlePauseResume}>
+        <button
+          className={buttonStyles.primaryButton}
+          onClick={handlePauseResume}
+        >
+          {' '}
+          {/* Use shared button style */}
           {isRunning ? 'Pause' : 'Resume'}
         </button>
 
-        <button className={styles.primaryButton} onClick={handleComplete}>
+        <button className={buttonStyles.primaryButton} onClick={handleComplete}>
+          {' '}
+          {/* Use shared button style */}
           Complete
         </button>
 
-        <button className={styles.secondaryButton} onClick={onCancel}>
+        <button className={buttonStyles.secondaryButton} onClick={onCancel}>
+          {' '}
+          {/* Use shared button style */}
           Cancel
         </button>
       </div>

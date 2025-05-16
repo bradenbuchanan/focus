@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Task, defaultActivityCategories } from '@/lib/timer';
 import styles from './TaskForm.module.css';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
 import { useData } from '@/providers/DataProvider';
 
 interface TaskFormProps {
@@ -176,7 +177,9 @@ export default function TaskForm({
         </div>
       )}
 
-      <button type="submit" className={styles.taskAddButton}>
+      <button type="submit" className={buttonStyles.primaryButton}>
+        {' '}
+        {/* Use shared button style */}
         Add Task
       </button>
     </form>

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Goal, defaultActivityCategories } from '@/lib/timer';
 import { useData } from '@/providers/DataProvider';
 import styles from './GoalEditForm.module.css';
+import buttonStyles from '@/app/styles/shared/buttons.module.css'; // Import shared button styles
 
 interface GoalEditFormProps {
   goal: Goal;
@@ -164,14 +165,14 @@ export default function GoalEditForm({
         <div className={styles.formActions}>
           <button
             type="submit"
-            className={styles.primaryButton}
+            className={buttonStyles.primaryButton} // Use shared button style
             disabled={isLoading}
           >
             {isLoading ? 'Saving...' : 'Save Changes'}
           </button>
           <button
             type="button"
-            className={styles.secondaryButton}
+            className={buttonStyles.secondaryButton} // Use shared button style
             onClick={onCancel}
             disabled={isLoading}
           >
