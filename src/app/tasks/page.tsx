@@ -4,7 +4,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Task } from '@/lib/timer';
-import { TaskItem } from '@/app/components/ui/TaskItem'; // Updated import
+import { TaskItem } from '@/app/components/ui/TaskItem';
+import filterStyles from '@/app/styles/shared/filters.module.css';
 import TaskForm from '@/app/components/goals/TaskForm';
 import styles from './tasks.module.css';
 import { useData } from '@/providers/DataProvider';
@@ -218,26 +219,26 @@ export default function TasksPage() {
         </div>
       </div>
 
-      <div className={styles.taskFilters}>
+      <div className={filterStyles.filterTabs}>
         <button
-          className={`${styles.filterButton} ${
-            filter === 'all' ? styles.active : ''
+          className={`${filterStyles.filterTab} ${
+            filter === 'all' ? filterStyles.activeTab : ''
           }`}
           onClick={() => setFilter('all')}
         >
           All
         </button>
         <button
-          className={`${styles.filterButton} ${
-            filter === 'active' ? styles.active : ''
+          className={`${filterStyles.filterTab} ${
+            filter === 'active' ? filterStyles.activeTab : ''
           }`}
           onClick={() => setFilter('active')}
         >
           Active
         </button>
         <button
-          className={`${styles.filterButton} ${
-            filter === 'completed' ? styles.active : ''
+          className={`${filterStyles.filterTab} ${
+            filter === 'completed' ? filterStyles.activeTab : ''
           }`}
           onClick={() => setFilter('completed')}
         >
