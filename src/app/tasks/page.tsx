@@ -5,11 +5,13 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Task } from '@/lib/timer';
 import { TaskItem } from '@/app/components/ui/TaskItem';
-import filterStyles from '@/app/styles/shared/filters.module.css';
 import TaskForm from '@/app/components/goals/TaskForm';
 import styles from './tasks.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
+import filterStyles from '@/app/styles/shared/filters.module.css';
+import listStyles from '@/app/styles/shared/lists.module.css';
 import { useData } from '@/providers/DataProvider';
-import { supabase } from '@/lib/supabase';
 
 export default function TasksPage() {
   const { getTasks: getTasksFromDB, updateTask } = useData();
@@ -24,7 +26,20 @@ export default function TasksPage() {
     setActiveTasks((prevTasks) => [newTask, ...prevTasks]);
   };
 
-  // Updated handler to work with unified TaskItem
+  // Debug tasks function
+  const debugTasks = async () => {
+    console.log('=== DEBUG: Tasks in state ===');
+    console.log('Active tasks:', activeTasks);
+    console.log('Completed tasks:', completedTasks);
+    try {
+      const tasks = await getTasksFromDB();
+      console.log('Tasks from DB:', tasks);
+    } catch (error) {
+      console.error('Error getting tasks for debug:', error);
+    }
+  };
+
+  // Task toggle handler
   const handleTaskToggle = async (taskId: string) => {
     try {
       // Find the task
@@ -46,45 +61,17 @@ export default function TasksPage() {
     }
   };
 
+  // Other task handlers remain the same
   const handleTaskEdit = async (task: Task) => {
-    // Implement edit functionality if needed
     console.log('Edit task:', task);
   };
 
   const handleTaskDelete = async (taskId: string) => {
-    // Implement delete functionality if needed
     console.log('Delete task:', taskId);
     await loadTasks();
   };
 
-  const debugTasks = async () => {
-    console.log('=== DEBUG: Directly checking tasks in Supabase ===');
-    try {
-      // Get the current user
-      const { data: userData } = await supabase.auth.getUser();
-      console.log('Current user:', userData?.user?.id);
-
-      // Direct query to see all tasks for this user
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', userData?.user?.id);
-
-      console.log('Direct Supabase query result:', {
-        success: !error,
-        count: data?.length || 0,
-        tasks: data,
-      });
-
-      // Also try your loadTasks function
-      await loadTasks();
-    } catch (error) {
-      console.error('Debug error:', error);
-    }
-  };
-
-  // Change: Use useCallback to memoize the loadTasks function
-  // This prevents it from being recreated on every render
+  // Task loading function
   const loadTasks = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -102,35 +89,25 @@ export default function TasksPage() {
         return;
       }
 
-      console.log('LOAD TASKS: Processing tasks...');
-
-      // Convert Supabase tasks to your app's Task format
-      const convertedTasks = supabaseTasks.map((task) => ({
+      // Convert Supabase tasks to app's Task format
+      const allTasks = supabaseTasks.map((task) => ({
         id: task.id,
         goalId: task.goal_id || undefined,
         text: task.text,
         completed: task.completed,
-        createdAt: task.created_at, // Convert snake_case to camelCase
+        createdAt: task.created_at,
         dueDate: task.due_date || undefined,
         activity: task.activity || undefined,
         priority: (task.priority as 'low' | 'medium' | 'high') || 'medium',
         completedAt: task.completed_at || undefined,
       }));
 
-      console.log('LOAD TASKS: Converted tasks:', convertedTasks);
-
-      // Separate active and completed tasks
-      const active = convertedTasks.filter((task) => !task.completed);
-      const completed = convertedTasks.filter((task) => task.completed);
-
-      console.log('LOAD TASKS: Separated tasks:', {
-        active: active.length,
-        completed: completed.length,
-      });
+      // Filter active and completed tasks
+      const active = allTasks.filter((task) => !task.completed);
+      const completed = allTasks.filter((task) => task.completed);
 
       // Sort active tasks by dueDate (if available) and then by creation date
       active.sort((a, b) => {
-        // First sort by due date (if available)
         if (a.dueDate && b.dueDate) {
           return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
         } else if (a.dueDate) {
@@ -138,7 +115,6 @@ export default function TasksPage() {
         } else if (b.dueDate) {
           return 1; // b has due date, a doesn't, b comes first
         }
-
         // Then by creation date (newest first)
         return (
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -156,11 +132,6 @@ export default function TasksPage() {
         return dateB.getTime() - dateA.getTime();
       });
 
-      console.log('LOAD TASKS: Sorted tasks:', {
-        active: active.length,
-        completed: completed.length,
-      });
-
       // Update state with the properly converted tasks
       setActiveTasks(active);
       setCompletedTasks(completed);
@@ -174,10 +145,10 @@ export default function TasksPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [getTasksFromDB]); // Add getTasksFromDB as a dependency
+  }, [getTasksFromDB]);
 
+  // Initial data load
   useEffect(() => {
-    // Load tasks initially
     loadTasks();
 
     // Add visibility change listener
@@ -192,7 +163,7 @@ export default function TasksPage() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [loadTasks]); // Change: Add loadTasks to the dependency array
+  }, [loadTasks]);
 
   // Get filtered tasks based on the selected filter
   const getFilteredTasks = () => {
@@ -209,7 +180,6 @@ export default function TasksPage() {
 
   const filteredTasks = getFilteredTasks();
 
-  // Option 1: Simply remove the unused activityFilter state
   return (
     <div className={styles.tasksPage}>
       <div className={styles.tasksHeader}>
@@ -246,7 +216,7 @@ export default function TasksPage() {
         </button>
       </div>
 
-      {/* Debug button moved here for better visibility */}
+      {/* Debug button with proper onClick handler */}
       <button
         onClick={debugTasks}
         style={{
@@ -268,12 +238,12 @@ export default function TasksPage() {
       ) : error ? (
         <div className={styles.errorState}>
           <p>{error}</p>
-          <button onClick={loadTasks} className={styles.retryButton}>
+          <button onClick={loadTasks} className={buttonStyles.primaryButton}>
             Retry
           </button>
         </div>
       ) : (
-        <div className={styles.tasksList}>
+        <div className={listStyles.listContainer}>
           {filteredTasks.length > 0 ? (
             filteredTasks.map((task) => (
               <TaskItem
@@ -287,7 +257,7 @@ export default function TasksPage() {
               />
             ))
           ) : (
-            <div className={styles.noTasks}>
+            <div className={listStyles.emptyState}>
               {filter === 'all'
                 ? 'No tasks yet. Add some tasks to get started!'
                 : filter === 'active'
@@ -299,7 +269,7 @@ export default function TasksPage() {
       )}
 
       <div className={styles.linkBack}>
-        <Link href="/goals" className={styles.secondaryButton}>
+        <Link href="/goals" className={buttonStyles.secondaryButton}>
           Back to Goals
         </Link>
       </div>
