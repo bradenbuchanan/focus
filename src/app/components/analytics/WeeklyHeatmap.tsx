@@ -2,8 +2,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getSessions } from '@/lib/timer';
 import styles from './analytics.module.css';
+import cardStyles from '@/app/styles/shared/cards.module.css';
+import { useData } from '@/providers/DataProvider';
+import { TimerSession } from '@/lib/timer';
 
 export default function WeeklyHeatmap() {
   const [heatmapData, setHeatmapData] = useState<number[][]>(
@@ -12,28 +14,55 @@ export default function WeeklyHeatmap() {
       .map(() => Array(24).fill(0))
   );
 
+  const { getSessions } = useData();
+
   useEffect(() => {
-    const sessions = getSessions();
-    const focusSessions = sessions.filter((s) => s.type === 'focus');
+    async function loadData() {
+      try {
+        const dbSessions = await getSessions();
 
-    // Initialize heatmap data (7 days × 24 hours)
-    const heatmap = Array(7)
-      .fill(0)
-      .map(() => Array(24).fill(0));
+        // Convert database sessions to TimerSession format
+        const sessions = dbSessions.map((s) => ({
+          id: s.id,
+          date: s.start_time,
+          localDate: s.start_time.split('T')[0],
+          duration: s.duration || 0,
+          type: (s.category === 'focus' ? 'focus' : 'break') as
+            | 'focus'
+            | 'break',
+          completed: s.completed,
+          activity: s.activity || undefined,
+        }));
 
-    focusSessions.forEach((session) => {
-      // Use localDate if available, otherwise fall back to ISO date
-      const dateStr = session.localDate || session.date.split('T')[0];
-      const date = new Date(dateStr);
-      const day = date.getDay();
-      const hour = date.getHours();
+        // Filter for focus sessions
+        const focusSessions = sessions.filter(
+          (s: TimerSession) => s.type === 'focus'
+        );
 
-      // Add minutes to the appropriate cell
-      heatmap[day][hour] += session.duration / 60;
-    });
+        // Initialize heatmap data (7 days × 24 hours)
+        const heatmap = Array(7)
+          .fill(0)
+          .map(() => Array(24).fill(0));
 
-    setHeatmapData(heatmap);
-  }, []);
+        focusSessions.forEach((session: TimerSession) => {
+          // Use localDate if available, otherwise fall back to ISO date
+          const dateStr = session.localDate || session.date.split('T')[0];
+          const date = new Date(dateStr);
+          const day = date.getDay();
+          const hour = date.getHours();
+
+          // Add minutes to the appropriate cell
+          heatmap[day][hour] += session.duration / 60;
+        });
+
+        setHeatmapData(heatmap);
+      } catch (error) {
+        console.error('Error loading heatmap data:', error);
+      }
+    }
+
+    loadData();
+  }, [getSessions]);
 
   // Day and hour labels
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -48,8 +77,8 @@ export default function WeeklyHeatmap() {
   };
 
   return (
-    <div className={styles.heatmapContainer}>
-      <h3>Weekly Focus Pattern</h3>
+    <div className={`${cardStyles.card} ${styles.heatmapContainer}`}>
+      <h3 className={cardStyles.cardTitle}>Weekly Focus Pattern</h3>
       <div className={styles.heatmap}>
         <div className={styles.heatmapLabels}>
           {days.map((day) => (
