@@ -3,13 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import styles from './weeklySummary.module.css';
-import { useData } from '@/providers/DataProvider'; // Add this import
+import cardStyles from '@/app/styles/shared/cards.module.css';
+import { useData } from '@/providers/DataProvider';
 import {
   isFocusSession,
   getSessionDateString,
   getSessionMinutes,
   getSessionActivity,
-} from '@/utils/dataConversion'; // Import data conversion utilities
+} from '@/utils/dataConversion';
 
 interface WeeklySummary {
   startDate: string;
@@ -477,7 +478,7 @@ ${
   };
 
   return (
-    <div className={styles.summaryCard}>
+    <div className={`${cardStyles.card} ${styles.summaryCard}`}>
       {/* TEMPORARY: User-visible note that this is a preliminary feature */}
       <div className={styles.betaIndicator}>
         <span>BETA</span>
