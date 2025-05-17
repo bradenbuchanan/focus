@@ -1,32 +1,45 @@
+/* Add this to your CSS (timer.module.css or appropriate file) */
+.buttonContainer {
+  display: flex;
+  justify-content: center; /* Centers the buttons horizontally */
+  width: 100%;
+  max-width: 500px; /* Adjust as needed */
+  margin: 2rem auto; /* Center the container and add vertical margin */
+  gap: 20px; /* This adds equal spacing between buttons */
+}
+
+/* Style for the primary button (Resume) */
 .primaryButton {
-    background-color: var(--foreground);
-    color: var(--background);
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    cursor: pointer;
-    min-width: 100px;
-    transition: opacity 0.2s;
-  }
-  
-  .secondaryButton {
-    background-color: var(--gray-alpha-200);
-    color: var(--foreground);
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  
-  .primaryButton:hover,
-  .secondaryButton:hover {
-    opacity: 0.9;
-  }
-  
-  .compactButton {
-    padding: 0.5rem 1rem;
-    min-width: 80px;
-  }
+  background-color: #3b9eff;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  min-width: 120px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Style for secondary buttons (Reset, Settings) */
+.secondaryButton {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  min-width: 100px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.primaryButton:hover {
+  background-color: #3388e0;
+}
+
+.secondaryButton:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}

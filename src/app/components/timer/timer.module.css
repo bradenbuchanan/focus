@@ -1,255 +1,161 @@
-/* Main container and wrapper */
-.timerPageContainer {
-  max-width: 800px;
+.timerContainer {
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 1.5rem;
-}
-
-.timerWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-/* Card styling with no borders */
-.timerCard, .tasksCard {
-  background-color: rgba(30, 30, 30, 0.3);
-  border-radius: 1.25rem;
   padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  animation: fadeIn 0.5s ease;
 }
 
-/* Activity section styling */
-.activitySection {
-  margin-bottom: 2rem;
+.timerContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+}
+
+.section {
+  background-color: var(--gray-alpha-100, rgba(255, 255, 255, 0.05));
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--gray-alpha-200, rgba(255, 255, 255, 0.08));
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .sectionTitle {
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--foreground, #000);
+  padding-bottom: 0.75rem;
   margin-bottom: 1.25rem;
-  text-align: center;
-  color: var(--foreground);
-  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--gray-alpha-200, rgba(255, 255, 255, 0.1));
 }
 
-/* Activity pills */
-.activityPills {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.75rem;
-  margin: 1rem 0;
-}
-
-.activityPill {
-  padding: 0.6rem 1.25rem;
-  border-radius: 2rem;
-  background-color: var(--gray-alpha-200);
-  color: var(--foreground);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.activityPill:hover {
-  background-color: var(--gray-alpha-300, var(--gray-alpha-200));
-  transform: translateY(-2px);
-}
-
-.pillSelected {
-  background-color: var(--foreground);
-  color: var(--background);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Mode tabs styling */
-.modeTabsContainer {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
-
-.modeTabs {
-  display: flex;
-  background-color: var(--gray-alpha-200);
-  border-radius: 2rem;
-  padding: 0.3rem;
-  width: 100%;
-  max-width: 400px;
-}
-
-.modeTab {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border-radius: 1.75rem;
-  border: none;
-  background-color: transparent;
-  color: var(--foreground);
-  opacity: 0.7;
-  font-weight: 500;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.activeTab {
-  background-color: var(--foreground);
-  color: var(--background);
-  opacity: 1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Timer display wrapper */
-.timerDisplayWrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-/* Timer circle styling */
-.timerCircle {
-  position: relative;
-  width: 280px;
-  height: 280px;
-  margin: 0 auto 2rem;
-  border-radius: 50%;
-  background-color: var(--gray-alpha-200);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-.timerCircleProgress {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: conic-gradient(
-    var(--foreground) 0%, 
-    var(--foreground) var(--progress-percent, 0%), 
-    transparent var(--progress-percent, 0%)
-  );
-  opacity: 0.2;
-  mask: radial-gradient(transparent 65%, black 66%);
-  -webkit-mask: radial-gradient(transparent 65%, black 66%);
-}
-
-.timerTime {
-  font-size: 3.75rem;
-  font-weight: 500;
-  color: var(--foreground);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.5rem;
-}
-
-.timerLabel {
-  font-size: 0.95rem;
-  color: var(--foreground);
-  opacity: 0.7;
-  font-weight: 500;
-}
-
-/* Button layout styling */
-.timerControls {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 0.5rem;
-}
-
-/* Tasks section styling */
-.tasksSection {
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  background-color: rgba(25, 25, 25, 0.3);
-  border-radius: 1rem;
-}
-
-.tasksSectionTitle {
-  font-size: 1.1rem;
-  color: var(--foreground);
+.goalItem {
+  background-color: var(--gray-alpha-200, rgba(255, 255, 255, 0.1));
+  border-radius: 0.75rem;
+  padding: 1.25rem;
   margin-bottom: 1rem;
-  text-align: center;
-  font-weight: 500;
+  border-left: 3px solid #4a9eff;
+  transition: transform 0.2s ease;
+}
+
+.goalItem:hover {
+  transform: translateX(5px);
+}
+
+.goalTitle {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+  color: var(--foreground, #000);
+}
+
+.goalTarget {
+  color: var(--foreground-muted, rgba(0, 0, 0, 0.7));
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.progressContainer {
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+.progressBar {
+  height: 0.5rem;
+  background-color: var(--gray-alpha-100, rgba(255, 255, 255, 0.1));
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #4a9eff, #6abfff);
+  border-radius: 1rem;
+  transition: width 0.5s ease;
+}
+
+.progressLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  color: var(--foreground-muted, rgba(0, 0, 0, 0.7));
 }
 
 .emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  color: var(--foreground);
-  opacity: 0.6;
-  font-size: 0.95rem;
   text-align: center;
+  padding: 2rem 1rem;
+  color: var(--foreground-muted, rgba(0, 0, 0, 0.5));
+  font-style: italic;
+  background-color: var(--gray-alpha-100, rgba(255, 255, 255, 0.05));
   border-radius: 0.75rem;
+  margin: 1rem 0;
 }
 
-.emptyStateIcon {
-  font-size: 1.5rem;
-  margin-bottom: 0.75rem;
-  opacity: 0.7;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.emptyStateAction {
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  color: #4a9eff;
-}
-
-.emptyStateAction:hover {
-  text-decoration: underline;
-}
-
-/* Use a proper display:none instead of just hiding */
-.hidden {
-  display: none;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .timerPageContainer {
+@media (max-width: 768px) {
+  .timerContainer {
     padding: 1rem;
   }
   
-  .timerCard, .tasksCard {
-    padding: 1.5rem;
+  .timerContent {
+    grid-template-columns: 1fr;
   }
-  
-  .timerCircle {
-    width: 240px;
-    height: 240px;
-  }
-  
-  .timerTime {
-    font-size: 3rem;
-  }
-  
-  .activityPill {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-  }
-  
-  .timerControls {
-    flex-wrap: wrap;
-  }
-  
-  .timerControls button {
-    flex: 1;
-    min-width: 0;
-  }
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 500px;
+  margin: 2rem auto;
+  gap: 20px;
+}
+
+.primaryButton {
+  background-color: #3b9eff;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  min-width: 120px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.secondaryButton {
+  background-color: var(--gray-alpha-200, rgba(255, 255, 255, 0.08));
+  color: var(--foreground, #000);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  min-width: 100px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.primaryButton:hover {
+  background-color: #3388e0;
+}
+
+.secondaryButton:hover {
+  background-color: var(--gray-alpha-300, rgba(255, 255, 255, 0.12));
 }
