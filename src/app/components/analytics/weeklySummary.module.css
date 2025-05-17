@@ -66,19 +66,7 @@
   gap: 0.75rem;
 }
 
-/* Keep this class for styling but it will be combined with shared button styles */
-.timeframeButton {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--gray-alpha-200);
-  background-color: var(--background);
-}
-
-.timeframeButton.active {
-  background-color: var(--foreground);
-  color: var(--background);
-  border-color: var(--foreground);
-}
+/* Removed duplicate timeframeButton styles - use shared button styles instead */
 
 .dateRangePicker {
   display: flex;
@@ -120,22 +108,9 @@
   gap: 0.5rem;
 }
 
-/* Keep this class for styling but it will be combined with shared button styles */
-.activityButton {
-  padding: 0.4rem 0.8rem;
-  border-radius: 1rem;
-  border: 1px solid var(--gray-alpha-200);
-  background-color: var(--background);
-  font-size: 0.9rem;
-}
+/* Removed duplicate activityButton styles - use shared button styles instead */
 
-.activityButton.active {
-  background-color: var(--foreground);
-  color: var(--background);
-  border-color: var(--foreground);
-}
-
-/* This can be replaced with the shared button styles, but keep for specific styling */
+/* This can be replaced with the shared button styles, but keeping for specific styling */
 .generateButton {
   width: 100%;
 }
