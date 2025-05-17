@@ -56,20 +56,14 @@ export default function FreeTimer({ onComplete, onCancel }: FreeTimerProps) {
           className={buttonStyles.primaryButton}
           onClick={handlePauseResume}
         >
-          {' '}
-          {/* Use shared button style */}
           {isRunning ? 'Pause' : 'Resume'}
         </button>
 
         <button className={buttonStyles.primaryButton} onClick={handleComplete}>
-          {' '}
-          {/* Use shared button style */}
           Complete
         </button>
 
         <button className={buttonStyles.secondaryButton} onClick={onCancel}>
-          {' '}
-          {/* Use shared button style */}
           Cancel
         </button>
       </div>
