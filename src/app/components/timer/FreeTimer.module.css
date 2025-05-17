@@ -56,8 +56,6 @@
   margin-top: 1rem;
 }
 
-/* Removed duplicate button styles - use shared button styles instead */
-
 @media (max-width: 600px) {
   .freeTimerDisplay {
       width: 250px;
