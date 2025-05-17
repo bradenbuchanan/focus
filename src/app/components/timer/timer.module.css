@@ -125,37 +125,3 @@
   margin: 2rem auto;
   gap: 20px;
 }
-
-.primaryButton {
-  background-color: #3b9eff;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.8rem 1.5rem;
-  min-width: 120px;
-  font-weight: 500;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.secondaryButton {
-  background-color: var(--gray-alpha-200, rgba(255, 255, 255, 0.08));
-  color: var(--foreground, #000);
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.8rem 1.5rem;
-  min-width: 100px;
-  font-weight: 500;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.primaryButton:hover {
-  background-color: #3388e0;
-}
-
-.secondaryButton:hover {
-  background-color: var(--gray-alpha-300, rgba(255, 255, 255, 0.12));
-}
