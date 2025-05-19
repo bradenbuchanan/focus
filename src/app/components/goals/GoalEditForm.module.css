@@ -15,9 +15,6 @@
   border-bottom: 1px solid var(--gray-alpha-200);
 }
 
-/* The rest of the styling (formGroup, input fields, buttons, etc.) 
-   is now handled by the shared style modules */
-
 @media (max-width: 768px) {
   .goalEditForm {
     padding: 1.25rem;
