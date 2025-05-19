@@ -1,20 +1,27 @@
-/* src/app/components/goals/GoalForm.module.css */
-.goalForm {
-  background-color: var(--gray-alpha-100);
+/* src/app/components/goals/GoalEditForm.module.css */
+.goalEditForm {
+  background-color: var(--background);
   border-radius: 1rem;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px var(--gray-alpha-100);
+  border: 1px solid var(--gray-alpha-200);
 }
 
-/* Keep only the specific layout and modifications for this component */
-.formActions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
+.formTitle {
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gray-alpha-200);
 }
+
+/* The rest of the styling (formGroup, input fields, buttons, etc.) 
+   is now handled by the shared style modules */
 
 @media (max-width: 768px) {
-  .goalForm {
-    padding: 1.5rem;
+  .goalEditForm {
+    padding: 1.25rem;
   }
+  
+  /* The other media queries are handled by the shared styles */
 }
