@@ -1,4 +1,4 @@
-/* Add these styles to src/app/components/dashboard/dashboardHeatmap.module.css */
+/* src/app/components/dashboard/dashboardHeatmap.module.css */
 
 .heatmapHeader {
   display: flex;
@@ -38,21 +38,12 @@
   opacity: 0.7;
 }
 
-.refreshButton {
-  background: none;
-  border: 1px solid var(--gray-alpha-200);
-  color: var(--foreground);
-  opacity: 0.7;
-  cursor: pointer;
-  font-size: 0.8rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-}
+/* Removed the custom refreshButton styles since we'll use the shared button classes instead */
+/* Component should now use buttonStyles.secondaryButton and buttonStyles.compactButton from the shared styles */
 
-.refreshButton:hover {
-  opacity: 1;
-  background-color: var(--gray-alpha-100);
+.lastUpdated {
+  font-size: 0.8rem;
+  opacity: 0.7;
 }
 
 .loadingIndicator {
@@ -63,7 +54,6 @@
   font-size: 0.9rem;
   opacity: 0.7;
 }
-
 
 .heatmapLegend {
   display: flex;
