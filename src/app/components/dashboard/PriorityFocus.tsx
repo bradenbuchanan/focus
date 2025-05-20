@@ -115,9 +115,9 @@ export default function PriorityFocus() {
           .slice(0, 2); // Only show top 2
 
         // For each goal, find associated tasks
-        const goalsWithTheirTasks = needAttentionGoals.map((goal) => {
+        const goalsWithTheirTasks = needAttentionGoals.map((goalItem) => {
           const goalTasks = allTasks
-            .filter((task) => task.goalId === goal.id && !task.completed)
+            .filter((task) => task.goalId === goalItem.id && !task.completed)
             .sort((a, b) => {
               if (a.priority !== b.priority) {
                 if (a.priority === 'high') return -1;
@@ -130,11 +130,11 @@ export default function PriorityFocus() {
                 new Date(a.createdAt).getTime()
               );
             })
-            .slice(0, 2); // Limit to 2 tasks per goal
+            .slice(0, 2);
 
           return {
-            goal,
-            progress: 0, // We'll set this to 0 for now since we need sessions to calculate
+            goal: goalItem,
+            progress: 0,
             tasks: goalTasks,
           };
         });
