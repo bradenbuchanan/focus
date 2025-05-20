@@ -268,11 +268,12 @@ export class TaskRepository {
     this.lastFetch = 0;
   }
   
-  private isValidTask(task: any): task is SupabaseTask {
-    return task 
-      && typeof task.id === 'string'
-      && typeof task.text === 'string'
-      && typeof task.completed === 'boolean';
+  private isValidTask(task: unknown): task is SupabaseTask {
+    return typeof task === 'object' && 
+      task !== null &&
+      'id' in task && typeof (task as Record<string, unknown>).id === 'string' &&
+      'text' in task && typeof (task as Record<string, unknown>).text === 'string' &&
+      'completed' in task && typeof (task as Record<string, unknown>).completed === 'boolean';
   }
   
   // Local storage methods
