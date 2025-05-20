@@ -18,7 +18,7 @@ export default function Home() {
           </p>
           <div className={styles.heroCtas}>
             <Link href="/register" className={styles.primaryButton}>
-              Get Started — It's Free
+              Get Started — It&apos;s Free
             </Link>
             <Link href="/login" className={styles.textLink}>
               Already have an account? Sign in →
@@ -156,9 +156,9 @@ export default function Home() {
         <div className={styles.testimonialGrid}>
           <div className={styles.testimonialCard}>
             <p className={styles.testimonialText}>
-              "Focus has transformed how I work. I'm getting more done in less
-              time, and I can actually see my productivity improving week over
-              week."
+              &ldquo;Focus has transformed how I work. I&apos;m getting more
+              done in less time, and I can actually see my productivity
+              improving week over week.&rdquo;
             </p>
             <div className={styles.testimonialAuthor}>
               <p className={styles.authorName}>Sarah K.</p>
@@ -168,9 +168,9 @@ export default function Home() {
 
           <div className={styles.testimonialCard}>
             <p className={styles.testimonialText}>
-              "The analytics in this app are incredible. Being able to see when
-              I'm most productive has helped me schedule my most important tasks
-              at the right time."
+              &ldquo;The analytics in this app are incredible. Being able to see
+              when I&apos;m most productive has helped me schedule my most
+              important tasks at the right time.&rdquo;
             </p>
             <div className={styles.testimonialAuthor}>
               <p className={styles.authorName}>Michael T.</p>
@@ -180,9 +180,9 @@ export default function Home() {
 
           <div className={styles.testimonialCard}>
             <p className={styles.testimonialText}>
-              "I've tried many productivity apps, but Focus strikes the perfect
-              balance between simplicity and powerful features. It's now my
-              go-to tool every day."
+              &ldquo;I&apos;ve tried many productivity apps, but Focus strikes
+              the perfect balance between simplicity and powerful features.
+              It&apos;s now my go-to tool every day.&rdquo;
             </p>
             <div className={styles.testimonialAuthor}>
               <p className={styles.authorName}>Jessica W.</p>
