@@ -230,7 +230,7 @@ export default function PriorityFocus() {
                   <ul
                     className={`${listStyles.listContainer} ${styles.goalTasks}`}
                   >
-                    {tasks.map((task: Task) => (
+                    {tasks.map((task) => (
                       <li
                         key={task.id}
                         className={`${listStyles.listItem} ${
