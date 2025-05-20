@@ -3,7 +3,6 @@
 
 import { useAuth } from '@/context/AuthContext';
 import styles from './analytics.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
 import WeeklySummaryCard from '@/app/components/analytics/WeeklySummaryCard';
 
 // Import custom hook
