@@ -104,9 +104,11 @@ export function DataProvider({ children }: DataProviderProps) {
       getTasks: () => taskRepo.getTasks(),
       deleteTask: (taskId: string) => taskRepo.deleteTask(taskId),
       // Prefix with underscore to indicate intentionally unused parameter
-      updateGoal: async (_goalToUpdate: Goal): Promise<void> => {
+      updateGoal: async (
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _goalToUpdate: Goal
+      ): Promise<void> => {
         // This is currently just a stub implementation
-        // You can implement goalRepo.updateGoal here when needed
         return Promise.resolve();
       },
     }),
