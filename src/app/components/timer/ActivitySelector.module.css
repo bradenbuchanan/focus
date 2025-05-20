@@ -1,86 +1,52 @@
 /* src/app/components/timer/ActivitySelector.module.css */
 
 .activitySelector {
-    margin-bottom: 3rem;
-    margin-top: 3rem;
-    text-align: center;
-  }
-  
-  .activitySelector h3 {
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-  }
-  
+  margin-bottom: 3rem;
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.activitySelector h3 {
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.activityOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+  padding-top: 1rem;
+}
+
+.activityButtonSelected {
+  background-color: var(--foreground);
+  color: var(--background);
+  border-color: var(--foreground);
+}
+
+.customActivityForm {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.customActivityInput {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--gray-alpha-200);
+  background-color: var(--background);
+  min-width: 200px;
+}
+
+@media (max-width: 600px) {
   .activityOptions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-    margin-bottom: 1rem;
-    padding-top: 1rem;
-  }
-  
-  .activityButton {
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
-    border: 1px solid var(--gray-alpha-200);
-    background-color: var(--background);
-    color: var(--foreground);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 1rem;
-  }
-  
-  .activityButtonSelected {
-    background-color: var(--foreground);
-    color: var(--background);
-    border-color: var(--foreground);
-  }
-  
-  .activityButton:hover:not(.activityButtonSelected) {
-    background-color: var(--gray-alpha-100);
-  }
-  
-  .customActivityForm {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    margin-top: 1rem;
+    gap: 0.4rem;
   }
   
   .customActivityInput {
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--gray-alpha-200);
-    background-color: var(--background);
-    min-width: 200px;
+    min-width: 150px;
   }
-
-.primaryButton {
-    background-color: var(--foreground);
-    color: var(--background);
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    cursor: pointer;
-  }
-  
-  .primaryButton:hover {
-    opacity: 0.9;
-  }
-  
-  @media (max-width: 600px) {
-    .activityOptions {
-      gap: 0.4rem;
-    }
-    
-    .activityButton {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.9rem;
-    }
-    
-    .customActivityInput {
-      min-width: 150px;
-    }
-  }
+}
