@@ -19,7 +19,9 @@ export function ActivitySelector({
   }
 
   return (
-    <div className={filterStyles.filterContainer}>
+    <div
+      className={`${filterStyles.filterContainer} ${styles.activitySelectorWrapper}`}
+    >
       <label className={filterStyles.filterLabel}>Filter by Activity:</label>
       <div className={filterStyles.activityButtons}>
         {activities.map((activity) => (
