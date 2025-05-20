@@ -177,7 +177,6 @@ export default function TaskForm({
         </div>
       )}
 
-      {/* Changed from styles.taskAddButton to buttonStyles.primaryButton */}
       <button type="submit" className={buttonStyles.primaryButton}>
         Add Task
       </button>
