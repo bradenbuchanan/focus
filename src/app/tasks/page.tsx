@@ -182,14 +182,14 @@ export default function TasksPage() {
 
   return (
     <div className={styles.tasksPage}>
-      <div className={styles.tasksHeader}>
+      <div className={`${cardStyles.card} ${styles.tasksHeader}`}>
         <div>
           <h1>Tasks</h1>
           <p>Track and manage your specific action items</p>
         </div>
       </div>
 
-      <div className={filterStyles.filterTabs}>
+      <div className={`${cardStyles.card} ${filterStyles.filterTabs}`}>
         <button
           className={`${filterStyles.filterTab} ${
             filter === 'all' ? filterStyles.activeTab : ''
@@ -217,33 +217,39 @@ export default function TasksPage() {
       </div>
 
       {/* Debug button with proper onClick handler */}
-      <button
-        onClick={debugTasks}
-        style={{
-          margin: '1rem 0',
-          padding: '0.5rem 1rem',
-          backgroundColor: '#333',
-          color: 'white',
-          border: 'none',
-          borderRadius: '0.25rem',
-        }}
-      >
-        Debug Tasks
-      </button>
+      <div className={cardStyles.card}>
+        <button
+          onClick={debugTasks}
+          style={{
+            margin: '0.5rem 0',
+            padding: '0.5rem 1rem',
+            backgroundColor: '#333',
+            color: 'white',
+            border: 'none',
+            borderRadius: '0.25rem',
+          }}
+        >
+          Debug Tasks
+        </button>
+      </div>
 
-      <TaskForm onAdd={loadTasks} onAddImmediate={handleAddImmediate} />
+      <div className={cardStyles.card}>
+        <TaskForm onAdd={loadTasks} onAddImmediate={handleAddImmediate} />
+      </div>
 
       {isLoading ? (
-        <div className={styles.loadingState}>Loading tasks...</div>
+        <div className={`${cardStyles.card} ${styles.loadingState}`}>
+          Loading tasks...
+        </div>
       ) : error ? (
-        <div className={styles.errorState}>
+        <div className={`${cardStyles.card} ${styles.errorState}`}>
           <p>{error}</p>
           <button onClick={loadTasks} className={buttonStyles.primaryButton}>
             Retry
           </button>
         </div>
       ) : (
-        <div className={listStyles.listContainer}>
+        <div className={`${cardStyles.card} ${listStyles.listContainer}`}>
           {filteredTasks.length > 0 ? (
             filteredTasks.map((task) => (
               <TaskItem
@@ -268,7 +274,7 @@ export default function TasksPage() {
         </div>
       )}
 
-      <div className={styles.linkBack}>
+      <div className={`${cardStyles.card} ${styles.linkBack}`}>
         <Link href="/goals" className={buttonStyles.secondaryButton}>
           Back to Goals
         </Link>
