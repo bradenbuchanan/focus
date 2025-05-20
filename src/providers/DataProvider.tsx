@@ -104,8 +104,6 @@ export function DataProvider({ children }: DataProviderProps) {
       getTasks: () => taskRepo.getTasks(),
       deleteTask: (taskId: string) => taskRepo.deleteTask(taskId),
       updateGoal: async (goal: Goal): Promise<void> => {
-        const result = await goalRepo.updateGoal(goal);
-        // Just ignore the boolean result to match the void return type
         return;
       },
     }),
