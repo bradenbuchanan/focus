@@ -24,7 +24,9 @@ export function TaskList({
   }
 
   return (
-    <div className={`${listStyles.listContainer} ${className}`}>
+    <div
+      className={`${styles.taskList} ${listStyles.listContainer} ${className}`}
+    >
       {tasks.map((task) => (
         <TaskItem
           key={task.id}
