@@ -115,6 +115,7 @@ export default function PriorityFocus() {
           .slice(0, 2); // Only show top 2
 
         // For each goal, find associated tasks
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const goalsWithTheirTasks: GoalWithTasks[] = needAttentionGoals.map(
           (goal) => {
             const goalTasks = allTasks
