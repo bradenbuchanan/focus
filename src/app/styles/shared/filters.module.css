@@ -1,7 +1,8 @@
+/* src/app/styles/shared/filters.module.css */
 .filterContainer {
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background-color: var(--gray-alpha-100, rgba(255, 255, 255, 0.05));
+  background-color: var(--gray-alpha-100);
   border-radius: 0.5rem;
 }
 
@@ -10,7 +11,7 @@
   margin-bottom: 0.5rem;
   font-weight: 500;
   font-size: 0.9rem;
-  color: var(--foreground, #000);
+  color: var(--foreground);
 }
 
 .activityButtons {
@@ -24,9 +25,9 @@
 .activityButton {
   padding: 0.7rem 1.3rem;
   border-radius: 2rem;
-  background-color: var(--gray-alpha-100, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--gray-alpha-200, rgba(255, 255, 255, 0.1));
-  color: var(--foreground, #000);
+  background-color: var(--gray-alpha-100);
+  border: 1px solid var(--gray-alpha-200);
+  color: var(--foreground);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -34,27 +35,27 @@
 }
 
 .activityButton:hover {
-  background-color: var(--gray-alpha-200, rgba(255, 255, 255, 0.1));
+  background-color: var(--gray-alpha-200);
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .activeButton, .activityButton.active {
-  background-color: #4a9eff;
-  color: white;
-  border-color: #4a9eff;
-  box-shadow: 0 4px 15px rgba(74, 158, 255, 0.3);
+  background-color: var(--foreground);
+  color: var(--background);
+  border-color: var(--foreground);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .filterTabs {
   display: flex;
-  background-color: var(--gray-alpha-100, rgba(255, 255, 255, 0.05));
+  background-color: var(--gray-alpha-100);
   border-radius: 2rem;
   padding: 0.4rem;
   width: 100%;
   max-width: 450px;
   margin: 2rem auto;
-  border: 1px solid var(--gray-alpha-200, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--gray-alpha-200);
 }
 
 .filterTab {
@@ -63,7 +64,8 @@
   border-radius: 1.75rem;
   border: none;
   background-color: transparent;
-  color: var(--foreground-muted, rgba(0, 0, 0, 0.7));
+  color: var(--foreground);
+  opacity: 0.7;
   font-weight: 500;
   font-size: 1rem;
   cursor: pointer;
@@ -72,10 +74,43 @@
 }
 
 .activeTab, .filterTab.active {
-  background-color: var(--foreground, #000);
-  color: var(--background, #fff);
+  background-color: var(--foreground);
+  color: var(--background);
+  opacity: 1;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.timeframeSelector {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.dateRangePicker {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.dateInput {
+  flex: 1;
+}
+
+.dateInput label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.dateInput input {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--gray-alpha-200);
+  background-color: var(--background);
 }
 
 @media (max-width: 768px) {
@@ -88,13 +123,13 @@
     font-size: 0.85rem;
   }
   
-  .compactButton {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.75rem;
-  }
-  
   .filterTab {
     padding: 0.6rem 0.5rem;
     font-size: 0.85rem;
+  }
+  
+  .dateRangePicker {
+    flex-direction: column;
+    gap: 0.75rem;
   }
 }

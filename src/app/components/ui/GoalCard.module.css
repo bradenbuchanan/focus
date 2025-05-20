@@ -1,98 +1,45 @@
-/* src/components/ui/GoalCard.module.css */
-.goalCard {
-    background-color: var(--background);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 8px var(--gray-alpha-100);
-    border: 1px solid var(--gray-alpha-200);
-    transition: transform 0.2s ease;
-  }
-  
-  .goalCard:hover {
-    transform: translateY(-3px);
-  }
-  
-  .goalCard.compact {
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .goalHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-  
-  .goalHeader h3 {
-    margin: 0;
-    font-size: 1.25rem;
-  }
-  
-  .compact .goalHeader h3 {
-    font-size: 1.1rem;
-  }
-  
-  .goalActions {
-    display: flex;
-    gap: 0.5rem;
-  }
-  
-  .editButton,
-  .deleteButton {
-    background: none;
-    border: none;
-    color: var(--foreground);
-    font-size: 1.25rem;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-  }
-  
-  .editButton:hover,
-  .deleteButton:hover {
-    opacity: 1;
-  }
-  
+/* src/app/components/ui/GoalCard.module.css */
+/* Simplified to use shared card styles */
+.goalInfo {
+  margin-top: 1rem;
+}
+
+.goalDescription {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.goalTarget {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.activityTag {
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.goalProgress {
+  margin-top: 0.75rem;
+}
+
+.goalActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editButton,
+.deleteButton {
+  /* These should use the shared iconButton styles */
+}
+
+@media (max-width: 768px) {
   .goalDescription {
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    opacity: 0.7;
-  }
-  
-  .goalInfo {
-    margin-top: 1rem;
+    font-size: 0.85rem;
   }
   
   .goalTarget {
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
   }
-  
-  .activityTag {
-    opacity: 0.8;
-    font-style: italic;
-  }
-  
-  .goalProgress {
-    margin-top: 0.75rem;
-  }
-  
-  @media (max-width: 768px) {
-    .goalCard {
-      padding: 1.25rem;
-    }
-    
-    .goalCard.compact {
-      padding: 0.875rem;
-    }
-    
-    .goalHeader h3 {
-      font-size: 1.1rem;
-    }
-    
-    .compact .goalHeader h3 {
-      font-size: 1rem;
-    }
-  }
+}

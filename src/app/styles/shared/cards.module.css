@@ -41,6 +41,7 @@
   border-top: 1px solid var(--gray-alpha-100);
 }
 
+/* Card variants */
 .compactCard {
   padding: 1.25rem;
 }
