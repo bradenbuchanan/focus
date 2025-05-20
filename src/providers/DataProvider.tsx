@@ -103,7 +103,7 @@ export function DataProvider({ children }: DataProviderProps) {
       updateTask: (task: TaskUpdateInput) => taskRepo.updateTask(task),
       getTasks: () => taskRepo.getTasks(),
       deleteTask: (taskId: string) => taskRepo.deleteTask(taskId),
-      updateGoal: async (goalToUpdate: Goal): Promise<void> => {
+      updateGoal: async (_goalToUpdate: Goal): Promise<void> => {
         // This is currently just a stub implementation
         // You can implement goalRepo.updateGoal here when needed
         return Promise.resolve();
