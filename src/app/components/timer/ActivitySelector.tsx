@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import styles from './ActivitySelector.module.css';
 import filterStyles from '@/app/styles/shared/filters.module.css';
+import buttonStyles from '@/app/styles/shared/buttons.module.css';
 import { defaultActivityCategories } from '@/lib/timer';
 
 interface ActivitySelectorProps {
@@ -73,7 +74,7 @@ export default function ActivitySelector({
             className={styles.customActivityInput}
             autoFocus
           />
-          <button type="submit" className={styles.primaryButton}>
+          <button type="submit" className={buttonStyles.primaryButton}>
             Add
           </button>
         </form>
