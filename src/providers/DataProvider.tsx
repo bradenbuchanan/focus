@@ -76,7 +76,7 @@ interface DataContextType {
   updateTask: (task: TaskUpdateInput) => Promise<void>;
   getTasks: () => Promise<Task[]>;
   deleteTask: (taskId: string) => Promise<void>;
-  updateGoal: (goal: Goal) => Promise<void>;
+  updateGoal: (goalToUpdate: Goal) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -103,8 +103,10 @@ export function DataProvider({ children }: DataProviderProps) {
       updateTask: (task: TaskUpdateInput) => taskRepo.updateTask(task),
       getTasks: () => taskRepo.getTasks(),
       deleteTask: (taskId: string) => taskRepo.deleteTask(taskId),
-      updateGoal: async (goal: Goal): Promise<void> => {
-        return;
+      updateGoal: async (goalToUpdate: Goal): Promise<void> => {
+        // This is currently just a stub implementation
+        // You can implement goalRepo.updateGoal here when needed
+        return Promise.resolve();
       },
     }),
     [sessionRepo, goalRepo, taskRepo, accomplishmentRepo]
