@@ -115,32 +115,29 @@ export default function PriorityFocus() {
           .slice(0, 2); // Only show top 2
 
         // For each goal, find associated tasks
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const goalsWithTheirTasks: GoalWithTasks[] = needAttentionGoals.map(
-          (goal) => {
-            const goalTasks = allTasks
-              .filter((task) => task.goalId === goal.id && !task.completed)
-              .sort((a, b) => {
-                if (a.priority !== b.priority) {
-                  if (a.priority === 'high') return -1;
-                  if (b.priority === 'high') return 1;
-                  if (a.priority === 'medium') return -1;
-                  return 1;
-                }
-                return (
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
-                );
-              })
-              .slice(0, 2); // Limit to 2 tasks per goal
+        const goalsWithTheirTasks = needAttentionGoals.map((goal) => {
+          const goalTasks = allTasks
+            .filter((task) => task.goalId === goal.id && !task.completed)
+            .sort((a, b) => {
+              if (a.priority !== b.priority) {
+                if (a.priority === 'high') return -1;
+                if (b.priority === 'high') return 1;
+                if (a.priority === 'medium') return -1;
+                return 1;
+              }
+              return (
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+              );
+            })
+            .slice(0, 2); // Limit to 2 tasks per goal
 
-            return {
-              goal,
-              progress: 0, // We'll set this to 0 for now since we need sessions to calculate
-              tasks: goalTasks,
-            };
-          }
-        );
+          return {
+            goal,
+            progress: 0, // We'll set this to 0 for now since we need sessions to calculate
+            tasks: goalTasks,
+          };
+        });
 
         setGoalsWithTasks(goalsWithTheirTasks);
       } catch (error) {
