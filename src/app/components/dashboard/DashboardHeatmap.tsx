@@ -87,7 +87,7 @@ export default function DashboardHeatmap() {
         <h3 className={cardStyles.cardTitle}>Recent Activity</h3>
         <div className={styles.controlsRow}>
           <select
-            className={styles.activitySelector}
+            className={`${filterStyles.activityButton}`}
             value={selectedActivity}
             onChange={(e) => setSelectedActivity(e.target.value)}
           >
@@ -98,7 +98,7 @@ export default function DashboardHeatmap() {
             ))}
           </select>
           <button
-            className={`${buttonStyles.secondaryButton} ${buttonStyles.compactButton} ${styles.refreshButton}`}
+            className={`${buttonStyles.secondaryButton} ${buttonStyles.compactButton}`}
             onClick={handleRefresh}
             title="Refresh data"
           >
@@ -127,19 +127,21 @@ export default function DashboardHeatmap() {
             />
           </div>
 
-          <div className={styles.heatmapLegend}>
-            <span>Less</span>
-            {[0, 1, 2, 3, 4].map((level) => (
-              <div
-                key={level}
-                className={styles.legendCell}
-                style={{
-                  backgroundColor:
-                    currentActivityData.colorScheme.levels[level],
-                }}
-              />
-            ))}
-            <span>More</span>
+          <div className={filterStyles.filterContainer}>
+            <div className={styles.heatmapLegend}>
+              <span>Less</span>
+              {[0, 1, 2, 3, 4].map((level) => (
+                <div
+                  key={level}
+                  className={styles.legendCell}
+                  style={{
+                    backgroundColor:
+                      currentActivityData.colorScheme.levels[level],
+                  }}
+                />
+              ))}
+              <span>More</span>
+            </div>
           </div>
         </div>
       )}
