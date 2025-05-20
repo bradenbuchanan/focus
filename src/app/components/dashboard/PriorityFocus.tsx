@@ -78,17 +78,17 @@ export default function PriorityFocus() {
         }));
 
         // Convert database goals to app format
-        const allGoals: Goal[] = dbGoals.map((goal) => ({
-          id: goal.id,
-          title: goal.title,
-          description: goal.description || undefined,
-          type: goal.type as 'time' | 'sessions',
-          target: goal.target,
-          period: goal.period as 'daily' | 'weekly' | 'monthly' | 'yearly',
-          startDate: goal.start_date,
-          endDate: goal.end_date || undefined,
-          createdAt: goal.created_at,
-          activity: goal.activity || undefined,
+        const allGoals: Goal[] = dbGoals.map((goalItem) => ({
+          id: goalItem.id,
+          title: goalItem.title,
+          description: goalItem.description || undefined,
+          type: goalItem.type as 'time' | 'sessions',
+          target: goalItem.target,
+          period: goalItem.period as 'daily' | 'weekly' | 'monthly' | 'yearly',
+          startDate: goalItem.start_date,
+          endDate: goalItem.end_date || undefined,
+          createdAt: goalItem.created_at,
+          activity: goalItem.activity || undefined,
         }));
 
         // Filter for high priority standalone tasks (tasks without a goalId)
@@ -107,7 +107,7 @@ export default function PriorityFocus() {
 
         // Get goals that need attention (less than 40% progress)
         const needAttentionGoals = allGoals
-          .filter((goal) => {
+          .filter(() => {
             // We need sessions to calculate progress
             // For now, we'll use a simple check
             return true; // Just include all goals for simplicity
@@ -115,9 +115,9 @@ export default function PriorityFocus() {
           .slice(0, 2); // Only show top 2
 
         // For each goal, find associated tasks
-        const goalsWithTheirTasks = needAttentionGoals.map((goal) => {
+        const goalsWithTheirTasks = needAttentionGoals.map((goalItem) => {
           const goalTasks = allTasks
-            .filter((task) => task.goalId === goal.id && !task.completed)
+            .filter((task) => task.goalId === goalItem.id && !task.completed)
             .sort((a, b) => {
               if (a.priority !== b.priority) {
                 if (a.priority === 'high') return -1;
@@ -133,7 +133,7 @@ export default function PriorityFocus() {
             .slice(0, 2); // Limit to 2 tasks per goal
 
           return {
-            goal,
+            goal: goalItem,
             progress: 0, // We'll set this to 0 for now since we need sessions to calculate
             tasks: goalTasks,
           };
@@ -208,59 +208,64 @@ export default function PriorityFocus() {
             Goals Needing Attention ({goalsWithTasks.length})
           </h3>
           <ul className={`${listStyles.listContainer} ${styles.priorityList}`}>
-            {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-            {goalsWithTasks.map(({ goal, progress, tasks }: GoalWithTasks) => (
-              <li
-                key={goal.id}
-                className={`${cardStyles.card} ${cardStyles.compactCard} ${styles.goalItem}`}
-              >
-                <div className={styles.goalHeader}>
-                  <div className={styles.goalProgress}>
-                    <div
-                      className={styles.progressBar}
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <span className={styles.priorityText}>{goal.title}</span>
-                  <span className={styles.progressText}>{progress}%</span>
-                </div>
+            {goalsWithTasks.map((goalWithTask) => {
+              const goal = goalWithTask.goal;
+              const progress = goalWithTask.progress;
+              const tasks = goalWithTask.tasks;
 
-                {tasks.length > 0 ? (
-                  <ul
-                    className={`${listStyles.listContainer} ${styles.goalTasks}`}
-                  >
-                    {tasks.map((task) => (
-                      <li
-                        key={task.id}
-                        className={`${listStyles.listItem} ${
-                          listStyles.compactListItem
-                        } ${styles.goalTask} ${
-                          completingTask === task.id ? styles.completing : ''
-                        }`}
-                      >
-                        <div className={styles.taskCheckbox}>
-                          <input
-                            type="checkbox"
-                            onChange={() => handleCompleteTask(task.id)}
-                            disabled={completingTask === task.id}
-                          />
-                        </div>
-                        {task.priority === 'high' && (
-                          <span className={styles.taskPriority}>High</span>
-                        )}
-                        <span
-                          className={`${listStyles.listItemText} ${styles.taskText}`}
+              return (
+                <li
+                  key={goal.id}
+                  className={`${cardStyles.card} ${cardStyles.compactCard} ${styles.goalItem}`}
+                >
+                  <div className={styles.goalHeader}>
+                    <div className={styles.goalProgress}>
+                      <div
+                        className={styles.progressBar}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <span className={styles.priorityText}>{goal.title}</span>
+                    <span className={styles.progressText}>{progress}%</span>
+                  </div>
+
+                  {tasks.length > 0 ? (
+                    <ul
+                      className={`${listStyles.listContainer} ${styles.goalTasks}`}
+                    >
+                      {tasks.map((task) => (
+                        <li
+                          key={task.id}
+                          className={`${listStyles.listItem} ${
+                            listStyles.compactListItem
+                          } ${styles.goalTask} ${
+                            completingTask === task.id ? styles.completing : ''
+                          }`}
                         >
-                          {task.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className={styles.noTasks}>No tasks for this goal</div>
-                )}
-              </li>
-            ))}
+                          <div className={styles.taskCheckbox}>
+                            <input
+                              type="checkbox"
+                              onChange={() => handleCompleteTask(task.id)}
+                              disabled={completingTask === task.id}
+                            />
+                          </div>
+                          {task.priority === 'high' && (
+                            <span className={styles.taskPriority}>High</span>
+                          )}
+                          <span
+                            className={`${listStyles.listItemText} ${styles.taskText}`}
+                          >
+                            {task.text}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className={styles.noTasks}>No tasks for this goal</div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
           <Link href="/goals" className={styles.viewAllLink}>
             View all goals →
