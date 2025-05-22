@@ -9,12 +9,19 @@ interface Accomplishment {
   category?: string;
 }
 
-// Add this interface for the session type
+// Define a more specific interface for the session type
 interface LocalSession {
   id: string;
+  date?: string;
+  localDate?: string;
+  duration?: number;
+  type?: string;
+  completed?: boolean;
+  activity?: string;
   accomplishment?: string;
   accomplishmentCategory?: string;
-  [key: string]: any; // Allow other properties
+  startTime?: string;
+  endTime?: string;
 }
 
 export function useAccomplishments() {
