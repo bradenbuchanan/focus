@@ -21,6 +21,14 @@
   position: relative;
 }
 
+.freeTimerStatus {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  z-index: 2;
+  position: relative;
+}
+
 .freeTimerDisplay::before {
   content: '';
   position: absolute;

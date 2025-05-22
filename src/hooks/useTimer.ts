@@ -64,20 +64,20 @@ export function useTimer(selectedActivity: string): TimerHookResult {
   // ======= BACKGROUND HANDLING =======
   // Store the timer state in localStorage
   const storeTimerState = useCallback(() => {
-    if (timerData.state !== TimerState.RUNNING && timerData.state !== TimerState.BREAK) {
-      return;
+    // Store state for any active timer
+    if (timerData.state === TimerState.RUNNING || timerData.state === TimerState.BREAK) {
+      const endTime = Date.now() + timerData.timeRemaining * 1000;
+      
+      localStorage.setItem('focus_timer_end_time', endTime.toString());
+      localStorage.setItem('focus_timer_state', JSON.stringify({
+        state: timerData.state,
+        currentSession: timerData.currentSession,
+        totalSessions: timerData.totalSessions,
+        activity: selectedActivity,
+        sessionStartTime: sessionStartTimeRef.current,
+        lastUpdate: Date.now(), // Add timestamp for debugging
+      }));
     }
-    
-    const endTime = Date.now() + timerData.timeRemaining * 1000;
-    
-    localStorage.setItem('focus_timer_end_time', endTime.toString());
-    localStorage.setItem('focus_timer_state', JSON.stringify({
-      state: timerData.state,
-      currentSession: timerData.currentSession,
-      totalSessions: timerData.totalSessions,
-      activity: selectedActivity,
-      sessionStartTime: sessionStartTimeRef.current,
-    }));
   }, [timerData, selectedActivity]);
   
   // Clear stored timer
@@ -309,46 +309,56 @@ export function useTimer(selectedActivity: string): TimerHookResult {
     });
   }, [isLongBreak]);
   
-  // Restore timer when tab becomes visible
-  const restoreTimerState = useCallback(() => {
-    const endTimeStr = localStorage.getItem('focus_timer_end_time');
-    const stateStr = localStorage.getItem('focus_timer_state');
+  // Update the restoreTimerState function to add better error handling:
+const restoreTimerState = useCallback(() => {
+  const endTimeStr = localStorage.getItem('focus_timer_end_time');
+  const stateStr = localStorage.getItem('focus_timer_state');
+  
+  if (!endTimeStr || !stateStr) {
+    return;
+  }
+  
+  try {
+    const endTime = parseInt(endTimeStr, 10);
+    const storedState = JSON.parse(stateStr) as StoredTimerState;
     
-    if (!endTimeStr || !stateStr) {
+    // Calculate remaining time
+    const now = Date.now();
+    const timeRemaining = Math.max(0, Math.floor((endTime - now) / 1000));
+    
+    console.log('Restoring timer state:', {
+      endTime: new Date(endTime).toLocaleTimeString(),
+      now: new Date(now).toLocaleTimeString(),
+      timeRemaining,
+      storedState
+    });
+    
+    if (timeRemaining <= 0) {
+      // Timer completed while in background
+      handleTimerCompletion(storedState);
       return;
     }
     
-    try {
-      const endTime = parseInt(endTimeStr, 10);
-      const storedState = JSON.parse(stateStr) as StoredTimerState;
-      
-      // Calculate remaining time
-      const now = Date.now();
-      const timeRemaining = Math.max(0, Math.floor((endTime - now) / 1000));
-      
-      if (timeRemaining <= 0) {
-        // Timer completed while in background
-        handleTimerCompletion(storedState);
-        return;
-      }
-      
-      // Restore timer state
-      setTimerData(prev => ({
-        ...prev,
-        state: storedState.state,
-        timeRemaining,
-        currentSession: storedState.currentSession,
-        totalSessions: storedState.totalSessions,
-      }));
-      
-      sessionStartTimeRef.current = storedState.sessionStartTime;
-      
-      // Restart the timer
-      startTimer();
-    } catch (error) {
-      console.error('Error restoring timer state:', error);
-    }
-  }, [startTimer, handleTimerCompletion]);
+    // Restore timer state
+    setTimerData(prev => ({
+      ...prev,
+      state: storedState.state,
+      timeRemaining,
+      currentSession: storedState.currentSession,
+      totalSessions: storedState.totalSessions,
+    }));
+    
+    sessionStartTimeRef.current = storedState.sessionStartTime;
+    
+    // Restart the timer
+    startTimer();
+  } catch (error) {
+    console.error('Error restoring timer state:', error);
+    // Clear corrupted state
+    localStorage.removeItem('focus_timer_end_time');
+    localStorage.removeItem('focus_timer_state');
+  }
+}, [startTimer, handleTimerCompletion]);
   
   // Record a free session
   const recordFreeSession = useCallback(async (
