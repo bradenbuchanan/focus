@@ -102,6 +102,229 @@
   margin: 1rem 0;
 }
 
+/* Accomplishment Recorder Styles */
+.accomplishmentRecorder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.accomplishmentRecorder h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  text-align: center;
+  color: var(--foreground);
+}
+
+.accomplishmentRecorder > p {
+  font-size: 1.1rem;
+  color: var(--foreground);
+  opacity: 0.8;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.quickOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  max-width: 600px;
+  width: 100%;
+}
+
+.quickOptionButton {
+  padding: 0.6rem 1.2rem;
+  border-radius: 2rem;
+  background-color: var(--gray-alpha-100);
+  border: 1px solid var(--gray-alpha-200);
+  color: var(--foreground);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quickOptionButton:hover {
+  background-color: var(--gray-alpha-200);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.quickOptionButton:active {
+  transform: translateY(0);
+}
+
+.accomplishmentRecorder form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 600px;
+  background-color: var(--background);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--gray-alpha-200);
+}
+
+.accomplishmentInput {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--gray-alpha-200);
+  background-color: var(--gray-alpha-100);
+  color: var(--foreground);
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.accomplishmentInput:focus {
+  outline: none;
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 3px rgba(var(--gray-rgb), 0.1);
+}
+
+.accomplishmentInput::placeholder {
+  color: var(--foreground);
+  opacity: 0.5;
+}
+
+.categorySelector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.categorySelector label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--foreground);
+}
+
+.categoryOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.categoryButton {
+  padding: 0.5rem 1rem;
+  border-radius: 1.5rem;
+  background-color: var(--background);
+  border: 2px solid var(--gray-alpha-200);
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.categoryButton:hover {
+  background-color: var(--gray-alpha-100);
+  transform: scale(1.05);
+}
+
+.categoryButton.selected {
+  background-color: var(--foreground);
+  color: var(--background);
+  border-color: var(--foreground);
+}
+
+.recorderActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.recorderActions button {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recorderActions .primaryButton {
+  background-color: var(--foreground);
+  color: var(--background);
+  border: none;
+}
+
+.recorderActions .primaryButton:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.recorderActions .secondaryButton {
+  background-color: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--gray-alpha-200);
+}
+
+.recorderActions .secondaryButton:hover {
+  background-color: var(--gray-alpha-100);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .accomplishmentRecorder {
+    padding: 1rem;
+  }
+  
+  .accomplishmentRecorder h3 {
+    font-size: 1.75rem;
+  }
+  
+  .accomplishmentRecorder > p {
+    font-size: 1rem;
+  }
+  
+  .accomplishmentRecorder form {
+    padding: 1.5rem;
+  }
+  
+  .quickOptions {
+    gap: 0.5rem;
+  }
+  
+  .quickOptionButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .recorderActions {
+    flex-direction: column;
+  }
+  
+  .recorderActions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .accomplishmentRecorder h3 {
+    font-size: 1.5rem;
+  }
+  
+  .quickOptionButton {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
