@@ -1,13 +1,20 @@
 // src/hooks/timer/useAccomplishments.ts
 import { useState } from 'react';
-import { getSessions } from '@/lib/timer';
 
 interface Accomplishment {
   id: string;
   text: string;
   date: string;
   sessionId?: string;
-  category?: string; // Add this line properly
+  category?: string;
+}
+
+// Add this interface for the session type
+interface LocalSession {
+  id: string;
+  accomplishment?: string;
+  accomplishmentCategory?: string;
+  [key: string]: any; // Allow other properties
 }
 
 export function useAccomplishments() {
@@ -26,7 +33,7 @@ export function useAccomplishments() {
       text: text.trim(),
       date: new Date().toISOString(),
       sessionId: effectiveSessionId,
-      category: category // Correct syntax - no question mark here
+      category: category
     };
     
     // Get existing accomplishments from localStorage
@@ -40,11 +47,11 @@ export function useAccomplishments() {
     
     // Also update the session to include the accomplishment text
     if (effectiveSessionId) {
-      const sessions = getSessions();
-      const sessionIndex = sessions.findIndex(s => s.id === effectiveSessionId);
+      const sessions = getLocalSessions();
+      const sessionIndex = sessions.findIndex((s: LocalSession) => s.id === effectiveSessionId);
       if (sessionIndex !== -1) {
         sessions[sessionIndex].accomplishment = text.trim();
-        sessions[sessionIndex].accomplishmentCategory = category; // Add this line
+        sessions[sessionIndex].accomplishmentCategory = category;
         localStorage.setItem('timerSessions', JSON.stringify(sessions));
       }
     }
@@ -57,15 +64,14 @@ export function useAccomplishments() {
     return true;
   };
   
-  
   // Skip recording an accomplishment
   const skipAccomplishment = () => {
     // Reset state
     setShowAccomplishmentPrompt(false);
-    setCurrentSessionId(''); // Reset the session ID
+    setCurrentSessionId('');
     
     console.log("Accomplishment skipped, prompt hidden");
-    return true; // Return success
+    return true;
   };
   
   // Show the accomplishment prompt
@@ -95,6 +101,13 @@ export function useAccomplishments() {
     const accomplishments = getAccomplishments();
     const sessionAccomplishment = accomplishments.find(a => a.sessionId === sessionId);
     return sessionAccomplishment ? sessionAccomplishment.text : null;
+  };
+
+  // Helper function to get local sessions with proper typing
+  const getLocalSessions = (): LocalSession[] => {
+    if (typeof window === 'undefined') return [];
+    const sessionsData = localStorage.getItem('timerSessions');
+    return sessionsData ? JSON.parse(sessionsData) : [];
   };
   
   return {
