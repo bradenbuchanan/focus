@@ -6,8 +6,6 @@ import { Pie } from 'react-chartjs-2';
 import { useState, useEffect, useRef } from 'react';
 import { TimerSession } from '@/lib/timer';
 import { useData } from '@/providers/DataProvider';
-import styles from './analytics.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -119,8 +117,8 @@ export default function ActivityPieChart() {
   };
 
   return (
-    <div className={`${cardStyles.card} ${styles.chartContainer}`}>
-      <h3 className={cardStyles.cardTitle}>Time by Activity</h3>
+    <div className="card chart-container">
+      <h3 className="card__title">Time by Activity</h3>
       <div
         style={{
           height: '350px',
