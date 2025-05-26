@@ -1,6 +1,5 @@
 // src/components/analytics/CalendarGrid.tsx
 import React from 'react';
-import styles from './analytics.module.css';
 import { CalendarDay } from '@/hooks/useActivityCalendarData';
 
 interface CalendarGridProps {
@@ -94,13 +93,13 @@ export function CalendarGrid({ calendarData, colorScheme }: CalendarGridProps) {
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className={styles.githubCalendar}>
+    <div className="github-calendar">
       {/* Month labels at the top */}
-      <div className={styles.monthLabelsRow}>
+      <div className="month-labels-row">
         {monthLabels.map((month, index) => (
           <div
             key={index}
-            className={styles.monthLabel}
+            className="month-label"
             style={{
               left: `${month.position * 15}px`, // Adjust based on cell width + gap
             }}
@@ -110,29 +109,29 @@ export function CalendarGrid({ calendarData, colorScheme }: CalendarGridProps) {
         ))}
       </div>
 
-      <div className={styles.calendarBody}>
+      <div className="calendar-body">
         {/* Day labels on the left */}
-        <div className={styles.dayLabels}>
+        <div className="day-labels">
           {/* Only show every other day to save space */}
           {days
             .filter((_, i) => i % 2 !== 0)
             .map((day) => (
-              <div key={day} className={styles.dayLabel}>
+              <div key={day} className="day-label">
                 {day}
               </div>
             ))}
         </div>
 
         {/* Main calendar grid */}
-        <div className={styles.calendarGrid}>
+        <div className="calendar-grid">
           {/* For each day of the week */}
           {Array.from({ length: 7 }).map((_, dayIndex) => (
-            <div key={dayIndex} className={styles.calendarRow}>
+            <div key={dayIndex} className="calendar-row">
               {/* For each week */}
               {weeks.map((week, weekIndex) => (
                 <div
                   key={`${weekIndex}-${dayIndex}`}
-                  className={styles.calendarCell}
+                  className="calendar-cell"
                   style={{
                     backgroundColor:
                       colorScheme.levels[week[dayIndex]?.intensity || 0],
