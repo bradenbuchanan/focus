@@ -1,11 +1,10 @@
 // src/app/components/analytics/CalendarSection.tsx
 import MultiActivityHeatmap from './MultiActivityHeatmap';
-import styles from '../../analytics/analytics.module.css';
 
 export default function CalendarSection() {
   return (
-    <div className={styles.chartSection}>
-      <h3 className={styles.sectionTitle}>
+    <div className="chart-container animate-fade-in">
+      <h3 className="card__title">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
