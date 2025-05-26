@@ -1,7 +1,5 @@
 // src/components/analytics/ActivitySelector.tsx
 import React from 'react';
-import styles from './analytics.module.css';
-import filterStyles from '@/app/styles/shared/filters.module.css';
 
 interface ActivitySelectorProps {
   activities: string[];
@@ -19,16 +17,14 @@ export function ActivitySelector({
   }
 
   return (
-    <div
-      className={`${filterStyles.filterContainer} ${styles.activitySelectorWrapper}`}
-    >
-      <label className={filterStyles.filterLabel}>Filter by Activity:</label>
-      <div className={filterStyles.activityButtons}>
+    <div className="filter-container">
+      <label className="filter-label">Filter by Activity:</label>
+      <div className="filter-buttons">
         {activities.map((activity) => (
           <button
             key={activity}
-            className={`${filterStyles.activityButton} ${
-              selected === activity ? filterStyles.activeButton : ''
+            className={`filter-button ${
+              selected === activity ? 'filter-button--active' : ''
             }`}
             onClick={() => onChange(activity)}
           >
