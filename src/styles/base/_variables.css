@@ -1,0 +1,106 @@
+/* CSS Custom Properties for theming and consistency */
+:root {
+    /* Colors */
+    --color-primary: #3b82f6;
+    --color-primary-hover: #2563eb;
+    --color-secondary: #6b7280;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    
+    /* Semantic colors - these will be overridden by theme */
+    --color-background: #ffffff;
+    --color-foreground: #171717;
+    --color-surface: #f9fafb;
+    --color-border: #e5e7eb;
+    --color-muted: #6b7280;
+    
+    /* Alpha colors for overlays */
+    --gray-rgb: 0, 0, 0;
+    --gray-alpha-50: rgba(var(--gray-rgb), 0.02);
+    --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
+    --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
+    --gray-alpha-300: rgba(var(--gray-rgb), 0.12);
+    
+    /* Spacing */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 0.75rem;
+    --space-lg: 1rem;
+    --space-xl: 1.5rem;
+    --space-2xl: 2rem;
+    --space-3xl: 3rem;
+    
+    /* Border radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
+    
+    /* Typography */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+    
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* Line heights */
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-base: 250ms ease;
+    --transition-slow: 350ms ease;
+    
+    /* Z-index scale */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal: 1040;
+    --z-popover: 1050;
+    --z-tooltip: 1060;
+  }
+  
+  /* Theme variants */
+  [data-theme="dark"] {
+    --color-background: #0a0a0a;
+    --color-foreground: #ededed;
+    --color-surface: #1a1a1a;
+    --color-border: #2a2a2a;
+    --color-muted: #a1a1aa;
+    --gray-rgb: 255, 255, 255;
+  }
+  
+  [data-theme="darker"] {
+    --color-background: #2a2929;
+    --color-foreground: #ededed;
+    --color-surface: #3a3939;
+    --color-border: #4a4949;
+    --color-muted: #a1a1aa;
+    --gray-rgb: 255, 255, 255;
+  }
+  
+  /* Legacy variable mapping for backward compatibility */
+  :root {
+    --background: var(--color-background);
+    --foreground: var(--color-foreground);
+    --gray-alpha-100: var(--gray-alpha-100);
+    --gray-alpha-200: var(--gray-alpha-200);
+  }
