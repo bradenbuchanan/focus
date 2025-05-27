@@ -2,8 +2,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import styles from './weeklySummary.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
 import { useData } from '@/providers/DataProvider';
 import {
   isFocusSession,
@@ -478,21 +476,34 @@ ${
   };
 
   return (
-    <div className={`${cardStyles.card} ${styles.summaryCard}`}>
+    <div className="card">
       {/* TEMPORARY: User-visible note that this is a preliminary feature */}
-      <div className={styles.betaIndicator}>
-        <span>BETA</span>
-        <p>
-          Weekly insights feature with AI-powered analytics. Limited API calls
-          available.
-        </p>
+      <div
+        className="card--surface card--compact"
+        style={{ marginBottom: '1rem' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span
+            className="priority-badge"
+            style={{ backgroundColor: '#f59e0b' }}
+          >
+            BETA
+          </span>
+          <p style={{ margin: 0, fontSize: '0.9rem' }}>
+            Weekly insights feature with AI-powered analytics. Limited API calls
+            available.
+          </p>
+        </div>
       </div>
 
       {/* Filtering controls */}
-      <div className={styles.filterControls}>
-        <h3>Generate Productivity Insights</h3>
+      <div className="filter-container">
+        <h3 className="card__title">Generate Productivity Insights</h3>
 
-        <div className={styles.apiInfo}>
+        <div
+          className="card--surface card--compact"
+          style={{ marginBottom: '1rem' }}
+        >
           <p>
             <strong>Note:</strong> Generating insights uses the Gemini API and
             counts toward your API usage limit. Choose your time periods
@@ -500,28 +511,28 @@ ${
           </p>
         </div>
 
-        <div className={styles.timeframeSelector}>
-          <label>Time Period:</label>
-          <div className={styles.timeframeButtons}>
+        <div className="form-group">
+          <label className="form-label">Time Period:</label>
+          <div className="filter-tabs">
             <button
-              className={`${styles.timeframeButton} ${
-                timeframe === 'week' ? styles.active : ''
+              className={`filter-tab ${
+                timeframe === 'week' ? 'filter-tab--active' : ''
               }`}
               onClick={() => setTimeframe('week')}
             >
               This Week
             </button>
             <button
-              className={`${styles.timeframeButton} ${
-                timeframe === 'month' ? styles.active : ''
+              className={`filter-tab ${
+                timeframe === 'month' ? 'filter-tab--active' : ''
               }`}
               onClick={() => setTimeframe('month')}
             >
               This Month
             </button>
             <button
-              className={`${styles.timeframeButton} ${
-                timeframe === 'custom' ? styles.active : ''
+              className={`filter-tab ${
+                timeframe === 'custom' ? 'filter-tab--active' : ''
               }`}
               onClick={() => setTimeframe('custom')}
             >
@@ -531,21 +542,27 @@ ${
         </div>
 
         {timeframe === 'custom' && (
-          <div className={styles.dateRangePicker}>
-            <div className={styles.dateInput}>
-              <label htmlFor="startDate">Start Date:</label>
+          <div className="filter-date-range">
+            <div className="filter-date-input">
+              <label className="form-label" htmlFor="startDate">
+                Start Date:
+              </label>
               <input
                 type="date"
                 id="startDate"
+                className="form-input"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
-            <div className={styles.dateInput}>
-              <label htmlFor="endDate">End Date:</label>
+            <div className="filter-date-input">
+              <label className="form-label" htmlFor="endDate">
+                End Date:
+              </label>
               <input
                 type="date"
                 id="endDate"
+                className="form-input"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
@@ -554,14 +571,18 @@ ${
         )}
 
         {availableActivities.length > 0 && (
-          <div className={styles.activitySelector}>
-            <label>Filter by Activities (optional):</label>
-            <div className={styles.activityButtons}>
+          <div className="form-group">
+            <label className="form-label">
+              Filter by Activities (optional):
+            </label>
+            <div className="filter-buttons">
               {availableActivities.map((activity) => (
                 <button
                   key={activity}
-                  className={`${styles.activityButton} ${
-                    selectedActivities.includes(activity) ? styles.active : ''
+                  className={`filter-button ${
+                    selectedActivities.includes(activity)
+                      ? 'filter-button--active'
+                      : ''
                   }`}
                   onClick={() => handleActivityToggle(activity)}
                 >
@@ -573,7 +594,7 @@ ${
         )}
 
         <button
-          className={styles.generateButton}
+          className="btn btn--primary btn--full"
           onClick={generateSummary}
           disabled={loading || apiLoading}
         >
@@ -586,8 +607,22 @@ ${
       </div>
 
       {(loading || apiLoading) && (
-        <div className={styles.loadingIndicator}>
-          <div className={styles.spinner}></div>
+        <div
+          className="card--surface"
+          style={{ textAlign: 'center', padding: '2rem' }}
+        >
+          <div
+            className="animate-spin"
+            style={{
+              display: 'inline-block',
+              width: '2.5rem',
+              height: '2.5rem',
+              border: '3px solid var(--gray-alpha-200)',
+              borderTopColor: 'var(--color-foreground)',
+              borderRadius: '50%',
+              marginBottom: '1rem',
+            }}
+          ></div>
           <p>
             {loading
               ? 'Processing your focus data...'
@@ -597,10 +632,13 @@ ${
       )}
 
       {error && !loading && !apiLoading && (
-        <div className={styles.noDataMessage}>
-          <h3>Insights Not Available</h3>
+        <div
+          className="card--surface"
+          style={{ textAlign: 'center', padding: '2rem' }}
+        >
+          <h3 className="card__title">Insights Not Available</h3>
           <p>{error}</p>
-          <p className={styles.suggestion}>
+          <p style={{ marginTop: '1rem', fontStyle: 'italic' }}>
             Try selecting a different time period or complete more focus
             sessions.
           </p>
@@ -609,24 +647,29 @@ ${
 
       {summary && !loading && !apiLoading && !error && (
         <>
-          <div className={styles.summaryHeader}>
-            <h2>Productivity Insights</h2>
-            <p className={styles.dateRange}>
-              {formatDate(summary.startDate)} - {formatDate(summary.endDate)}
-            </p>
+          <div className="card__header" style={{ textAlign: 'center' }}>
+            <div>
+              <h2 className="card__title">Productivity Insights</h2>
+              <p className="card__subtitle">
+                {formatDate(summary.startDate)} - {formatDate(summary.endDate)}
+              </p>
+            </div>
           </div>
 
-          <div className={styles.statsGrid}>
-            <div className={styles.statBox}>
-              <span className={styles.statValue}>{summary.totalFocusTime}</span>
-              <span className={styles.statLabel}>Minutes Focused</span>
+          <div
+            className="card-grid card-grid--stats"
+            style={{ marginBottom: '2rem' }}
+          >
+            <div className="card card--stats">
+              <span className="stats-value">{summary.totalFocusTime}</span>
+              <span className="stats-label">Minutes Focused</span>
             </div>
-            <div className={styles.statBox}>
-              <span className={styles.statValue}>{summary.totalSessions}</span>
-              <span className={styles.statLabel}>Sessions</span>
+            <div className="card card--stats">
+              <span className="stats-value">{summary.totalSessions}</span>
+              <span className="stats-label">Sessions</span>
             </div>
-            <div className={styles.statBox}>
-              <span className={styles.statValue}>
+            <div className="card card--stats">
+              <span className="stats-value">
                 {summary.mostProductiveDay
                   ? new Date(summary.mostProductiveDay.day).toLocaleDateString(
                       'en-US',
@@ -634,20 +677,47 @@ ${
                     )
                   : 'N/A'}
               </span>
-              <span className={styles.statLabel}>Best Day</span>
+              <span className="stats-label">Best Day</span>
             </div>
           </div>
 
           {summary.topCategories.length > 0 && (
-            <div className={styles.topCategories}>
-              <h3>Top Focus Categories</h3>
-              <div className={styles.categoryBars}>
+            <div
+              className="card--surface card--compact"
+              style={{ marginBottom: '2rem' }}
+            >
+              <h3 className="card__title">Top Focus Categories</h3>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                }}
+              >
                 {summary.topCategories.map((category, index) => (
-                  <div key={index} className={styles.categoryBar}>
-                    <div className={styles.categoryName}>{category.name}</div>
-                    <div className={styles.categoryBarContainer}>
+                  <div
+                    key={index}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <span style={{ fontWeight: '500' }}>{category.name}</span>
+                      <span style={{ fontSize: '0.9rem', opacity: '0.8' }}>
+                        {category.minutes} min
+                      </span>
+                    </div>
+                    <div className="progress-bar">
                       <div
-                        className={styles.categoryBarFill}
+                        className="progress-fill"
                         style={{
                           width: `${Math.min(
                             100,
@@ -655,15 +725,12 @@ ${
                           )}%`,
                           backgroundColor:
                             index === 0
-                              ? 'var(--primary-color)'
+                              ? 'var(--color-primary)'
                               : index === 1
-                              ? 'var(--secondary-color)'
-                              : 'var(--tertiary-color)',
+                              ? 'var(--color-success)'
+                              : 'var(--color-warning)',
                         }}
                       ></div>
-                    </div>
-                    <div className={styles.categoryMinutes}>
-                      {category.minutes} min
                     </div>
                   </div>
                 ))}
@@ -671,18 +738,20 @@ ${
             </div>
           )}
 
-          <div className={styles.insightsContainer}>
+          <div className="card--surface card--compact">
             {insights ? (
               <>
-                <h3>Your Insights</h3>
-                <div className={styles.insights}>
+                <h3 className="card__title">Your Insights</h3>
+                <div className="card__body">
                   {insights.split('\n\n').map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
+                    <p key={index} style={{ marginBottom: '1rem' }}>
+                      {paragraph}
+                    </p>
                   ))}
                 </div>
               </>
             ) : (
-              <div className={styles.noInsights}>
+              <div style={{ textAlign: 'center', padding: '2rem' }}>
                 <p>No insights available for this period yet.</p>
               </div>
             )}
