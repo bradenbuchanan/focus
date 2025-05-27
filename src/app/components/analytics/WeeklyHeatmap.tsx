@@ -1,9 +1,6 @@
-// src/app/components/analytics/WeeklyHeatmap.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import styles from './analytics.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
 import { useData } from '@/providers/DataProvider';
 import { TimerSession } from '@/lib/timer';
 
@@ -77,23 +74,37 @@ export default function WeeklyHeatmap() {
   };
 
   return (
-    <div className={`${cardStyles.card} ${styles.heatmapContainer}`}>
-      <h3 className={cardStyles.cardTitle}>Weekly Focus Pattern</h3>
-      <div className={styles.heatmap}>
-        <div className={styles.heatmapLabels}>
+    <div className="card chart-container">
+      <h3 className="card__title">Weekly Focus Pattern</h3>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-md)',
+          alignItems: 'center',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            gap: 'var(--space-sm)',
+            fontSize: 'var(--font-size-xs)',
+            color: 'var(--color-muted)',
+          }}
+        >
           {days.map((day) => (
-            <div key={day} className={styles.dayLabel}>
+            <div key={day} style={{ width: '24px', textAlign: 'center' }}>
               {day}
             </div>
           ))}
         </div>
-        <div className={styles.heatmapGrid}>
+        <div className="calendar-grid">
           {heatmapData.map((dayData, dayIndex) => (
-            <div key={dayIndex} className={styles.heatmapRow}>
+            <div key={dayIndex} className="calendar-row">
               {dayData.map((value, hourIndex) => (
                 <div
                   key={`${dayIndex}-${hourIndex}`}
-                  className={styles.heatmapCell}
+                  className="calendar-cell"
                   style={{ backgroundColor: getCellColor(value) }}
                   title={`${days[dayIndex]} ${hourIndex}:00 - ${value.toFixed(
                     1
@@ -103,7 +114,16 @@ export default function WeeklyHeatmap() {
             </div>
           ))}
         </div>
-        <div className={styles.hourLabels}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            width: '100%',
+            maxWidth: '300px',
+            fontSize: 'var(--font-size-xs)',
+            color: 'var(--color-muted)',
+          }}
+        >
           <div>12 AM</div>
           <div>6 AM</div>
           <div>12 PM</div>

@@ -1,6 +1,4 @@
-// src/app/components/analytics/SectionTitle.tsx
 import React from 'react';
-import styles from '../../analytics/analytics.module.css';
 
 interface SectionTitleProps {
   title: string;
@@ -9,7 +7,7 @@ interface SectionTitleProps {
 
 export default function SectionTitle({ title, icon }: SectionTitleProps) {
   return (
-    <h3 className={styles.sectionTitle}>
+    <h3 className="card__title">
       {icon}
       {title}
     </h3>
