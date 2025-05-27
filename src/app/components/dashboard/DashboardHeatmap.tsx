@@ -2,10 +2,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import styles from './dashboardHeatmap.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
-import filterStyles from '@/app/styles/shared/filters.module.css';
 import {
   ActivityData,
   useMultiActivityData,
@@ -72,24 +68,29 @@ export default function DashboardHeatmap() {
 
   if (isLoading) {
     return (
-      <div className={`${cardStyles.card} ${styles.heatmapCard}`}>
-        <div className={cardStyles.cardHeader}>
-          <h3 className={cardStyles.cardTitle}>Recent Activity</h3>
+      <div className="card">
+        <div className="card__header">
+          <h3 className="card__title">Recent Activity</h3>
         </div>
-        <div className={styles.loadingIndicator}>Loading activity data...</div>
+        <div className="card__body">
+          <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>
+            Loading activity data...
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`${cardStyles.card} ${styles.heatmapCard}`}>
-      <div className={styles.heatmapHeader}>
-        <h3 className={cardStyles.cardTitle}>Recent Activity</h3>
-        <div className={styles.controlsRow}>
+    <div className="card">
+      <div className="card__header">
+        <h3 className="card__title">Recent Activity</h3>
+        <div className="card__actions">
           <select
-            className={`${filterStyles.activityButton}`}
+            className="form-select"
             value={selectedActivity}
             onChange={(e) => setSelectedActivity(e.target.value)}
+            style={{ minWidth: '150px' }}
           >
             {activityDataSets.map((dataset: ActivityData) => (
               <option key={dataset.name} value={dataset.name}>
@@ -98,49 +99,93 @@ export default function DashboardHeatmap() {
             ))}
           </select>
           <button
-            className={`${buttonStyles.secondaryButton} ${buttonStyles.compactButton}`}
+            className="btn btn--secondary btn--compact"
             onClick={handleRefresh}
             title="Refresh data"
           >
             ↻ Refresh
           </button>
-          <span className={styles.lastUpdated}>
+          <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>
             Last updated: {lastUpdated.toLocaleTimeString()}
           </span>
         </div>
       </div>
 
       {currentActivityData && (
-        <div className={styles.activityHeatmapSection}>
-          <div className={styles.maxCountInfo}>
+        <div className="card__body">
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginBottom: '1rem',
+            }}
+          >
             {currentActivityData.maxCount > 0 && (
-              <span className={styles.maxTimeLabel}>
+              <span style={{ fontSize: '0.85rem', opacity: 0.7 }}>
                 Max: {currentActivityData.maxCount} min in a day
               </span>
             )}
           </div>
 
-          <div className={styles.heatmapWrapper}>
+          <div style={{ marginBottom: '1rem' }}>
             <CalendarGrid
               calendarData={currentActivityData.data}
               colorScheme={currentActivityData.colorScheme}
             />
           </div>
 
-          <div className={filterStyles.filterContainer}>
-            <div className={styles.heatmapLegend}>
-              <span>Less</span>
+          <div className="filter-container">
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                padding: '0.5rem',
+                backgroundColor: 'var(--gray-alpha-100)',
+                borderRadius: '0.5rem',
+                width: 'fit-content',
+                margin: '0 auto',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  padding: '0 0.25rem',
+                }}
+              >
+                Less
+              </span>
               {[0, 1, 2, 3, 4].map((level) => (
                 <div
                   key={level}
-                  className={styles.legendCell}
                   style={{
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '2px',
+                    border: '1px solid rgba(var(--gray-rgb), 0.1)',
                     backgroundColor:
                       currentActivityData.colorScheme.levels[level],
+                    transition: 'transform 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.2)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
                   }}
                 />
               ))}
-              <span>More</span>
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  padding: '0 0.25rem',
+                }}
+              >
+                More
+              </span>
             </div>
           </div>
         </div>
