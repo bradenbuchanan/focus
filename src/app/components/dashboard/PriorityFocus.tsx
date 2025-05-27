@@ -4,9 +4,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Task, Goal } from '@/lib/timer';
-import styles from './priorityFocus.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
-import listStyles from '@/app/styles/shared/lists.module.css';
 import { useData } from '@/providers/DataProvider';
 
 interface GoalWithTasks {
@@ -149,133 +146,129 @@ export default function PriorityFocus() {
   }, [getTasks, getGoals]);
 
   return (
-    <div className={`${cardStyles.card} ${styles.priorityContainer}`}>
-      <h2 className={styles.priorityTitle}>Priority Focus</h2>
+    <div className="card">
+      <h2 className="card__title">⚡ Priority Focus</h2>
 
       {(() => {
         const urgentTasks = getUrgentTasksFromAllSources();
         return urgentTasks.length > 0 ? (
-          <div className={styles.section}>
-            <h3 className={`${listStyles.listTitle} ${styles.sectionTitle}`}>
-              Urgent Tasks ({urgentTasks.length})
-            </h3>
-            <ul
-              className={`${listStyles.listContainer} ${styles.priorityList}`}
-            >
+          <div className="card__body">
+            <h3 className="list-title">Urgent Tasks ({urgentTasks.length})</h3>
+            <ul className="list">
               {urgentTasks.map((task: Task) => (
                 <li
                   key={task.id}
-                  className={`${listStyles.listItem} ${styles.priorityItem} ${
-                    completingTask === task.id ? styles.completing : ''
+                  className={`list-item ${
+                    completingTask === task.id ? 'list-item--loading' : ''
                   }`}
                 >
-                  <div className={styles.taskCheckbox}>
-                    <input
-                      type="checkbox"
-                      onChange={() => handleCompleteTask(task.id)}
-                      disabled={completingTask === task.id}
-                    />
+                  <div className="list-item__leading">
+                    <div className="task-checkbox">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox"
+                        onChange={() => handleCompleteTask(task.id)}
+                        disabled={completingTask === task.id}
+                      />
+                    </div>
                   </div>
-                  <span className={styles.priorityBadge}>High</span>
-                  <span
-                    className={`${listStyles.listItemText} ${styles.priorityText}`}
-                  >
-                    {task.text}
-                  </span>
-                  {task.activity && (
-                    <span className={styles.activityTag}>{task.activity}</span>
-                  )}
+                  <div className="list-item__content">
+                    <span className="priority-badge">High</span>
+                    <span className="list-item__text">{task.text}</span>
+                  </div>
+                  <div className="list-item__trailing">
+                    {task.activity && (
+                      <span className="activity-tag">{task.activity}</span>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
-            <Link href="/tasks" className={styles.viewAllLink}>
+            <Link href="/tasks" className="btn btn--ghost btn--sm">
               View all tasks →
             </Link>
           </div>
         ) : (
-          <div className={styles.section}>
-            <h3 className={`${listStyles.listTitle} ${styles.sectionTitle}`}>
-              Urgent Tasks
-            </h3>
+          <div className="card__body">
+            <h3 className="list-title">Urgent Tasks</h3>
             <p>No high priority tasks found</p>
           </div>
         );
       })()}
 
       {goalsWithTasks.length > 0 ? (
-        <div className={styles.section}>
-          <h3 className={`${listStyles.listTitle} ${styles.sectionTitle}`}>
+        <div className="card__body">
+          <h3 className="list-title">
             Goals Needing Attention ({goalsWithTasks.length})
           </h3>
-          <ul className={`${listStyles.listContainer} ${styles.priorityList}`}>
+          <ul className="list">
             {goalsWithTasks.map((goalWithTask) => {
               const goal = goalWithTask.goal;
               const progress = goalWithTask.progress;
               const tasks = goalWithTask.tasks;
 
               return (
-                <li
-                  key={goal.id}
-                  className={`${cardStyles.card} ${cardStyles.compactCard} ${styles.goalItem}`}
-                >
-                  <div className={styles.goalHeader}>
-                    <div className={styles.goalProgress}>
+                <li key={goal.id} className="card card--compact">
+                  <div className="card__header">
+                    <div
+                      className="progress-bar"
+                      style={{ width: '3rem', height: '0.5rem' }}
+                    >
                       <div
-                        className={styles.progressBar}
+                        className="progress-fill"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
-                    <span className={styles.priorityText}>{goal.title}</span>
-                    <span className={styles.progressText}>{progress}%</span>
+                    <span className="card__title">{goal.title}</span>
+                    <span className="list-item__text">{progress}%</span>
                   </div>
 
                   {tasks.length > 0 ? (
-                    <ul
-                      className={`${listStyles.listContainer} ${styles.goalTasks}`}
-                    >
+                    <ul className="list list--compact">
                       {tasks.map((task) => (
                         <li
                           key={task.id}
-                          className={`${listStyles.listItem} ${
-                            listStyles.compactListItem
-                          } ${styles.goalTask} ${
-                            completingTask === task.id ? styles.completing : ''
+                          className={`list-item list-item--compact ${
+                            completingTask === task.id
+                              ? 'list-item--loading'
+                              : ''
                           }`}
                         >
-                          <div className={styles.taskCheckbox}>
-                            <input
-                              type="checkbox"
-                              onChange={() => handleCompleteTask(task.id)}
-                              disabled={completingTask === task.id}
-                            />
+                          <div className="list-item__leading">
+                            <div className="task-checkbox">
+                              <input
+                                type="checkbox"
+                                className="form-checkbox"
+                                onChange={() => handleCompleteTask(task.id)}
+                                disabled={completingTask === task.id}
+                              />
+                            </div>
                           </div>
-                          {task.priority === 'high' && (
-                            <span className={styles.taskPriority}>High</span>
-                          )}
-                          <span
-                            className={`${listStyles.listItemText} ${styles.taskText}`}
-                          >
-                            {task.text}
-                          </span>
+                          <div className="list-item__content">
+                            {task.priority === 'high' && (
+                              <span className="priority-badge">High</span>
+                            )}
+                            <span className="list-item__text">{task.text}</span>
+                          </div>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <div className={styles.noTasks}>No tasks for this goal</div>
+                    <div className="list-empty">
+                      <p>No tasks for this goal</p>
+                    </div>
                   )}
                 </li>
               );
             })}
           </ul>
-          <Link href="/goals" className={styles.viewAllLink}>
+          <Link href="/goals" className="btn btn--ghost btn--sm">
             View all goals →
           </Link>
         </div>
       ) : (
-        <div className={styles.section}>
-          <h3 className={`${listStyles.listTitle} ${styles.sectionTitle}`}>
-            Goals Needing Attention
-          </h3>
+        <div className="card__body">
+          <h3 className="list-title">Goals Needing Attention</h3>
           <p>No goals with low progress found</p>
         </div>
       )}
