@@ -2,11 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import styles from './analytics.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
-import filterStyles from '@/app/styles/shared/filters.module.css';
 import { useData } from '@/providers/DataProvider';
-import listStyles from '@/app/styles/shared/lists.module.css';
 
 // Type definitions remain the same
 type TimeFrame = '7d' | '30d' | '90d' | '6m' | '1y';
@@ -322,44 +318,44 @@ export default function DailyBarChart() {
   const maxValue = Math.max(...chartData.values, 1); // Use at least 1 to avoid division by zero
 
   return (
-    <div className={`${cardStyles.card} ${styles.chartContainer}`}>
-      <div className={styles.chartControls}>
-        <div className={filterStyles.filterTabs}>
+    <div className="card chart-container">
+      <div className="chart-controls">
+        <div className="filter-tabs">
           <button
-            className={`${filterStyles.filterTab} ${
-              timeframe === '7d' ? filterStyles.activeTab : ''
+            className={`filter-tab ${
+              timeframe === '7d' ? 'filter-tab--active' : ''
             }`}
             onClick={() => setTimeframe('7d')}
           >
             7 Days
           </button>
           <button
-            className={`${filterStyles.filterTab} ${
-              timeframe === '30d' ? filterStyles.activeTab : ''
+            className={`filter-tab ${
+              timeframe === '30d' ? 'filter-tab--active' : ''
             }`}
             onClick={() => setTimeframe('30d')}
           >
             30 Days
           </button>
           <button
-            className={`${filterStyles.filterTab} ${
-              timeframe === '90d' ? filterStyles.activeTab : ''
+            className={`filter-tab ${
+              timeframe === '90d' ? 'filter-tab--active' : ''
             }`}
             onClick={() => setTimeframe('90d')}
           >
             90 Days
           </button>
           <button
-            className={`${filterStyles.filterTab} ${
-              timeframe === '6m' ? filterStyles.activeTab : ''
+            className={`filter-tab ${
+              timeframe === '6m' ? 'filter-tab--active' : ''
             }`}
             onClick={() => setTimeframe('6m')}
           >
             6 Months
           </button>
           <button
-            className={`${filterStyles.filterTab} ${
-              timeframe === '1y' ? filterStyles.activeTab : ''
+            className={`filter-tab ${
+              timeframe === '1y' ? 'filter-tab--active' : ''
             }`}
             onClick={() => setTimeframe('1y')}
           >
@@ -368,18 +364,23 @@ export default function DailyBarChart() {
         </div>
       </div>
 
-      <h3 className={cardStyles.cardTitle}>{getChartTitle(timeframe)}</h3>
+      <h3 className="card__title">{getChartTitle(timeframe)}</h3>
 
       {isLoading ? (
-        <div className={styles.loadingIndicator}>Loading data...</div>
+        <div
+          className="loading-shimmer"
+          style={{ height: '300px', borderRadius: '8px' }}
+        >
+          <p style={{ textAlign: 'center', paddingTop: '140px', opacity: 0.6 }}>
+            Loading data...
+          </p>
+        </div>
       ) : chartData.values.length === 0 ? (
-        <div className={listStyles.emptyState}>
+        <div className="list-empty">
           <p>No focus sessions found for this time period.</p>
           <p>Complete some focus sessions to see your data here.</p>
         </div>
       ) : (
-        // The rest of the chart rendering logic remains the same
-        // ...
         <div>
           {/* Custom chart implementation */}
           <div
