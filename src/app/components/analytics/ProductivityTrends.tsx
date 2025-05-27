@@ -15,9 +15,6 @@ import { Line } from 'react-chartjs-2';
 import { useState, useEffect } from 'react';
 import { TimerSession } from '@/lib/timer';
 import { useData } from '@/providers/DataProvider';
-import styles from './analytics.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
-import filterStyles from '@/app/styles/shared/filters.module.css';
 
 ChartJS.register(
   CategoryScale,
@@ -219,36 +216,36 @@ export default function ProductivityTrends() {
   }
 
   return (
-    <div className={`${cardStyles.card} ${styles.chartContainer}`}>
-      <div className={styles.chartControls}>
-        <div className={filterStyles.activityButtons}>
+    <div className="card chart-container">
+      <div className="chart-controls">
+        <div className="filter-buttons">
           <button
-            className={`${filterStyles.activityButton} ${
-              timeframe === '4w' ? filterStyles.activeButton : ''
+            className={`filter-button ${
+              timeframe === '4w' ? 'filter-button--active' : ''
             }`}
             onClick={() => setTimeframe('4w')}
           >
             4 Weeks
           </button>
           <button
-            className={`${filterStyles.activityButton} ${
-              timeframe === '3m' ? filterStyles.activeButton : ''
+            className={`filter-button ${
+              timeframe === '3m' ? 'filter-button--active' : ''
             }`}
             onClick={() => setTimeframe('3m')}
           >
             3 Months
           </button>
           <button
-            className={`${filterStyles.activityButton} ${
-              timeframe === '6m' ? filterStyles.activeButton : ''
+            className={`filter-button ${
+              timeframe === '6m' ? 'filter-button--active' : ''
             }`}
             onClick={() => setTimeframe('6m')}
           >
             6 Months
           </button>
           <button
-            className={`${filterStyles.activityButton} ${
-              timeframe === '1y' ? filterStyles.activeButton : ''
+            className={`filter-button ${
+              timeframe === '1y' ? 'filter-button--active' : ''
             }`}
             onClick={() => setTimeframe('1y')}
           >
