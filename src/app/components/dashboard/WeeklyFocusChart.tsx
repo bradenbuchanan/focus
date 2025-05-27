@@ -1,8 +1,5 @@
-// src/app/dashboard/components/WeeklyFocusChart.tsx
 'use client';
 
-import styles from '../../dashboard/dashboard.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -107,9 +104,9 @@ export default function WeeklyFocusChart({
   };
 
   return (
-    <div className={`${cardStyles.card} ${styles.chartCard}`}>
-      <h3 className={cardStyles.cardTitle}>Weekly Focus Time</h3>
-      <div className={styles.miniChart}>
+    <div className="card chart-container">
+      <h3 className="card__title">Weekly Focus Time</h3>
+      <div style={{ height: '250px', position: 'relative' }}>
         <Bar data={chartData} options={chartOptions} />
       </div>
     </div>
