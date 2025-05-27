@@ -1,8 +1,5 @@
-// src/app/dashboard/components/TopActivities.tsx
 'use client';
 
-import styles from './dashboardTopActivities.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
 import { formatTimeValue } from '@/utils/formatTime';
 
 interface TopActivitiesProps {
@@ -11,21 +8,27 @@ interface TopActivitiesProps {
 
 export default function TopActivities({ activities }: TopActivitiesProps) {
   return (
-    <div className={`${cardStyles.card} ${styles.topActivitiesCard}`}>
-      <h3 className={cardStyles.cardTitle}>Top Activities</h3>
+    <div className="card">
+      <h3 className="card__title">Top Activities</h3>
       {activities.length > 0 ? (
-        <ul className={styles.topActivitiesList}>
+        <ul className="list">
           {activities.map((activity, index) => (
-            <li key={index} className={styles.topActivity}>
-              <span className={styles.activityName}>{activity.name}</span>
-              <span className={styles.activityTime}>
-                {formatTimeValue(activity.minutes)}
-              </span>
+            <li key={index} className="list-item list-item--compact">
+              <div className="list-item__content">
+                <span className="list-item__text">{activity.name}</span>
+              </div>
+              <div className="list-item__trailing">
+                <span style={{ fontWeight: 600, opacity: 0.8 }}>
+                  {formatTimeValue(activity.minutes)}
+                </span>
+              </div>
             </li>
           ))}
         </ul>
       ) : (
-        <p className={styles.noData}>No activities recorded yet</p>
+        <div className="list-empty">
+          <p>No activities recorded yet</p>
+        </div>
       )}
     </div>
   );
