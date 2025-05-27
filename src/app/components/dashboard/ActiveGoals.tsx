@@ -3,7 +3,6 @@
 
 import Link from 'next/link';
 import { GoalCard } from '../../components/ui/GoalCard';
-import styles from './dashboardActiveGoals.module.css';
 
 interface GoalsProps {
   goals: Array<{
@@ -27,9 +26,11 @@ interface GoalsProps {
 
 export default function ActiveGoals({ goals }: GoalsProps) {
   return (
-    <div className={styles.goalsSection}>
-      <h2 className={styles.sectionTitle}>Active Goals</h2>
-      <div className={styles.goalCards}>
+    <section className="card card--compact">
+      <div className="card__header">
+        <h2 className="card__title">Active Goals</h2>
+      </div>
+      <div className="card-grid card-grid--compact">
         {goals.map(({ goal, progress }) => (
           <GoalCard
             key={goal.id}
@@ -39,10 +40,13 @@ export default function ActiveGoals({ goals }: GoalsProps) {
             showActions={false}
           />
         ))}
-        <Link href="/goals" className={styles.viewAllGoals}>
-          View All Goals
+        <Link
+          href="/goals"
+          className="card card--interactive hover-lift transition-all"
+        >
+          <div className="card__body">View All Goals</div>
         </Link>
       </div>
-    </div>
+    </section>
   );
 }
