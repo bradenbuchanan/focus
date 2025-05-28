@@ -1,8 +1,6 @@
 // src/app/components/goals/TaskForm.tsx
 import { useState } from 'react';
 import { Task, defaultActivityCategories } from '@/lib/timer';
-import styles from './TaskForm.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
 import { useData } from '@/providers/DataProvider';
 
 interface TaskFormProps {
@@ -21,7 +19,7 @@ export default function TaskForm({
   const [text, setText] = useState('');
   const [activity, setActivity] = useState(defaultActivity || '');
   const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
-  const [dueDate, setDueDate] = useState<string>(''); // Add due date state
+  const [dueDate, setDueDate] = useState<string>('');
   const [showActivitySelector, setShowActivitySelector] = useState(false);
 
   const { saveTask } = useData();
@@ -69,29 +67,31 @@ export default function TaskForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.taskForm}>
-      <div className={styles.taskInputContainer}>
+    <form onSubmit={handleSubmit} className="card card--compact">
+      <div className="form-group">
         <input
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Add a new task..."
-          className={styles.taskInput}
+          className="form-input"
         />
 
-        <div className={styles.taskMeta}>
-          {/* Activity selector (existing code) */}
+        <div className="task-meta">
+          {/* Activity selector */}
           {activity ? (
             <div
-              className={styles.selectedActivity}
+              className="activity-tag hover-lift transition-all"
               onClick={() => setShowActivitySelector(!showActivitySelector)}
+              style={{ cursor: 'pointer' }}
             >
-              {activity} <span className={styles.editIcon}>✎</span>
+              {activity}{' '}
+              <span style={{ opacity: 0.6, fontSize: '0.8rem' }}>✎</span>
             </div>
           ) : (
             <button
               type="button"
-              className={styles.selectActivityButton}
+              className="btn btn--ghost btn--sm"
               onClick={() => setShowActivitySelector(!showActivitySelector)}
             >
               Select Activity
@@ -99,46 +99,65 @@ export default function TaskForm({
           )}
 
           {/* Due date selector */}
-          <div className={styles.dueDateSelector}>
+          <div>
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className={styles.dueDateInput}
-              min={new Date().toISOString().split('T')[0]} // Set min to today
+              className="form-input"
+              min={new Date().toISOString().split('T')[0]}
               title="Due date (optional)"
+              style={{ fontSize: '0.85rem', padding: '0.4rem' }}
             />
           </div>
 
           {/* Priority selector */}
-          <div className={styles.prioritySelector}>
+          <div style={{ display: 'flex', gap: '0.3rem' }}>
             <button
               type="button"
-              className={`${styles.priorityButton} ${styles.highPriority} ${
-                priority === 'high' ? styles.selected : ''
-              }`}
+              className={`priority-tag priority-high ${
+                priority === 'high' ? 'btn--primary' : 'btn--ghost'
+              } btn--compact`}
               onClick={() => setPriority('high')}
               title="High Priority"
+              style={{
+                fontSize: '0.75rem',
+                padding: '0.25rem 0.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: priority === 'high' ? '600' : '500',
+              }}
             >
               High
             </button>
             <button
               type="button"
-              className={`${styles.priorityButton} ${styles.mediumPriority} ${
-                priority === 'medium' ? styles.selected : ''
-              }`}
+              className={`priority-tag priority-medium ${
+                priority === 'medium' ? 'btn--primary' : 'btn--ghost'
+              } btn--compact`}
               onClick={() => setPriority('medium')}
               title="Medium Priority"
+              style={{
+                fontSize: '0.75rem',
+                padding: '0.25rem 0.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: priority === 'medium' ? '600' : '500',
+              }}
             >
               Medium
             </button>
             <button
               type="button"
-              className={`${styles.priorityButton} ${styles.lowPriority} ${
-                priority === 'low' ? styles.selected : ''
-              }`}
+              className={`priority-tag priority-low ${
+                priority === 'low' ? 'btn--primary' : 'btn--ghost'
+              } btn--compact`}
               onClick={() => setPriority('low')}
               title="Low Priority"
+              style={{
+                fontSize: '0.75rem',
+                padding: '0.25rem 0.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: priority === 'low' ? '600' : '500',
+              }}
             >
               Low
             </button>
@@ -146,15 +165,25 @@ export default function TaskForm({
         </div>
       </div>
 
-      {/* Activity dropdown (existing code) */}
+      {/* Activity dropdown */}
       {showActivitySelector && (
-        <div className={styles.activitySelectorDropdown}>
+        <div
+          className="card card--surface"
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '0.5rem',
+            marginTop: '0.5rem',
+            padding: '0.75rem',
+            boxShadow: '0 2px 8px rgba(var(--gray-rgb), 0.1)',
+          }}
+        >
           {defaultActivityCategories.map((activityOption) => (
             <button
               key={activityOption}
               type="button"
-              className={`${styles.activityOption} ${
-                activity === activityOption ? styles.selected : ''
+              className={`filter-button ${
+                activity === activityOption ? 'filter-button--active' : ''
               }`}
               onClick={() => {
                 setActivity(activityOption);
@@ -166,7 +195,7 @@ export default function TaskForm({
           ))}
           <button
             type="button"
-            className={styles.activityOption}
+            className="filter-button"
             onClick={() => {
               setActivity('');
               setShowActivitySelector(false);
@@ -177,9 +206,11 @@ export default function TaskForm({
         </div>
       )}
 
-      <button type="submit" className={buttonStyles.primaryButton}>
-        Add Task
-      </button>
+      <div className="form-actions">
+        <button type="submit" className="btn btn--primary">
+          Add Task
+        </button>
+      </div>
     </form>
   );
 }
