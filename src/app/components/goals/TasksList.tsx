@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { Task } from '@/lib/timer';
 import { TaskList } from '../../components/ui/TaskList';
 import TaskForm from './TaskForm';
-import styles from './TaskList.module.css';
 import { useData } from '@/providers/DataProvider';
 
 interface TasksListProps {
@@ -75,52 +74,67 @@ export default function TasksList({ goalId }: TasksListProps) {
   }, [goalId, showCompleted, activityFilter]);
 
   return (
-    <div className={styles.tasksContainer}>
-      <h4 className={styles.tasksHeader}>Tasks for this Goal</h4>
+    <div className="card">
+      <div className="card__header">
+        <h4 className="card__title">Tasks for this Goal</h4>
+      </div>
 
-      {availableActivities.length > 0 && (
-        <div className={styles.filterBar}>
-          <div className={styles.activityFilters}>
-            <span className={styles.filterLabel}>Filter by Activity:</span>
-            <div className={styles.activityButtons}>
-              <button
-                className={`${styles.activityButton} ${
-                  activityFilter === 'all' ? styles.active : ''
-                }`}
-                onClick={() => setActivityFilter('all')}
-              >
-                All Activities
-              </button>
-              {availableActivities.map((activity) => (
+      <div className="card__body">
+        {availableActivities.length > 0 && (
+          <div className="filter-container">
+            <div>
+              <span className="filter-label">Filter by Activity:</span>
+              <div className="filter-buttons">
                 <button
-                  key={activity}
-                  className={`${styles.activityButton} ${
-                    activityFilter === activity ? styles.active : ''
+                  className={`filter-button ${
+                    activityFilter === 'all' ? 'filter-button--active' : ''
                   }`}
-                  onClick={() => setActivityFilter(activity)}
+                  onClick={() => setActivityFilter('all')}
                 >
-                  {activity}
+                  All Activities
                 </button>
-              ))}
+                {availableActivities.map((activity) => (
+                  <button
+                    key={activity}
+                    className={`filter-button ${
+                      activityFilter === activity ? 'filter-button--active' : ''
+                    }`}
+                    onClick={() => setActivityFilter(activity)}
+                  >
+                    {activity}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <TaskForm
-        goalId={goalId}
-        onAdd={loadTasks}
-        activity={activityFilter !== 'all' ? activityFilter : undefined}
-      />
+        <TaskForm
+          goalId={goalId}
+          onAdd={loadTasks}
+          activity={activityFilter !== 'all' ? activityFilter : undefined}
+        />
 
-      <TaskList tasks={tasks} isCompact={false} onTaskUpdate={loadTasks} />
+        <TaskList tasks={tasks} isCompact={false} onTaskUpdate={loadTasks} />
+      </div>
 
-      <button
-        className={styles.toggleCompletedButton}
-        onClick={() => setShowCompleted(!showCompleted)}
-      >
-        {showCompleted ? 'Hide' : 'Show'} completed tasks
-      </button>
+      <div className="card__footer" style={{ justifyContent: 'center' }}>
+        <button
+          className="btn btn--ghost btn--sm transition-all hover-lift"
+          onClick={() => setShowCompleted(!showCompleted)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            opacity: 0.8,
+          }}
+        >
+          <span style={{ fontSize: '0.7rem' }}>
+            {showCompleted ? '▲' : '▼'}
+          </span>
+          {showCompleted ? 'Hide' : 'Show'} completed tasks
+        </button>
+      </div>
     </div>
   );
 }
