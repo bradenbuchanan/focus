@@ -3,9 +3,6 @@
 
 import { useState } from 'react';
 import type { TimerSettings } from '@/lib/timer';
-import styles from './timer.module.css';
-import formStyles from '@/app/styles/shared/forms.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
 
 // Local function to save settings to localStorage
 const saveTimerSettings = (settings: TimerSettings): void => {
@@ -47,11 +44,13 @@ export default function TimerSetting({
   };
 
   return (
-    <div className={styles.settingsContainer}>
+    <div className="card card--spacious">
       <h2>Timer Settings</h2>
       <form onSubmit={handleSubmit}>
-        <div className={formStyles.formGroup}>
-          <label htmlFor="focusDuration">Focus Duration (minutes)</label>
+        <div className="form-group">
+          <label htmlFor="focusDuration" className="form-label">
+            Focus Duration (minutes)
+          </label>
           <input
             type="number"
             id="focusDuration"
@@ -60,12 +59,14 @@ export default function TimerSetting({
             max="120"
             value={editSettings.focusDuration}
             onChange={handleChange}
-            className={formStyles.input}
+            className="form-input"
           />
         </div>
 
-        <div className={formStyles.formGroup}>
-          <label htmlFor="breakDuration">Short Break Duration (minutes)</label>
+        <div className="form-group">
+          <label htmlFor="breakDuration" className="form-label">
+            Short Break Duration (minutes)
+          </label>
           <input
             type="number"
             id="breakDuration"
@@ -74,12 +75,12 @@ export default function TimerSetting({
             max="30"
             value={editSettings.breakDuration}
             onChange={handleChange}
-            className={formStyles.input}
+            className="form-input"
           />
         </div>
 
-        <div className={formStyles.formGroup}>
-          <label htmlFor="longBreakDuration">
+        <div className="form-group">
+          <label htmlFor="longBreakDuration" className="form-label">
             Long Break Duration (minutes)
           </label>
           <input
@@ -90,12 +91,14 @@ export default function TimerSetting({
             max="60"
             value={editSettings.longBreakDuration}
             onChange={handleChange}
-            className={formStyles.input}
+            className="form-input"
           />
         </div>
 
-        <div className={formStyles.formGroup}>
-          <label htmlFor="longBreakInterval">Long Break After (sessions)</label>
+        <div className="form-group">
+          <label htmlFor="longBreakInterval" className="form-label">
+            Long Break After (sessions)
+          </label>
           <input
             type="number"
             id="longBreakInterval"
@@ -104,41 +107,45 @@ export default function TimerSetting({
             max="10"
             value={editSettings.longBreakInterval}
             onChange={handleChange}
-            className={formStyles.input}
+            className="form-input"
           />
         </div>
 
-        <div className={formStyles.formGroup}>
-          <label>
+        <div className="form-group">
+          <div className="form-check">
             <input
               type="checkbox"
               name="autoStartBreaks"
               checked={editSettings.autoStartBreaks}
               onChange={handleChange}
+              className="form-checkbox"
             />
-            Auto-start breaks
-          </label>
+            <label className="form-check-label">Auto-start breaks</label>
+          </div>
         </div>
 
-        <div className={formStyles.formGroup}>
-          <label>
+        <div className="form-group">
+          <div className="form-check">
             <input
               type="checkbox"
               name="autoStartPomodoros"
               checked={editSettings.autoStartPomodoros}
               onChange={handleChange}
+              className="form-checkbox"
             />
-            Auto-start focus sessions
-          </label>
+            <label className="form-check-label">
+              Auto-start focus sessions
+            </label>
+          </div>
         </div>
 
-        <div className={formStyles.formActions}>
-          <button type="submit" className={buttonStyles.primaryButton}>
+        <div className="form-actions">
+          <button type="submit" className="btn btn--primary">
             Save Settings
           </button>
           <button
             type="button"
-            className={buttonStyles.secondaryButton}
+            className="btn btn--secondary"
             onClick={onCancel}
           >
             Cancel
