@@ -3,8 +3,6 @@
 
 import { useState } from 'react';
 import { migrateLocalData } from './actions';
-import styles from './migration.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
 
 // Define a specific type for the migration result
 interface MigrationResult {
@@ -62,47 +60,70 @@ export default function MigrationForm() {
   };
 
   return (
-    <div className={styles.migrationContainer}>
-      <h2>Migrate Local Storage Data to Database</h2>
-      <p>
-        This will transfer your locally stored sessions and accomplishments to
-        the database.
-      </p>
+    <div className="card card--compact">
+      <div className="card__header">
+        <h2 className="card__title">Migrate Local Storage Data to Database</h2>
+        <p>
+          This will transfer your locally stored sessions and accomplishments to
+          the database.
+        </p>
+      </div>
 
-      <button
-        className={buttonStyles.primaryButton} // Use shared button style
-        onClick={handleMigrate}
-        disabled={isLoading}
-      >
-        {isLoading ? 'Migrating...' : 'Migrate My Data'}
-      </button>
-
-      {result && (
-        <div
-          className={`${styles.result} ${
-            result.success ? styles.success : styles.error
-          }`}
+      <div className="card__body">
+        <button
+          className={`btn btn--primary ${isLoading ? 'btn--loading' : ''}`}
+          onClick={handleMigrate}
+          disabled={isLoading}
         >
-          {result.success ? (
-            <p>
-              Successfully migrated {result.sessionsCount} sessions and{' '}
-              {result.accomplishmentsCount} accomplishments!
-            </p>
-          ) : (
-            <p>Error: {result.error}</p>
-          )}
-        </div>
-      )}
+          {isLoading ? 'Migrating...' : 'Migrate My Data'}
+        </button>
 
-      <div className={styles.infoBox}>
-        <h3>Important Notes:</h3>
-        <ul>
-          <li>This migration is a one-time process.</li>
-          <li>
-            Your locally stored data will remain until you choose to clear it.
-          </li>
-          <li>You should migrate your data only once to avoid duplicates.</li>
-        </ul>
+        {result && (
+          <div
+            className={`card card--compact ${
+              result.success ? 'card--success' : 'card--error'
+            }`}
+            style={{
+              marginTop: '1rem',
+              backgroundColor: result.success
+                ? 'rgba(76, 175, 80, 0.1)'
+                : 'rgba(244, 67, 54, 0.1)',
+              borderColor: result.success
+                ? 'rgba(76, 175, 80, 0.3)'
+                : 'rgba(244, 67, 54, 0.3)',
+              color: result.success ? '#2e7d32' : '#d32f2f',
+            }}
+          >
+            {result.success ? (
+              <p>
+                Successfully migrated {result.sessionsCount} sessions and{' '}
+                {result.accomplishmentsCount} accomplishments!
+              </p>
+            ) : (
+              <p>Error: {result.error}</p>
+            )}
+          </div>
+        )}
+
+        <div
+          className="card card--compact"
+          style={{
+            marginTop: '1.5rem',
+            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+            borderColor: 'rgba(33, 150, 243, 0.3)',
+          }}
+        >
+          <h3 className="card__title" style={{ color: '#1976d2' }}>
+            Important Notes:
+          </h3>
+          <ul style={{ marginBottom: 0 }}>
+            <li>This migration is a one-time process.</li>
+            <li>
+              Your locally stored data will remain until you choose to clear it.
+            </li>
+            <li>You should migrate your data only once to avoid duplicates.</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
