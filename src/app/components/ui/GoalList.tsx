@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { Goal, TimerSession, calculateGoalProgress } from '@/lib/timer';
 import { GoalCard } from './GoalCard';
 import { useData } from '@/providers/DataProvider';
-import styles from './GoalList.module.css';
 
 interface GoalListProps {
   goals: Goal[];
@@ -55,7 +54,7 @@ export function GoalList({
   }
 
   return (
-    <div className={`${styles.goalList} ${className}`}>
+    <div className={`card-grid ${className}`}>
       {goals.map((goal) => {
         const progress =
           sessions.length > 0
