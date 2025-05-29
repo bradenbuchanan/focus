@@ -1,5 +1,6 @@
+// src/services/DataService.ts
 import { supabase } from '@/lib/supabase';
-import { OfflineQueue } from '@/utils/offlineQueue';
+import { OfflineQueue, type OperationData } from '@/utils/offlineQueue';
 import { Database } from '@/types/supabase';
 
 // Type definitions
@@ -9,8 +10,8 @@ type Goal = Tables['goals']['Row'];
 type Task = Tables['tasks']['Row'];
 type Accomplishment = Tables['accomplishments']['Row'];
 
-// Input types
-interface SessionInput {
+// Export all input types so they can be used in DataProvider
+export interface SessionInput extends OperationData {
   startTime: Date;
   endTime?: Date;
   duration: number;
@@ -19,7 +20,7 @@ interface SessionInput {
   activity?: string;
 }
 
-interface GoalInput {
+export interface GoalInput extends OperationData {
   title: string;
   description?: string;
   type: 'time' | 'sessions';
@@ -30,7 +31,7 @@ interface GoalInput {
   endDate?: string;
 }
 
-interface TaskInput {
+export interface TaskInput extends OperationData {
   goalId?: string;
   text: string;
   activity?: string;
@@ -38,10 +39,62 @@ interface TaskInput {
   dueDate?: string;
 }
 
-interface AccomplishmentInput {
+export interface AccomplishmentInput extends OperationData {
   sessionId: string;
   text: string;
   categories?: string;
+}
+
+export interface TaskUpdateInput extends OperationData {
+  id: string;
+  goalId?: string;
+  text?: string;
+  completed?: boolean;
+  activity?: string;
+  priority?: 'low' | 'medium' | 'high';
+  dueDate?: string;
+  completedAt?: string;
+}
+interface DeleteOperation extends OperationData {
+  id: string;
+}
+
+// Task update data for Supabase
+interface TaskUpdateData {
+  goal_id?: string | null;
+  text?: string;
+  completed?: boolean;
+  activity?: string | null;
+  priority?: string | null;
+  due_date?: string | null;
+  completed_at?: string | null;
+}
+
+// Type guards - now they work because all types extend OperationData
+function isSessionInput(data: OperationData): data is SessionInput {
+  return typeof data === 'object' && data !== null && 
+         'startTime' in data && 'duration' in data && 'type' in data && 'completed' in data;
+}
+
+function isGoalInput(data: OperationData): data is GoalInput {
+  return typeof data === 'object' && data !== null && 
+         'title' in data && 'type' in data && 'target' in data && 'period' in data && 'startDate' in data;
+}
+
+function isTaskInput(data: OperationData): data is TaskInput {
+  return typeof data === 'object' && data !== null && 'text' in data;
+}
+
+function isTaskUpdateInput(data: OperationData): data is TaskUpdateInput {
+  return typeof data === 'object' && data !== null && 'id' in data;
+}
+
+function isAccomplishmentInput(data: OperationData): data is AccomplishmentInput {
+  return typeof data === 'object' && data !== null && 'sessionId' in data && 'text' in data;
+}
+
+function isDeleteOperation(data: OperationData): data is DeleteOperation {
+  return typeof data === 'object' && data !== null && 'id' in data;
 }
 
 export class DataService {
@@ -82,11 +135,13 @@ export class DataService {
       return data.id;
     } catch (error) {
       if (!this.isOnline()) {
-        return this.offlineQueue.add('focus_sessions', 'create', {
+        // Convert Date to string for storage
+        const offlineData: OperationData = {
           ...session,
           startTime: session.startTime.toISOString(),
           endTime: session.endTime?.toISOString(),
-        });
+        };
+        return this.offlineQueue.add('focus_sessions', 'create', offlineData);
       }
       throw error;
     }
@@ -106,7 +161,6 @@ export class DataService {
       return data || [];
     } catch (error) {
       if (!this.isOnline()) {
-        // Return empty array when offline
         return [];
       }
       throw error;
@@ -233,21 +287,12 @@ export class DataService {
     }
   }
 
-  async updateTask(taskUpdate: {
-    id: string;
-    goalId?: string;
-    text?: string;
-    completed?: boolean;
-    activity?: string;
-    priority?: 'low' | 'medium' | 'high';
-    dueDate?: string;
-    completedAt?: string;
-  }): Promise<void> {
+  async updateTask(taskUpdate: TaskUpdateInput): Promise<void> {
     try {
       const user = await this.getCurrentUser();
       const { id, ...updates } = taskUpdate;
       
-      const updateData: any = {};
+      const updateData: TaskUpdateData = {};
       if (updates.goalId !== undefined) updateData.goal_id = updates.goalId;
       if (updates.text !== undefined) updateData.text = updates.text;
       if (updates.completed !== undefined) updateData.completed = updates.completed;
@@ -339,41 +384,49 @@ export class DataService {
   }
 
   // Process offline queue when back online
-  async processOfflineQueue(): Promise<void> {
+ // Process offline queue when back online
+async processOfflineQueue(): Promise<void> {
     if (!this.isOnline()) return;
-
+  
     const queue = this.offlineQueue.getQueue();
     
     for (const operation of queue) {
       try {
         switch (operation.table) {
           case 'focus_sessions':
-            if (operation.operation === 'create') {
-              await this.saveSession(operation.data as SessionInput);
+            if (operation.operation === 'create' && isSessionInput(operation.data)) {
+              // The data stored in offline queue has dates as strings
+              // We need to reconstruct the SessionInput with proper Date objects
+              const sessionData: SessionInput = {
+                ...operation.data,
+                startTime: new Date(operation.data.startTime),
+                endTime: operation.data.endTime ? new Date(operation.data.endTime) : undefined,
+              };
+              await this.saveSession(sessionData);
             }
             break;
           
           case 'goals':
-            if (operation.operation === 'create') {
-              await this.saveGoal(operation.data as GoalInput);
-            } else if (operation.operation === 'delete') {
-              await this.deleteGoal((operation.data as any).id);
+            if (operation.operation === 'create' && isGoalInput(operation.data)) {
+              await this.saveGoal(operation.data);
+            } else if (operation.operation === 'delete' && isDeleteOperation(operation.data)) {
+              await this.deleteGoal(operation.data.id);
             }
             break;
           
           case 'tasks':
-            if (operation.operation === 'create') {
-              await this.saveTask(operation.data as TaskInput);
-            } else if (operation.operation === 'update') {
-              await this.updateTask(operation.data as any);
-            } else if (operation.operation === 'delete') {
-              await this.deleteTask((operation.data as any).id);
+            if (operation.operation === 'create' && isTaskInput(operation.data)) {
+              await this.saveTask(operation.data);
+            } else if (operation.operation === 'update' && isTaskUpdateInput(operation.data)) {
+              await this.updateTask(operation.data);
+            } else if (operation.operation === 'delete' && isDeleteOperation(operation.data)) {
+              await this.deleteTask(operation.data.id);
             }
             break;
           
           case 'accomplishments':
-            if (operation.operation === 'create') {
-              await this.saveAccomplishment(operation.data as AccomplishmentInput);
+            if (operation.operation === 'create' && isAccomplishmentInput(operation.data)) {
+              await this.saveAccomplishment(operation.data);
             }
             break;
         }
