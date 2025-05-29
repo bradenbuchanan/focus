@@ -1,12 +1,8 @@
-// src/app/(auth)/login/page.tsx
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import styles from '../auth.module.css';
-import formStyles from '@/app/styles/shared/forms.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Login() {
@@ -38,53 +34,78 @@ export default function Login() {
   };
 
   return (
-    <div className={styles.authContainer}>
-      <div className={styles.authForm}>
-        <h1>Login</h1>
-        <p>Welcome back! Sign in to continue your focus journey.</p>
+    <div
+      className="card"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: '2rem',
+      }}
+    >
+      <div
+        className="card card--elevated"
+        style={{
+          width: '100%',
+          maxWidth: '420px',
+        }}
+      >
+        <div className="card__header">
+          <h1 className="card__title">Login</h1>
+          <p>Welcome back! Sign in to continue your focus journey.</p>
+        </div>
 
-        {error && <div className={formStyles.error}>{error}</div>}
+        <div className="card__body">
+          {error && <div className="form-error">{error}</div>}
 
-        <form onSubmit={handleSubmit}>
-          <div className={formStyles.formGroup}>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className={formStyles.input}
-            />
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-actions">
+              <button
+                type="submit"
+                className={`btn btn--primary btn--full ${
+                  isLoading ? 'btn--loading' : ''
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </div>
+          </form>
+
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <p>
+              Don&apos;t have an account? <Link href="/register">Sign up</Link>
+            </p>
           </div>
-
-          <div className={formStyles.formGroup}>
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className={formStyles.input}
-            />
-          </div>
-
-          <div className={formStyles.formActions}>
-            <button
-              type="submit"
-              className={buttonStyles.primaryButton}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </div>
-        </form>
-
-        <div className={styles.authLinks}>
-          <p>
-            Don&apos;t have an account? <Link href="/register">Sign up</Link>
-          </p>
         </div>
       </div>
     </div>

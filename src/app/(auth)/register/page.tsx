@@ -1,11 +1,7 @@
-// src/app/(auth)/register/page.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import styles from '../auth.module.css';
-import formStyles from '@/app/styles/shared/forms.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Register() {
@@ -41,12 +37,31 @@ export default function Register() {
   };
 
   return (
-    <div className={styles.authContainer}>
-      <div className={styles.authForm}>
+    <div
+      className="card"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: '2rem',
+      }}
+    >
+      <div
+        className="card card--elevated"
+        style={{
+          width: '100%',
+          maxWidth: '420px',
+        }}
+      >
         {success ? (
-          <div className={styles.successMessage}>
-            <h2>Account Created Successfully!</h2>
-            <p>Please check your email to confirm your registration.</p>
+          <div className="card__body" style={{ textAlign: 'center' }}>
+            <h2 style={{ color: '#4caf50', marginBottom: '1rem' }}>
+              Account Created Successfully!
+            </h2>
+            <p style={{ marginBottom: '1rem' }}>
+              Please check your email to confirm your registration.
+            </p>
             <p>
               <Link href="/login">Return to login</Link> once you&apos;ve
               confirmed your email.
@@ -54,66 +69,78 @@ export default function Register() {
           </div>
         ) : (
           <>
-            <h1>Create an Account</h1>
-            <p>
-              Join thousands of users improving their productivity with Focus.
-            </p>
-
-            {error && <div className={formStyles.error}>{error}</div>}
-
-            <form onSubmit={handleSubmit}>
-              <div className={formStyles.formGroup}>
-                <label htmlFor="name">Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className={formStyles.input}
-                />
-              </div>
-
-              <div className={formStyles.formGroup}>
-                <label htmlFor="email">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className={formStyles.input}
-                />
-              </div>
-
-              <div className={formStyles.formGroup}>
-                <label htmlFor="password">Password</label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  className={formStyles.input}
-                />
-              </div>
-
-              <div className={formStyles.formActions}>
-                <button
-                  type="submit"
-                  className={buttonStyles.primaryButton}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Creating account...' : 'Create Account'}
-                </button>
-              </div>
-            </form>
-
-            <div className={styles.authLinks}>
+            <div className="card__header">
+              <h1 className="card__title">Create an Account</h1>
               <p>
-                Already have an account? <Link href="/login">Sign in</Link>
+                Join thousands of users improving their productivity with Focus.
               </p>
+            </div>
+
+            <div className="card__body">
+              {error && <div className="form-error">{error}</div>}
+
+              <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <label htmlFor="name" className="form-label">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="email" className="form-label">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="password" className="form-label">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-actions">
+                  <button
+                    type="submit"
+                    className={`btn btn--primary btn--full ${
+                      isLoading ? 'btn--loading' : ''
+                    }`}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Creating account...' : 'Create Account'}
+                  </button>
+                </div>
+              </form>
+
+              <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+                <p>
+                  Already have an account? <Link href="/login">Sign in</Link>
+                </p>
+              </div>
             </div>
           </>
         )}
