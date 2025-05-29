@@ -3,8 +3,6 @@
 
 import { Goal } from '@/lib/timer';
 import { ProgressBar } from './ProgressBar';
-import styles from './GoalCard.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
 
 interface GoalCardProps {
   goal: Goal;
@@ -48,19 +46,19 @@ export function GoalCard({
 
   return (
     <div
-      className={`${cardStyles.card} ${
-        isCompact ? cardStyles.compactCard : ''
+      className={`card ${isCompact ? 'card--compact' : ''} ${
+        onGoalClick ? 'card--interactive' : ''
       } ${className}`}
       onClick={handleCardClick}
       style={{ cursor: onGoalClick ? 'pointer' : 'default' }}
     >
-      <div className={cardStyles.cardHeader}>
-        <h3 className={cardStyles.cardTitle}>{goal.title}</h3>
+      <div className="card__header">
+        <h3 className="card__title">{goal.title}</h3>
         {showActions && (onEdit || onDelete) && (
-          <div className={styles.goalActions}>
+          <div className="card__actions">
             {onEdit && (
               <button
-                className={styles.editButton}
+                className="btn--icon-action"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit(goal);
@@ -72,7 +70,7 @@ export function GoalCard({
             )}
             {onDelete && (
               <button
-                className={styles.deleteButton}
+                className="btn--icon-action"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(goal.id);
@@ -86,25 +84,29 @@ export function GoalCard({
         )}
       </div>
 
-      {!isCompact && goal.description && (
-        <p className={styles.goalDescription}>{goal.description}</p>
-      )}
+      <div className="card__body">
+        {!isCompact && goal.description && (
+          <p style={{ marginBottom: '1rem', opacity: '0.8' }}>
+            {goal.description}
+          </p>
+        )}
 
-      <div className={styles.goalInfo}>
-        <div className={styles.goalTarget}>
-          Target: {goal.target} {goal.type === 'time' ? 'minutes' : 'sessions'}{' '}
-          {formatPeriod(goal.period)}
-          {goal.activity && (
-            <span className={styles.activityTag}> • {goal.activity}</span>
-          )}
+        <div style={{ marginBottom: '1rem' }}>
+          <div style={{ marginBottom: '0.75rem', fontSize: '0.9rem' }}>
+            Target: {goal.target}{' '}
+            {goal.type === 'time' ? 'minutes' : 'sessions'}{' '}
+            {formatPeriod(goal.period)}
+            {goal.activity && (
+              <span className="activity-tag"> • {goal.activity}</span>
+            )}
+          </div>
+
+          <ProgressBar
+            percentage={progress.percentage}
+            showLabel={true}
+            label={`${progress.current} / ${goal.target} (${progress.percentage}%)`}
+          />
         </div>
-
-        <ProgressBar
-          percentage={progress.percentage}
-          showLabel={true}
-          label={`${progress.current} / ${goal.target} (${progress.percentage}%)`}
-          className={styles.goalProgress}
-        />
       </div>
     </div>
   );
