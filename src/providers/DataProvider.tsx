@@ -1,3 +1,4 @@
+// src/providers/DataProvider.tsx
 'use client';
 
 import {
@@ -7,60 +8,22 @@ import {
   useMemo,
   useEffect,
 } from 'react';
-import { DataService } from '@/services/DataService';
+import {
+  DataService,
+  type SessionInput,
+  type AccomplishmentInput,
+  type GoalInput,
+  type TaskInput,
+  type TaskUpdateInput,
+} from '@/services/DataService';
 import { Database } from '@/types/supabase';
 import { Goal } from '@/lib/timer';
 
-// Keep existing type definitions
+// Keep only the types that aren't exported from DataService
 type Session = Database['public']['Tables']['focus_sessions']['Row'];
 type Accomplishment = Database['public']['Tables']['accomplishments']['Row'];
 type SupabaseGoal = Database['public']['Tables']['goals']['Row'];
 type Task = Database['public']['Tables']['tasks']['Row'];
-
-interface SessionInput {
-  startTime: Date;
-  endTime?: Date;
-  duration: number;
-  type: 'focus' | 'break';
-  completed: boolean;
-  activity?: string;
-}
-
-interface AccomplishmentInput {
-  sessionId: string;
-  text: string;
-  categories?: string;
-}
-
-interface GoalInput {
-  title: string;
-  description?: string;
-  type: 'time' | 'sessions';
-  target: number;
-  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  activity?: string;
-  startDate: string;
-  endDate?: string;
-}
-
-interface TaskInput {
-  goalId?: string;
-  text: string;
-  activity?: string;
-  priority?: 'low' | 'medium' | 'high';
-  dueDate?: string;
-}
-
-interface TaskUpdateInput {
-  id: string;
-  goalId?: string;
-  text?: string;
-  completed?: boolean;
-  activity?: string;
-  priority?: 'low' | 'medium' | 'high';
-  dueDate?: string;
-  completedAt?: string;
-}
 
 interface DataProviderProps {
   children: ReactNode;

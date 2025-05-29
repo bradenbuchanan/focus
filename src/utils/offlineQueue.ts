@@ -1,4 +1,5 @@
-export type OperationData = any; // Simplified for now
+// src/utils/offlineQueue.ts
+export type OperationData = Record<string, unknown>;
 
 export interface QueuedOperation {
   id: string;
