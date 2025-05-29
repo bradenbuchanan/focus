@@ -7,7 +7,6 @@ import { Goal, Task, calculateGoalProgress } from '@/lib/timer';
 import { Database } from '../../../types/supabase';
 import { TaskItem } from '../../components/ui/TaskItem';
 import { GoalCard } from '../../components/ui/GoalCard';
-import styles from './timerGoalsTasks.module.css';
 import { useData } from '@/providers/DataProvider';
 import { supabase } from '@/lib/supabase';
 
@@ -215,8 +214,8 @@ export default function TimerGoalsTasksPanel({
 
   if (isLoading) {
     return (
-      <div className={styles.panelContainer}>
-        <div className={styles.loadingState}>
+      <div className="card card--compact">
+        <div style={{ textAlign: 'center', padding: '3rem', opacity: 0.7 }}>
           Loading your tasks and goals...
         </div>
       </div>
@@ -224,78 +223,181 @@ export default function TimerGoalsTasksPanel({
   }
 
   return (
-    <div className={styles.panelContainer}>
-      <div className={styles.debugButtonsContainer}>
-        <h4 className={styles.debugTitle}>Development Tools</h4>
-        <div className={styles.debugButtons}>
-          <button onClick={debugTaskCreation} className={styles.debugButton}>
-            Create Test Task
-          </button>
-          <button onClick={debugAllTasks} className={styles.debugButton}>
-            List All Tasks
-          </button>
-          <button onClick={debugTasks} className={styles.debugButton}>
-            Debug Tasks
-          </button>
+    <div
+      className="card card--compact"
+      style={{
+        marginTop: '2rem',
+        maxWidth: '800px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+      }}
+    >
+      <div
+        style={{
+          maxHeight: '400px',
+          overflowY: 'auto',
+          paddingRight: '0.5rem',
+        }}
+      >
+        {/* Debug section */}
+        <div
+          style={{
+            backgroundColor: 'rgba(30, 30, 30, 0.7)',
+            borderRadius: '0.5rem',
+            padding: '0.75rem',
+            marginBottom: '1.5rem',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <h4
+            style={{
+              fontSize: '0.9rem',
+              color: 'rgba(255, 255, 255, 0.5)',
+              marginBottom: '0.75rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            }}
+          >
+            Development Tools
+          </h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <button
+              onClick={debugTaskCreation}
+              style={{
+                backgroundColor: 'rgba(60, 60, 60, 0.6)',
+                color: 'rgba(255, 255, 255, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '0.375rem',
+                padding: '0.4rem 0.8rem',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Create Test Task
+            </button>
+            <button
+              onClick={debugAllTasks}
+              style={{
+                backgroundColor: 'rgba(60, 60, 60, 0.6)',
+                color: 'rgba(255, 255, 255, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '0.375rem',
+                padding: '0.4rem 0.8rem',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              List All Tasks
+            </button>
+            <button
+              onClick={debugTasks}
+              style={{
+                backgroundColor: 'rgba(60, 60, 60, 0.6)',
+                color: 'rgba(255, 255, 255, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '0.375rem',
+                padding: '0.4rem 0.8rem',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Debug Tasks
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className={styles.tasksSection}>
-        <h3 className={styles.sectionTitle}>
-          {activity ? `Tasks for ${activity}` : 'Current Tasks'}
-        </h3>
+        {/* Tasks section */}
+        <div style={{ marginBottom: '2rem' }}>
+          <h3
+            className="list-title"
+            style={{
+              textAlign: 'center',
+              fontSize: '1.2rem',
+              marginBottom: '1.25rem',
+            }}
+          >
+            {activity ? `Tasks for ${activity}` : 'Current Tasks'}
+          </h3>
 
-        {relevantTasks.length > 0 ? (
-          <div className={styles.tasksList}>
-            {relevantTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                onToggleComplete={handleTaskComplete}
-                showActions={false}
-                showMeta={true}
-                isCompact={true}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className={styles.emptyState}>
-            <p>No active tasks for {activity || 'any activity'}.</p>
-            <Link href="/tasks" className={styles.actionLink}>
-              Add a task
-            </Link>
-          </div>
-        )}
-      </div>
-
-      <div className={styles.goalsSection}>
-        <h3 className={styles.sectionTitle}>
-          {activity ? `Goals for ${activity}` : 'Current Goals'}
-        </h3>
-
-        {relevantGoals.length > 0 ? (
-          <div className={styles.goalsList}>
-            {relevantGoals.map((goal) => (
-              <GoalCard
-                key={goal.id}
-                goal={goal}
-                progress={{
-                  current: calculateGoalProgress(goal).current,
-                  percentage: goal.progress,
+          {relevantTasks.length > 0 ? (
+            <div className="list">
+              {relevantTasks.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  onToggleComplete={handleTaskComplete}
+                  showActions={false}
+                  showMeta={true}
+                  isCompact={true}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="list-empty">
+              <p>No active tasks for {activity || 'any activity'}.</p>
+              <Link
+                href="/tasks"
+                className="btn btn--secondary btn--sm"
+                style={{
+                  marginTop: '0.5rem',
+                  display: 'inline-block',
+                  textDecoration: 'underline',
                 }}
-                isCompact={true}
-                showActions={false}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className={styles.emptyState}>
-            <p>No active goals for {activity || 'any activity'}.</p>
-            <Link href="/goals" className={styles.actionLink}>
-              Create a goal
-            </Link>
-          </div>
-        )}
+              >
+                Add a task
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Goals section */}
+        <div style={{ marginBottom: '2rem' }}>
+          <h3
+            className="list-title"
+            style={{
+              textAlign: 'center',
+              fontSize: '1.2rem',
+              marginBottom: '1.25rem',
+            }}
+          >
+            {activity ? `Goals for ${activity}` : 'Current Goals'}
+          </h3>
+
+          {relevantGoals.length > 0 ? (
+            <div className="list">
+              {relevantGoals.map((goal) => (
+                <GoalCard
+                  key={goal.id}
+                  goal={goal}
+                  progress={{
+                    current: calculateGoalProgress(goal).current,
+                    percentage: goal.progress,
+                  }}
+                  isCompact={true}
+                  showActions={false}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="list-empty">
+              <p>No active goals for {activity || 'any activity'}.</p>
+              <Link
+                href="/goals"
+                className="btn btn--secondary btn--sm"
+                style={{
+                  marginTop: '0.5rem',
+                  display: 'inline-block',
+                  textDecoration: 'underline',
+                }}
+              >
+                Create a goal
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
