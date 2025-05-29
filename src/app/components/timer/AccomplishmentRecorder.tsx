@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import styles from './timer.module.css';
 
 // Common accomplishment types and categories
 const quickOptions = [
@@ -53,16 +52,47 @@ export default function AccomplishmentRecorder({
   };
 
   return (
-    <div className={styles.accomplishmentRecorder}>
-      <h3>What did you accomplish?</h3>
-      <p>Record what you achieved during your {activity} session</p>
+    <div
+      className="animate-fade-in"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: '2rem',
+      }}
+    >
+      <h3
+        style={{
+          fontSize: '2rem',
+          fontWeight: '700',
+          marginBottom: '0.75rem',
+          textAlign: 'center',
+        }}
+      >
+        What did you accomplish?
+      </h3>
+      <p
+        style={{
+          fontSize: '1.1rem',
+          opacity: '0.8',
+          marginBottom: '2rem',
+          textAlign: 'center',
+        }}
+      >
+        Record what you achieved during your {activity} session
+      </p>
 
-      <div className={styles.quickOptions}>
+      <div
+        className="filter-buttons"
+        style={{ marginBottom: '1.5rem', maxWidth: '600px' }}
+      >
         {quickOptions.map((option) => (
           <button
             key={option}
             type="button"
-            className={styles.quickOptionButton}
+            className="filter-button"
             onClick={() => handleQuickOption(option)}
           >
             {option}
@@ -70,23 +100,33 @@ export default function AccomplishmentRecorder({
         ))}
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <textarea
-          value={accomplishment}
-          onChange={(e) => setAccomplishment(e.target.value)}
-          placeholder="Describe what you accomplished (optional)"
-          className={styles.accomplishmentInput}
-        />
+      <form
+        onSubmit={handleSubmit}
+        className="card"
+        style={{
+          width: '100%',
+          maxWidth: '600px',
+        }}
+      >
+        <div className="form-group">
+          <textarea
+            value={accomplishment}
+            onChange={(e) => setAccomplishment(e.target.value)}
+            placeholder="Describe what you accomplished (optional)"
+            className="form-textarea"
+            style={{ minHeight: '120px' }}
+          />
+        </div>
 
-        <div className={styles.categorySelector}>
-          <label>Category (optional):</label>
-          <div className={styles.categoryOptions}>
+        <div className="form-group">
+          <label className="form-label">Category (optional):</label>
+          <div className="filter-buttons">
             {categories.map((category) => (
               <button
                 key={category}
                 type="button"
-                className={`${styles.categoryButton} ${
-                  selectedCategory === category ? styles.selected : ''
+                className={`filter-button ${
+                  selectedCategory === category ? 'filter-button--active' : ''
                 }`}
                 onClick={() => setSelectedCategory(category)}
               >
@@ -96,15 +136,11 @@ export default function AccomplishmentRecorder({
           </div>
         </div>
 
-        <div className={styles.recorderActions}>
-          <button type="submit" className={styles.primaryButton}>
+        <div className="form-actions">
+          <button type="submit" className="btn btn--primary">
             Save & Continue
           </button>
-          <button
-            type="button"
-            className={styles.secondaryButton}
-            onClick={onSkip}
-          >
+          <button type="button" className="btn btn--secondary" onClick={onSkip}>
             Skip
           </button>
         </div>
