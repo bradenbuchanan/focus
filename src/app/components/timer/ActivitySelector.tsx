@@ -2,9 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import styles from './ActivitySelector.module.css';
-import filterStyles from '@/app/styles/shared/filters.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
 import { defaultActivityCategories } from '@/lib/timer';
 
 interface ActivitySelectorProps {
@@ -38,15 +35,33 @@ export default function ActivitySelector({
   };
 
   return (
-    <div className={styles.activitySelector}>
-      <h3>What are you focusing on?</h3>
+    <div
+      style={{
+        marginBottom: '3rem',
+        marginTop: '3rem',
+        textAlign: 'center',
+      }}
+    >
+      <h3
+        style={{
+          marginBottom: '1rem',
+          fontSize: '1.3rem',
+        }}
+      >
+        What are you focusing on?
+      </h3>
 
-      <div className={filterStyles.activityButtons}>
+      <div
+        className="filter-buttons"
+        style={{
+          paddingTop: '1rem',
+        }}
+      >
         {defaultActivityCategories.map((activity) => (
           <button
             key={activity}
-            className={`${filterStyles.activityButton} ${
-              activity === selectedActivity ? filterStyles.activeButton : ''
+            className={`filter-button ${
+              activity === selectedActivity ? 'filter-button--active' : ''
             }`}
             onClick={() => handleActivitySelect(activity)}
           >
@@ -54,7 +69,7 @@ export default function ActivitySelector({
           </button>
         ))}
         <button
-          className={filterStyles.activityButton}
+          className="filter-button"
           onClick={() => handleActivitySelect('Custom')}
         >
           Custom
@@ -64,17 +79,25 @@ export default function ActivitySelector({
       {showCustomInput && (
         <form
           onSubmit={handleCustomSubmit}
-          className={styles.customActivityForm}
+          style={{
+            display: 'flex',
+            gap: '0.5rem',
+            justifyContent: 'center',
+            marginTop: '1rem',
+          }}
         >
           <input
             type="text"
             value={customActivity}
             onChange={(e) => setCustomActivity(e.target.value)}
             placeholder="Enter custom activity"
-            className={styles.customActivityInput}
+            className="form-input"
+            style={{
+              minWidth: '200px',
+            }}
             autoFocus
           />
-          <button type="submit" className={buttonStyles.primaryButton}>
+          <button type="submit" className="btn btn--primary">
             Add
           </button>
         </form>
