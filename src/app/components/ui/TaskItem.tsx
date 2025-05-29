@@ -3,7 +3,6 @@
 
 import { useState } from 'react';
 import { Task } from '@/lib/timer';
-import styles from './TaskItem.module.css';
 
 interface TaskItemProps {
   task: Task;
@@ -76,52 +75,67 @@ export function TaskItem({
     return 'future';
   };
 
-  const priorityClass =
-    styles[
-      `priority${task.priority?.charAt(0).toUpperCase()}${task.priority?.slice(
-        1
-      )}`
-    ];
-  const dueDateStatus = getDueDateStatus();
+  const getPriorityClass = () => {
+    if (!task.priority) return '';
+    switch (task.priority) {
+      case 'high':
+        return 'priority-high';
+      case 'medium':
+        return 'priority-medium';
+      case 'low':
+        return 'priority-low';
+      default:
+        return '';
+    }
+  };
+
+  const getDueDateClass = () => {
+    const status = getDueDateStatus();
+    switch (status) {
+      case 'overdue':
+        return 'due-date-overdue';
+      case 'soon':
+        return 'due-date-soon';
+      case 'future':
+        return 'due-date-future';
+      default:
+        return '';
+    }
+  };
 
   return (
     <div
-      className={`${styles.taskItem} ${
-        task.completed ? styles.completed : ''
-      } ${isCompact ? styles.compact : ''} ${className}`}
+      className={`list-item ${task.completed ? 'list-item--completed' : ''} ${
+        isCompact ? 'list-item--compact' : ''
+      } ${isLoading ? 'list-item--loading' : ''} ${className}`}
     >
-      <div className={styles.taskCheckbox}>
-        <input
-          type="checkbox"
-          checked={task.completed}
-          onChange={handleToggle}
-          disabled={isLoading}
-        />
+      <div className="list-item__leading">
+        <div className="task-checkbox">
+          <input
+            type="checkbox"
+            className="form-checkbox"
+            checked={task.completed}
+            onChange={handleToggle}
+            disabled={isLoading}
+          />
+        </div>
       </div>
 
-      <div className={styles.taskContent}>
-        <div className={styles.taskText}>{task.text}</div>
+      <div className="list-item__content">
+        <div className="list-item__text">{task.text}</div>
 
         {showMeta && (task.priority || task.activity || task.dueDate) && (
-          <div className={styles.taskMeta}>
+          <div className="task-meta">
             {task.priority && (
-              <span className={`${styles.priorityTag} ${priorityClass}`}>
+              <span className={`priority-tag ${getPriorityClass()}`}>
                 {task.priority}
               </span>
             )}
             {task.activity && (
-              <span className={styles.activityTag}>{task.activity}</span>
+              <span className="activity-tag">{task.activity}</span>
             )}
             {task.dueDate && (
-              <span
-                className={`${styles.dueDate} ${
-                  styles[
-                    `dueDate${dueDateStatus
-                      .charAt(0)
-                      .toUpperCase()}${dueDateStatus.slice(1)}`
-                  ]
-                }`}
-              >
+              <span className={`due-date ${getDueDateClass()}`}>
                 {formatDueDate(task.dueDate)}
               </span>
             )}
@@ -130,10 +144,10 @@ export function TaskItem({
       </div>
 
       {showActions && (onEdit || onDelete) && (
-        <div className={styles.taskActions}>
+        <div className="list-item__trailing">
           {onEdit && (
             <button
-              className={styles.editButton}
+              className="btn--icon-action"
               onClick={() => onEdit(task)}
               title="Edit task"
             >
@@ -142,7 +156,7 @@ export function TaskItem({
           )}
           {onDelete && (
             <button
-              className={styles.deleteButton}
+              className="btn--icon-action"
               onClick={() => onDelete(task.id)}
               title="Delete task"
             >
