@@ -3,8 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { formatTime } from '@/lib/timer';
-import styles from './FreeTimer.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
 
 interface FreeTimerProps {
   activity: string;
@@ -115,33 +113,28 @@ export default function FreeTimer({ onComplete, onCancel }: FreeTimerProps) {
   };
 
   return (
-    <div className={styles.freeTimerContainer}>
-      <div className={styles.freeTimerDisplay}>
-        <div className={styles.timeContent}>
-          <div className={styles.time}>{formatTime(timeElapsed)}</div>
-          <p className={styles.freeTimerInfo}>
-            Time tracked: {Math.floor(timeElapsed / 60)} min {timeElapsed % 60}{' '}
-            sec
-          </p>
-          <p className={styles.freeTimerStatus}>
-            {isRunning ? '⏸️ Running' : '▶️ Paused'}
-          </p>
-        </div>
+    <div className="timer-container">
+      <div className="timer-circle">
+        <div className="timer-time">{formatTime(timeElapsed)}</div>
+        <p className="text-sm opacity-70">
+          Time tracked: {Math.floor(timeElapsed / 60)} min {timeElapsed % 60}{' '}
+          sec
+        </p>
+        <p className="text-sm opacity-80">
+          {isRunning ? '⏸️ Running' : '▶️ Paused'}
+        </p>
       </div>
 
-      <div className={styles.controls}>
-        <button
-          className={buttonStyles.primaryButton}
-          onClick={handlePauseResume}
-        >
+      <div className="btn-group">
+        <button className="btn btn--primary" onClick={handlePauseResume}>
           {isRunning ? 'Pause' : 'Resume'}
         </button>
 
-        <button className={buttonStyles.primaryButton} onClick={handleComplete}>
+        <button className="btn btn--primary" onClick={handleComplete}>
           Complete
         </button>
 
-        <button className={buttonStyles.secondaryButton} onClick={handleCancel}>
+        <button className="btn btn--secondary" onClick={handleCancel}>
           Cancel
         </button>
       </div>
