@@ -3,8 +3,6 @@
 
 import React from 'react';
 import { TimerData, TimerState, formatTime } from '@/lib/timer';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
-import styles from './TimerDisplay.module.css';
 
 interface TimerDisplayProps {
   timerData: TimerData;
@@ -41,12 +39,11 @@ export default function TimerDisplay({
     return Math.min(100, Math.max(0, progress));
   };
 
-  // In TimerDisplay.tsx, update the return statement
   return (
-    <div className={styles.timerDisplay}>
-      <div className={styles.timerCircle}>
+    <div className="timer-display">
+      <div className="timer-circle">
         <div
-          className={styles.timerCircleProgress}
+          className="timer-circle-progress"
           style={
             {
               // Calculate progress based on current state and settings
@@ -54,31 +51,26 @@ export default function TimerDisplay({
             } as React.CSSProperties
           }
         ></div>
-        <div className={styles.timerTime}>
-          {formatTime(timerData.timeRemaining)}
-        </div>
-        <div className={styles.timerLabel}>
+        <div className="timer-time">{formatTime(timerData.timeRemaining)}</div>
+        <div className="timer-label">
           {isBreak ? 'Break Time' : 'Focus Time'}
         </div>
       </div>
 
-      <div className={styles.timerControls}>
+      <div className="timer-controls">
         {isRunning ? (
-          <button onClick={onPause} className={buttonStyles.primaryButton}>
+          <button onClick={onPause} className="btn btn--primary">
             Pause
           </button>
         ) : (
-          <button onClick={onStart} className={buttonStyles.primaryButton}>
+          <button onClick={onStart} className="btn btn--primary">
             {timerData.state === TimerState.IDLE ? 'Start' : 'Resume'}
           </button>
         )}
-        <button onClick={onReset} className={buttonStyles.secondaryButton}>
+        <button onClick={onReset} className="btn btn--secondary">
           Reset
         </button>
-        <button
-          onClick={onOpenSettings}
-          className={buttonStyles.secondaryButton}
-        >
+        <button onClick={onOpenSettings} className="btn btn--secondary">
           Settings
         </button>
       </div>
