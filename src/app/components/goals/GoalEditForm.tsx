@@ -4,9 +4,6 @@
 import { useState } from 'react';
 import { Goal, defaultActivityCategories } from '@/lib/timer';
 import { useData } from '@/providers/DataProvider';
-import styles from './GoalEditForm.module.css';
-import formStyles from '@/app/styles/shared/forms.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
 
 interface GoalEditFormProps {
   goal: Goal;
@@ -65,128 +62,145 @@ export default function GoalEditForm({
   };
 
   return (
-    <div className={styles.goalForm}>
-      <h2>Edit Goal</h2>
+    <div className="card animate-fade-in">
+      <div className="card__header">
+        <h2 className="card__title">Edit Goal</h2>
+      </div>
 
-      {error && <div className={formStyles.error}>{error}</div>}
+      <div className="card__body">
+        {error && <div className="form-error">{error}</div>}
 
-      <form onSubmit={handleSubmit}>
-        <div className={formStyles.formGroup}>
-          <label htmlFor="title">Goal Title</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g., Read more books"
-            required
-            disabled={isLoading}
-            className={formStyles.input}
-          />
-        </div>
-
-        <div className={formStyles.formGroup}>
-          <label htmlFor="description">Description (Optional)</label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Additional details about your goal"
-            disabled={isLoading}
-            className={formStyles.textarea}
-          />
-        </div>
-
-        <div className={formStyles.formRow}>
-          <div className={formStyles.formGroup}>
-            <label htmlFor="type">Goal Type</label>
-            <select
-              id="type"
-              value={type}
-              onChange={(e) => setType(e.target.value as 'time' | 'sessions')}
-              disabled={isLoading}
-              className={formStyles.select}
-            >
-              <option value="time">Focus Time</option>
-              <option value="sessions">Number of Sessions</option>
-            </select>
-          </div>
-
-          <div className={formStyles.formGroup}>
-            <label htmlFor="target">
-              Target {type === 'time' ? 'Minutes' : 'Sessions'}
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="title" className="form-label form-label--required">
+              Goal Title
             </label>
             <input
-              type="number"
-              id="target"
-              value={target}
-              onChange={(e) => setTarget(parseInt(e.target.value))}
-              min="1"
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Read more books"
               required
               disabled={isLoading}
-              className={formStyles.input}
+              className="form-input"
             />
           </div>
-        </div>
 
-        <div className={formStyles.formRow}>
-          <div className={formStyles.formGroup}>
-            <label htmlFor="period">Time Period</label>
-            <select
-              id="period"
-              value={period}
-              onChange={(e) =>
-                setPeriod(
-                  e.target.value as 'daily' | 'weekly' | 'monthly' | 'yearly'
-                )
-              }
+          <div className="form-group">
+            <label htmlFor="description" className="form-label">
+              Description (Optional)
+            </label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Additional details about your goal"
               disabled={isLoading}
-              className={formStyles.select}
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-            </select>
+              className="form-input form-textarea"
+            />
           </div>
 
-          <div className={formStyles.formGroup}>
-            <label htmlFor="activity">Activity (Optional)</label>
-            <select
-              id="activity"
-              value={activity}
-              onChange={(e) => setActivity(e.target.value)}
-              disabled={isLoading}
-              className={formStyles.select}
-            >
-              <option value="">All Activities</option>
-              {defaultActivityCategories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="type" className="form-label">
+                Goal Type
+              </label>
+              <select
+                id="type"
+                value={type}
+                onChange={(e) => setType(e.target.value as 'time' | 'sessions')}
+                disabled={isLoading}
+                className="form-input form-select"
+              >
+                <option value="time">Focus Time</option>
+                <option value="sessions">Number of Sessions</option>
+              </select>
+            </div>
 
-        <div className={formStyles.formActions}>
-          <button
-            type="submit"
-            className={buttonStyles.primaryButton}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Saving...' : 'Save Changes'}
-          </button>
-          <button
-            type="button"
-            className={buttonStyles.secondaryButton}
-            onClick={onCancel}
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+            <div className="form-group">
+              <label
+                htmlFor="target"
+                className="form-label form-label--required"
+              >
+                Target {type === 'time' ? 'Minutes' : 'Sessions'}
+              </label>
+              <input
+                type="number"
+                id="target"
+                value={target}
+                onChange={(e) => setTarget(parseInt(e.target.value))}
+                min="1"
+                required
+                disabled={isLoading}
+                className="form-input"
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="period" className="form-label">
+                Time Period
+              </label>
+              <select
+                id="period"
+                value={period}
+                onChange={(e) =>
+                  setPeriod(
+                    e.target.value as 'daily' | 'weekly' | 'monthly' | 'yearly'
+                  )
+                }
+                disabled={isLoading}
+                className="form-input form-select"
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="activity" className="form-label">
+                Activity (Optional)
+              </label>
+              <select
+                id="activity"
+                value={activity}
+                onChange={(e) => setActivity(e.target.value)}
+                disabled={isLoading}
+                className="form-input form-select"
+              >
+                <option value="">All Activities</option>
+                {defaultActivityCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button
+              type="submit"
+              className={`btn btn--primary ${isLoading ? 'btn--loading' : ''}`}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Saving...' : 'Save Changes'}
+            </button>
+            <button
+              type="button"
+              className="btn btn--secondary"
+              onClick={onCancel}
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
