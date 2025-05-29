@@ -6,11 +6,6 @@ import Link from 'next/link';
 import { Task } from '@/lib/timer';
 import { TaskItem } from '@/app/components/ui/TaskItem';
 import TaskForm from '@/app/components/goals/TaskForm';
-import styles from './tasks.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
-import filterStyles from '@/app/styles/shared/filters.module.css';
-import listStyles from '@/app/styles/shared/lists.module.css';
 import { useData } from '@/providers/DataProvider';
 
 export default function TasksPage() {
@@ -181,101 +176,109 @@ export default function TasksPage() {
   const filteredTasks = getFilteredTasks();
 
   return (
-    <div className={styles.tasksPage}>
-      <div className={`${cardStyles.card} ${styles.tasksHeader}`}>
-        <div>
-          <h1>Tasks</h1>
+    <div
+      style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1.5rem' }}
+    >
+      <div className="card">
+        <div className="card__header">
+          <h1 className="card__title">Tasks</h1>
           <p>Track and manage your specific action items</p>
         </div>
       </div>
 
-      <div className={`${cardStyles.card} ${filterStyles.filterTabs}`}>
-        <button
-          className={`${filterStyles.filterTab} ${
-            filter === 'all' ? filterStyles.activeTab : ''
-          }`}
-          onClick={() => setFilter('all')}
-        >
-          All
-        </button>
-        <button
-          className={`${filterStyles.filterTab} ${
-            filter === 'active' ? filterStyles.activeTab : ''
-          }`}
-          onClick={() => setFilter('active')}
-        >
-          Active
-        </button>
-        <button
-          className={`${filterStyles.filterTab} ${
-            filter === 'completed' ? filterStyles.activeTab : ''
-          }`}
-          onClick={() => setFilter('completed')}
-        >
-          Completed
-        </button>
+      <div className="card">
+        <div className="filter-tabs">
+          <button
+            className={`filter-tab ${
+              filter === 'all' ? 'filter-tab--active' : ''
+            }`}
+            onClick={() => setFilter('all')}
+          >
+            All
+          </button>
+          <button
+            className={`filter-tab ${
+              filter === 'active' ? 'filter-tab--active' : ''
+            }`}
+            onClick={() => setFilter('active')}
+          >
+            Active
+          </button>
+          <button
+            className={`filter-tab ${
+              filter === 'completed' ? 'filter-tab--active' : ''
+            }`}
+            onClick={() => setFilter('completed')}
+          >
+            Completed
+          </button>
+        </div>
       </div>
 
       {/* Debug button with proper onClick handler */}
-      <div className={cardStyles.card}>
+      <div className="card">
         <button
           onClick={debugTasks}
+          className="btn btn--secondary"
           style={{
             margin: '0.5rem 0',
-            padding: '0.5rem 1rem',
             backgroundColor: '#333',
             color: 'white',
-            border: 'none',
-            borderRadius: '0.25rem',
           }}
         >
           Debug Tasks
         </button>
       </div>
 
-      <div className={cardStyles.card}>
+      <div className="card">
         <TaskForm onAdd={loadTasks} onAddImmediate={handleAddImmediate} />
       </div>
 
       {isLoading ? (
-        <div className={`${cardStyles.card} ${styles.loadingState}`}>
-          Loading tasks...
+        <div className="card">
+          <div style={{ textAlign: 'center', padding: '3rem' }}>
+            Loading tasks...
+          </div>
         </div>
       ) : error ? (
-        <div className={`${cardStyles.card} ${styles.errorState}`}>
-          <p>{error}</p>
-          <button onClick={loadTasks} className={buttonStyles.primaryButton}>
-            Retry
-          </button>
+        <div className="card">
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <p>{error}</p>
+            <button onClick={loadTasks} className="btn btn--primary">
+              Retry
+            </button>
+          </div>
         </div>
       ) : (
-        <div className={`${cardStyles.card} ${listStyles.listContainer}`}>
-          {filteredTasks.length > 0 ? (
-            filteredTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                onToggleComplete={handleTaskToggle}
-                onEdit={handleTaskEdit}
-                onDelete={handleTaskDelete}
-                showActions={true}
-                isCompact={false}
-              />
-            ))
-          ) : (
-            <div className={listStyles.emptyState}>
-              {filter === 'all'
-                ? 'No tasks yet. Add some tasks to get started!'
-                : filter === 'active'
-                ? 'No active tasks. All done!'
-                : 'No completed tasks yet.'}
-            </div>
-          )}
+        <div className="card">
+          <div className="list">
+            {filteredTasks.length > 0 ? (
+              filteredTasks.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  onToggleComplete={handleTaskToggle}
+                  onEdit={handleTaskEdit}
+                  onDelete={handleTaskDelete}
+                  showActions={true}
+                  isCompact={false}
+                />
+              ))
+            ) : (
+              <div className="list-empty">
+                {filter === 'all'
+                  ? 'No tasks yet. Add some tasks to get started!'
+                  : filter === 'active'
+                  ? 'No active tasks. All done!'
+                  : 'No completed tasks yet.'}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      <div className={`${cardStyles.card} ${styles.linkBack}`}>
-        <Link href="/goals" className={buttonStyles.secondaryButton}>
+      <div className="card" style={{ textAlign: 'center' }}>
+        <Link href="/goals" className="btn btn--secondary">
           Back to Goals
         </Link>
       </div>
