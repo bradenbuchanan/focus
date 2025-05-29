@@ -2,7 +2,6 @@
 'use client';
 
 import React from 'react';
-import styles from './ProgressBar.module.css';
 
 interface ProgressBarProps {
   percentage: number;
@@ -24,15 +23,23 @@ export function ProgressBar({
   const clampedPercentage = Math.min(100, Math.max(0, percentage));
 
   return (
-    <div className={`${styles.progressContainer} ${className}`}>
+    <div className={className} style={{ width: '100%' }}>
       {showLabel && (
-        <div className={styles.progressLabel}>
+        <div
+          style={{
+            fontSize: '0.85rem',
+            marginBottom: '0.5rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           {label || `${Math.round(clampedPercentage)}%`}
         </div>
       )}
-      <div className={styles.progressBar} style={{ height }}>
+      <div className="progress-bar" style={{ height }}>
         <div
-          className={styles.progressFill}
+          className="progress-fill"
           style={{
             width: `${clampedPercentage}%`,
             backgroundColor: clampedPercentage >= 100 ? '#4CAF50' : color,
