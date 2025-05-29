@@ -29,7 +29,16 @@ export default function TaskForm({
 
     if (text.trim()) {
       try {
-        // Create task object
+        // Create TaskInput object for saving to database
+        const taskInput = {
+          goalId,
+          text: text.trim(),
+          activity: activity || undefined,
+          priority: priority,
+          dueDate: dueDate || undefined,
+        };
+
+        // Create full Task object for immediate UI update
         const newTask: Task = {
           id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
           goalId,
@@ -46,9 +55,9 @@ export default function TaskForm({
           onAddImmediate(newTask);
         }
 
-        console.log('Saving task:', newTask);
-        // Save to database
-        const savedId = await saveTask(newTask);
+        console.log('Saving task:', taskInput);
+        // Save to database using TaskInput
+        const savedId = await saveTask(taskInput);
         console.log('Task saved with ID:', savedId);
 
         // Reset form
@@ -66,6 +75,7 @@ export default function TaskForm({
     }
   };
 
+  // ... rest of your component remains the same
   return (
     <form onSubmit={handleSubmit} className="card card--compact">
       <div className="form-group">
