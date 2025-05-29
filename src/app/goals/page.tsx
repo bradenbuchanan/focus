@@ -14,11 +14,6 @@ import GoalCard from '@/app/components/goals/GoalCard';
 import GoalForm from '@/app/components/goals/GoalForm';
 import { TaskItem } from '@/app/components/ui/TaskItem';
 import TaskForm from '@/app/components/goals/TaskForm';
-import styles from './goals.module.css';
-import cardStyles from '@/app/styles/shared/cards.module.css';
-import buttonStyles from '@/app/styles/shared/buttons.module.css';
-import filterStyles from '@/app/styles/shared/filters.module.css';
-import listStyles from '@/app/styles/shared/lists.module.css';
 import { useData } from '@/providers/DataProvider';
 
 type TabType = 'goals' | 'tasks' | 'completed';
@@ -216,32 +211,34 @@ export default function GoalsPage() {
   };
 
   return (
-    <div className={styles.goalsPage}>
-      <div className={styles.goalsHeader}>
+    <div
+      style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1.5rem' }}
+    >
+      <div className="card card--compact" style={{ marginBottom: '2rem' }}>
         <div>
           <h1>Focus Goals & Tasks</h1>
           <p>Set objectives and track your progress</p>
         </div>
-        <div className={filterStyles.filterTabs}>
+        <div className="filter-tabs">
           <button
-            className={`${filterStyles.filterTab} ${
-              activeTab === 'goals' ? filterStyles.activeTab : ''
+            className={`filter-tab ${
+              activeTab === 'goals' ? 'filter-tab--active' : ''
             }`}
             onClick={() => setActiveTab('goals')}
           >
             Goals
           </button>
           <button
-            className={`${filterStyles.filterTab} ${
-              activeTab === 'tasks' ? filterStyles.activeTab : ''
+            className={`filter-tab ${
+              activeTab === 'tasks' ? 'filter-tab--active' : ''
             }`}
             onClick={() => setActiveTab('tasks')}
           >
             Tasks
           </button>
           <button
-            className={`${filterStyles.filterTab} ${
-              activeTab === 'completed' ? filterStyles.activeTab : ''
+            className={`filter-tab ${
+              activeTab === 'completed' ? 'filter-tab--active' : ''
             }`}
             onClick={() => setActiveTab('completed')}
           >
@@ -250,7 +247,7 @@ export default function GoalsPage() {
         </div>
         {activeTab === 'goals' && (
           <button
-            className={buttonStyles.primaryButton}
+            className="btn btn--primary"
             onClick={() => setShowForm(true)}
           >
             Create New Goal
@@ -259,28 +256,30 @@ export default function GoalsPage() {
       </div>
 
       {isLoading ? (
-        <div className={styles.loadingState}>
-          <p>Loading goals...</p>
+        <div className="card">
+          <div style={{ textAlign: 'center', padding: '3rem' }}>
+            <p>Loading goals...</p>
+          </div>
         </div>
       ) : error ? (
-        <div className={styles.errorState}>
-          <p>{error}</p>
-          <button onClick={loadData} className={buttonStyles.primaryButton}>
-            Retry
-          </button>
+        <div className="card">
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <p>{error}</p>
+            <button onClick={loadData} className="btn btn--primary">
+              Retry
+            </button>
+          </div>
         </div>
       ) : (
         <>
           {availableActivities.length > 0 && (
-            <div className={filterStyles.filterContainer}>
-              <div className={filterStyles.activityFilters}>
-                <span className={filterStyles.filterLabel}>
-                  Filter by Activity:
-                </span>
-                <div className={filterStyles.activityButtons}>
+            <div className="filter-container">
+              <div>
+                <span className="filter-label">Filter by Activity:</span>
+                <div className="filter-buttons">
                   <button
-                    className={`${filterStyles.activityButton} ${
-                      activityFilter === 'all' ? filterStyles.activeButton : ''
+                    className={`filter-button ${
+                      activityFilter === 'all' ? 'filter-button--active' : ''
                     }`}
                     onClick={() => setActivityFilter('all')}
                   >
@@ -289,9 +288,9 @@ export default function GoalsPage() {
                   {availableActivities.map((activity) => (
                     <button
                       key={activity}
-                      className={`${filterStyles.activityButton} ${
+                      className={`filter-button ${
                         activityFilter === activity
-                          ? filterStyles.activeButton
+                          ? 'filter-button--active'
                           : ''
                       }`}
                       onClick={() => setActivityFilter(activity)}
@@ -320,7 +319,7 @@ export default function GoalsPage() {
               ) : (
                 <>
                   {filteredGoals.length > 0 ? (
-                    <div className={listStyles.listContainer}>
+                    <div className="list">
                       {filteredGoals.map((goal) => (
                         <GoalCard
                           key={goal.id}
@@ -331,7 +330,7 @@ export default function GoalsPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className={listStyles.emptyState}>
+                    <div className="list-empty">
                       <h3>
                         No active goals{' '}
                         {activityFilter !== 'all'
@@ -343,7 +342,7 @@ export default function GoalsPage() {
                         progress
                       </p>
                       <button
-                        className={buttonStyles.primaryButton}
+                        className="btn btn--primary"
                         onClick={() => setShowForm(true)}
                       >
                         Create Your First Goal
@@ -354,13 +353,13 @@ export default function GoalsPage() {
               )}
             </>
           ) : activeTab === 'tasks' ? (
-            <div className={`${cardStyles.card} ${styles.tasksSection}`}>
+            <div className="card">
               <TaskForm
                 onAdd={loadData}
                 activity={activityFilter !== 'all' ? activityFilter : undefined}
               />
 
-              <div className={listStyles.listContainer}>
+              <div className="list">
                 {filteredActiveTasks.length > 0 ? (
                   filteredActiveTasks.map((task) => (
                     <TaskItem
@@ -370,7 +369,7 @@ export default function GoalsPage() {
                     />
                   ))
                 ) : (
-                  <div className={listStyles.emptyState}>
+                  <div className="list-empty">
                     {activityFilter === 'all'
                       ? 'No active tasks. Add some tasks above to get started!'
                       : `No active tasks for ${activityFilter}. Add one above!`}
@@ -379,11 +378,13 @@ export default function GoalsPage() {
               </div>
             </div>
           ) : (
-            <div className={styles.completedSection}>
-              <div className={`${cardStyles.card} ${styles.completedGoals}`}>
-                <h3 className={cardStyles.cardTitle}>Completed Goals</h3>
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
+            >
+              <div className="card">
+                <h3 className="card__title">Completed Goals</h3>
                 {filteredCompletedGoals.length > 0 ? (
-                  <div className={listStyles.listContainer}>
+                  <div className="list">
                     {filteredCompletedGoals.map((goal) => (
                       <GoalCard
                         key={goal.id}
@@ -394,7 +395,7 @@ export default function GoalsPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className={listStyles.emptyState}>
+                  <div className="list-empty">
                     {activityFilter === 'all'
                       ? 'No completed goals yet. Keep working toward your objectives!'
                       : `No completed goals for ${activityFilter} yet.`}
@@ -402,21 +403,29 @@ export default function GoalsPage() {
                 )}
               </div>
 
-              <div className={`${cardStyles.card} ${styles.completedTasks}`}>
-                <h3 className={cardStyles.cardTitle}>Completed Tasks</h3>
-                <div className={listStyles.listContainer}>
+              <div className="card">
+                <h3 className="card__title">Completed Tasks</h3>
+                <div className="list">
                   {filteredCompletedTasks.length > 0 ? (
                     filteredCompletedTasks.map((task) => (
-                      <div key={task.id} className={styles.completedTaskItem}>
+                      <div key={task.id} style={{ position: 'relative' }}>
                         <TaskItem task={task} onToggleComplete={loadData} />
-                        <div className={styles.completionDate}>
+                        <div
+                          style={{
+                            fontSize: '0.8rem',
+                            color: 'var(--color-muted)',
+                            marginTop: '0.25rem',
+                            textAlign: 'right',
+                            paddingRight: '0.5rem',
+                          }}
+                        >
                           Completed:{' '}
                           {formatDate(task.completedAt || task.createdAt)}
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className={listStyles.emptyState}>
+                    <div className="list-empty">
                       {activityFilter === 'all'
                         ? 'No completed tasks yet.'
                         : `No completed tasks for ${activityFilter} yet.`}
@@ -427,8 +436,8 @@ export default function GoalsPage() {
             </div>
           )}
 
-          <div className={styles.timerLink}>
-            <Link href="/timer" className={buttonStyles.secondaryButton}>
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <Link href="/timer" className="btn btn--secondary">
               Back to Timer
             </Link>
           </div>
