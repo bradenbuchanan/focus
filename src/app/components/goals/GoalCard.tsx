@@ -68,7 +68,7 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
   }
 
   return (
-    <>
+    <div className="animate-fade-in">
       <UnifiedGoalCard
         goal={goal}
         progress={progress}
@@ -78,11 +78,18 @@ export default function GoalCard({ goal, onDelete, onEdit }: GoalCardProps) {
       />
 
       {showTasks && (
-        <div className="mt-4">
-          <h4>Tasks for this goal:</h4>
-          <TaskList tasks={[]} isCompact={true} />
+        <div
+          className="card card--compact animate-slide-up transition-all"
+          style={{ marginTop: '1rem' }}
+        >
+          <div className="card__header">
+            <h4 className="card__title">Tasks for this goal:</h4>
+          </div>
+          <div className="card__body">
+            <TaskList tasks={[]} isCompact={true} />
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
