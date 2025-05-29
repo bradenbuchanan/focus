@@ -13,9 +13,6 @@ import { TaskList } from '@/app/components/ui/TaskList';
 import { GoalList } from '@/app/components/ui/GoalList';
 import ActivitySelector from './ActivitySelector';
 import { defaultActivityCategories } from '@/lib/timer';
-import styles from './timer.module.css';
-import filterStyles from '@/app/styles/shared/filters.module.css';
-import listStyles from '@/app/styles/shared/lists.module.css';
 
 export default function TimerContainer() {
   const [selectedActivity, setSelectedActivity] = useState(
@@ -120,24 +117,24 @@ export default function TimerContainer() {
   }
 
   return (
-    <div className={styles.timerContainer}>
+    <div className="timer-container animate-fade-in">
       <ActivitySelector
         selectedActivity={selectedActivity}
         onSelectActivity={setSelectedActivity}
       />
 
-      <div className={filterStyles.filterTabs}>
+      <div className="filter-tabs">
         <button
-          className={`${filterStyles.filterTab} ${
-            timerMode === 'pomodoro' ? filterStyles.activeTab : ''
+          className={`filter-tab ${
+            timerMode === 'pomodoro' ? 'filter-tab--active' : ''
           }`}
           onClick={() => setTimerMode('pomodoro')}
         >
           Pomodoro Timer
         </button>
         <button
-          className={`${filterStyles.filterTab} ${
-            timerMode === 'free' ? filterStyles.activeTab : ''
+          className={`filter-tab ${
+            timerMode === 'free' ? 'filter-tab--active' : ''
           }`}
           onClick={() => setTimerMode('free')}
         >
@@ -161,27 +158,35 @@ export default function TimerContainer() {
         />
       )}
 
-      <div className={styles.timerContent}>
-        <div className={styles.section}>
-          <h3 className={listStyles.listTitle}>Active Tasks</h3>
-          {tasks.length > 0 ? (
-            <TaskList tasks={tasks} isCompact={true} />
-          ) : (
-            <p className={listStyles.emptyState}>
-              No tasks for {selectedActivity}
-            </p>
-          )}
+      <div className="timer-content">
+        <div className="card card--compact">
+          <div className="card__header">
+            <h3 className="list-title">Active Tasks</h3>
+          </div>
+          <div className="card__body">
+            {tasks.length > 0 ? (
+              <TaskList tasks={tasks} isCompact={true} />
+            ) : (
+              <div className="list-empty">
+                <p>No tasks for {selectedActivity}</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className={styles.section}>
-          <h3 className={listStyles.listTitle}>Active Goals</h3>
-          {goals.length > 0 ? (
-            <GoalList goals={goals} isCompact={true} />
-          ) : (
-            <p className={listStyles.emptyState}>
-              No goals for {selectedActivity}
-            </p>
-          )}
+        <div className="card card--compact">
+          <div className="card__header">
+            <h3 className="list-title">Active Goals</h3>
+          </div>
+          <div className="card__body">
+            {goals.length > 0 ? (
+              <GoalList goals={goals} isCompact={true} />
+            ) : (
+              <div className="list-empty">
+                <p>No goals for {selectedActivity}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
