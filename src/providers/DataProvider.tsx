@@ -1,15 +1,17 @@
-// src/providers/DataProvider.tsx
 'use client';
 
-import { createContext, useContext, ReactNode, useMemo } from 'react';
-import { SessionRepository } from '@/repositories/SessionRepository';
-import { GoalRepository } from '@/repositories/GoalRepository';
-import { TaskRepository } from '@/repositories/TaskRepository';
-import { AccomplishmentRepository } from '@/repositories/AccomplishmentRepository';
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useMemo,
+  useEffect,
+} from 'react';
+import { DataService } from '@/services/DataService';
 import { Database } from '@/types/supabase';
 import { Goal } from '@/lib/timer';
 
-// Keep all your EXISTING type definitions from your old DataProvider
+// Keep existing type definitions
 type Session = Database['public']['Tables']['focus_sessions']['Row'];
 type Accomplishment = Database['public']['Tables']['accomplishments']['Row'];
 type SupabaseGoal = Database['public']['Tables']['goals']['Row'];
@@ -82,36 +84,59 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: DataProviderProps) {
-  // Create repositories once using useMemo
-  const sessionRepo = useMemo(() => new SessionRepository(), []);
-  const goalRepo = useMemo(() => new GoalRepository(), []);
-  const taskRepo = useMemo(() => new TaskRepository(), []);
-  const accomplishmentRepo = useMemo(() => new AccomplishmentRepository(), []);
+  // Create single instance of DataService
+  const dataService = useMemo(() => new DataService(), []);
 
-  // Create the context value with methods delegated to repositories
+  // Process offline queue when coming back online
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log('Back online, processing offline queue...');
+      dataService.processOfflineQueue();
+    };
+
+    window.addEventListener('online', handleOnline);
+
+    // Process queue on mount if online
+    if (navigator.onLine) {
+      dataService.processOfflineQueue();
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [dataService]);
+
+  // Create the context value
   const contextValue = useMemo(
     () => ({
-      saveSession: (session: SessionInput) => sessionRepo.saveSession(session),
-      getSessions: () => sessionRepo.getSessions(),
+      saveSession: (session: SessionInput) => dataService.saveSession(session),
+      getSessions: () => dataService.getSessions(),
       saveAccomplishment: (data: AccomplishmentInput) =>
-        accomplishmentRepo.saveAccomplishment(data),
-      getAccomplishments: () => accomplishmentRepo.getAccomplishments(),
-      saveGoal: (goal: GoalInput) => goalRepo.saveGoal(goal),
-      getGoals: () => goalRepo.getGoals(),
-      deleteGoal: (goalId: string) => goalRepo.deleteGoal(goalId),
-      saveTask: (task: TaskInput) => taskRepo.saveTask(task),
-      updateTask: (task: TaskUpdateInput) => taskRepo.updateTask(task),
-      getTasks: () => taskRepo.getTasks(),
-      deleteTask: (taskId: string) => taskRepo.deleteTask(taskId),
-      updateGoal: async (
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        _goalToUpdate: Goal
-      ): Promise<void> => {
-        // This is currently just a stub implementation
-        return Promise.resolve();
+        dataService.saveAccomplishment(data),
+      getAccomplishments: () => dataService.getAccomplishments(),
+      saveGoal: (goal: GoalInput) => dataService.saveGoal(goal),
+      getGoals: () => dataService.getGoals(),
+      deleteGoal: (goalId: string) => dataService.deleteGoal(goalId),
+      saveTask: (task: TaskInput) => dataService.saveTask(task),
+      updateTask: (task: TaskUpdateInput) => dataService.updateTask(task),
+      getTasks: () => dataService.getTasks(),
+      deleteTask: (taskId: string) => dataService.deleteTask(taskId),
+      updateGoal: async (goalToUpdate: Goal): Promise<void> => {
+        // For now, we'll delete and recreate
+        await dataService.deleteGoal(goalToUpdate.id);
+        await dataService.saveGoal({
+          title: goalToUpdate.title,
+          description: goalToUpdate.description,
+          type: goalToUpdate.type,
+          target: goalToUpdate.target,
+          period: goalToUpdate.period,
+          activity: goalToUpdate.activity,
+          startDate: goalToUpdate.startDate,
+          endDate: goalToUpdate.endDate,
+        });
       },
     }),
-    [sessionRepo, goalRepo, taskRepo, accomplishmentRepo]
+    [dataService]
   );
 
   return (

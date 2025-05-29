@@ -1,9 +1,4 @@
-// src/utils/offlineQueue.ts
-
-// Define a more specific type for operation data
-export type OperationData = 
-  | Record<string, string | number | boolean | null | undefined>
-  | Array<Record<string, string | number | boolean | null | undefined>>;
+export type OperationData = any; // Simplified for now
 
 export interface QueuedOperation {
   id: string;
@@ -22,16 +17,21 @@ export class OfflineQueue {
     return data ? JSON.parse(data) : [];
   }
   
-  addToQueue(operation: Omit<QueuedOperation, 'id' | 'timestamp'>): void {
-    const queue = this.getQueue();
+  add(table: string, operation: 'create' | 'update' | 'delete', data: OperationData): string {
+    const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
     const newOp: QueuedOperation = {
-      ...operation,
-      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+      id,
+      table,
+      operation,
+      data,
       timestamp: Date.now()
     };
     
+    const queue = this.getQueue();
     queue.push(newOp);
     localStorage.setItem(this.QUEUE_KEY, JSON.stringify(queue));
+    
+    return id;
   }
   
   removeFromQueue(id: string): void {

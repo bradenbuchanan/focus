@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from './providers';
 import Navigation from './components/ui/Navigation';
+import { OfflineIndicator } from './components/ui/OfflineIndicator';
+
 import './globals.css';
 
 const geistSans = Geist({
@@ -32,6 +34,7 @@ export default function RootLayout({
           <Navigation />
           {children}
         </Providers>
+        <OfflineIndicator />
       </body>
     </html>
   );
