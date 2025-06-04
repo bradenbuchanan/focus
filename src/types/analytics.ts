@@ -1,5 +1,10 @@
 // src/types/analytics.ts
+import { Database } from './supabase';
+
 export type TimeFrame = 'week' | 'month' | 'custom';
+
+// Define the session type using your Database type
+export type AnalyticsSession = Database['public']['Tables']['focus_sessions']['Row'];
 
 export interface WeeklySummary {
   startDate: string;
@@ -19,7 +24,7 @@ export interface WeeklySummary {
 }
 
 export interface SummaryGeneratorParams {
-  sessions: any[]; // Replace with your session type
+  sessions: AnalyticsSession[]; // Changed from any[] to properly typed sessions
   timeframe: TimeFrame;
   dateRange: { start: string; end: string };
   selectedActivities: string[];
