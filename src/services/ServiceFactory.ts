@@ -1,9 +1,9 @@
 // src/services/ServiceFactory.ts
 import { CacheService } from './CacheService';
-import { SessionService } from './SessionService';
-import { GoalService } from './GoalService';
-import { TaskService } from './TaskService';
-import { AccomplishmentService } from './AccomplishmentService';
+import { SessionService } from './sessionService';
+import { GoalService } from './goalService';
+import { TaskService } from './taskService';
+import { AccomplishmentService } from './accomplishmentService';
 import { OfflineQueue } from '@/utils/offlineQueue';
 
 export class ServiceFactory {
