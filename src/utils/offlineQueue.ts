@@ -24,7 +24,7 @@ export class OfflineQueue {
       id,
       table,
       operation,
-      data,
+      data: { ...data }, // Spread to ensure it matches OperationData
       timestamp: Date.now()
     };
     
