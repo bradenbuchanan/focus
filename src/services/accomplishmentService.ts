@@ -1,115 +1,94 @@
-// src/services/accomplishmentService.ts
+// src/services/AccomplishmentService.ts
+import { BaseService } from './BaseService';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/supabase';
+import { QueuedOperation } from '@/utils/offlineQueue';
+import { emitDataUpdate } from '@/utils/events';
 
 type Accomplishment = Database['public']['Tables']['accomplishments']['Row'];
 
-// Create a type for local accomplishment structure
-interface LocalAccomplishment {
-  id: string;
-  text: string;
-  date: string;
-  sessionId?: string;
-  categories?: string;
-}
-
-interface LocalSession {
-  id: string;
-  accomplishment?: string;
-  accomplishmentCategory?: string;
-  date?: string;
-  localDate?: string;
-  duration?: number;
-  type?: string;
-  completed?: boolean;
-  activity?: string;
-  startTime?: string;
-  endTime?: string;
-  // Add any other specific properties that might exist in your session objects
-}
-
-export async function saveAccomplishment(data: {
+export interface AccomplishmentInput {
   sessionId: string;
   text: string;
   categories?: string;
-}): Promise<string> {
-  try {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    
-    if (userError) throw userError;
-    
-    const { data: accomplishment, error } = await supabase
-      .from('accomplishments')
-      .insert({
-        session_id: data.sessionId,
-        text: data.text,
-        categories: data.categories,
-        user_id: userData.user.id,
-      })
-      .select()
-      .single();
+  [key: string]: unknown; // Add index signature for OperationData compatibility
+}
 
-    if (error) throw error;
-    return accomplishment.id;
-  } catch (error) {
-    console.error('Error saving accomplishment to Supabase:', error);
-    
-    // Fallback to localStorage
-    const localAccomplishment: LocalAccomplishment = {
-      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
-      text: data.text,
-      date: new Date().toISOString(),
-      sessionId: data.sessionId,
-      categories: data.categories,
-    };
-    
-    // Save to localStorage
-    const accomplishments = getLocalAccomplishments();
-    accomplishments.push(localAccomplishment);
-    localStorage.setItem('focusAccomplishments', JSON.stringify(accomplishments));
-    
-    // Also update the session in localStorage
-    const sessions = JSON.parse(localStorage.getItem('timerSessions') || '[]') as LocalSession[];
-    const sessionIndex = sessions.findIndex(s => s.id === data.sessionId);
-    if (sessionIndex !== -1) {
-      sessions[sessionIndex].accomplishment = data.text;
-      sessions[sessionIndex].accomplishmentCategory = data.categories;
-      localStorage.setItem('timerSessions', JSON.stringify(sessions));
+export class AccomplishmentService extends BaseService {
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes for accomplishments
+
+  async saveAccomplishment(data: AccomplishmentInput): Promise<string> {
+    try {
+      const user = await this.getCurrentUser();
+      
+      const { data: result, error } = await supabase
+        .from('accomplishments')
+        .insert({
+          user_id: user.id,
+          session_id: data.sessionId,
+          text: data.text,
+          categories: data.categories || null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Invalidate cache
+      this.invalidateUserCache(user.id, 'accomplishments');
+      emitDataUpdate();
+
+      return result.id;
+    } catch (error) {
+      if (!this.isOnline()) {
+        return this.offlineQueue.add('accomplishments', 'create', this.toOperationData(data));
+      }
+      throw error;
     }
-    
-    return localAccomplishment.id;
   }
-}
 
-export async function getAccomplishments(): Promise<Accomplishment[]> {
-  try {
-    const { data, error } = await supabase
-      .from('accomplishments')
-      .select('*')
-      .order('created_at', { ascending: false });
+  async getAccomplishments(): Promise<Accomplishment[]> {
+    try {
+      const user = await this.getCurrentUser();
+      const cacheKey = this.getCacheKey('accomplishments', user.id);
+      
+      // Check cache first
+      const cached = this.cacheService.get<Accomplishment[]>(cacheKey);
+      if (cached) {
+        return cached;
+      }
 
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching accomplishments from Supabase:', error);
-    
-    // Fallback to localStorage
-    return getLocalAccomplishments().map(acc => ({
-      id: acc.id,
-      user_id: '', // This will be empty in fallback mode
-      session_id: acc.sessionId || null,
-      text: acc.text,
-      categories: acc.categories || null,
-      created_at: acc.date,
-      updated_at: acc.date,
-    }));
+      const { data, error } = await supabase
+        .from('accomplishments')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const accomplishments = data || [];
+      
+      // Cache the result
+      this.cacheService.set(cacheKey, accomplishments, this.CACHE_TTL);
+      
+      return accomplishments;
+    } catch (error) {
+      if (!this.isOnline()) {
+        return [];
+      }
+      throw error;
+    }
   }
-}
 
-// Helper function to get local accomplishments
-function getLocalAccomplishments(): LocalAccomplishment[] {
-  if (typeof window === 'undefined') return [];
-  
-  const accomplishmentsData = localStorage.getItem('focusAccomplishments');
-  return accomplishmentsData ? JSON.parse(accomplishmentsData) : [];
+  async processOfflineOperation(operation: QueuedOperation): Promise<void> {
+    if (operation.table !== 'accomplishments') return;
+
+    switch (operation.operation) {
+      case 'create':
+        await this.saveAccomplishment(operation.data as AccomplishmentInput);
+        break;
+      // Accomplishments typically don't have update/delete operations
+      // but you can add them if needed
+    }
+  }
 }
