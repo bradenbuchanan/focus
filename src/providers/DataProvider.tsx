@@ -8,86 +8,110 @@ import {
   useMemo,
   useEffect,
 } from 'react';
-import {
-  DataService,
-  type SessionInput,
-  type AccomplishmentInput,
-  type GoalInput,
-  type TaskInput,
-  type TaskUpdateInput,
-} from '@/services/DataService';
+import { ServiceFactory } from '@/services/ServiceFactory';
 import { Database } from '@/types/supabase';
 import { Goal } from '@/lib/timer';
 
-// Keep only the types that aren't exported from DataService
+// Types
 type Session = Database['public']['Tables']['focus_sessions']['Row'];
 type Accomplishment = Database['public']['Tables']['accomplishments']['Row'];
 type SupabaseGoal = Database['public']['Tables']['goals']['Row'];
 type Task = Database['public']['Tables']['tasks']['Row'];
+
+// Import input types from services
+import type { SessionInput, GoalInput } from '@/services/SessionService';
+import type { TaskInput, TaskUpdateInput } from '@/services/TaskService';
+import type { AccomplishmentInput } from '@/services/AccomplishmentService';
 
 interface DataProviderProps {
   children: ReactNode;
 }
 
 interface DataContextType {
+  // Session operations
   saveSession: (session: SessionInput) => Promise<string>;
   getSessions: () => Promise<Session[]>;
+  getSessionsInDateRange: (
+    startDate: Date,
+    endDate: Date
+  ) => Promise<Session[]>;
+  deleteSession: (sessionId: string) => Promise<void>;
+
+  // Accomplishment operations
   saveAccomplishment: (data: AccomplishmentInput) => Promise<string>;
   getAccomplishments: () => Promise<Accomplishment[]>;
+
+  // Goal operations
   saveGoal: (goal: GoalInput) => Promise<string>;
   getGoals: () => Promise<SupabaseGoal[]>;
   deleteGoal: (goalId: string) => Promise<void>;
+  updateGoal: (goalToUpdate: Goal) => Promise<void>;
+
+  // Task operations
   saveTask: (task: TaskInput) => Promise<string>;
   updateTask: (task: TaskUpdateInput) => Promise<void>;
   getTasks: () => Promise<Task[]>;
   deleteTask: (taskId: string) => Promise<void>;
-  updateGoal: (goalToUpdate: Goal) => Promise<void>;
+
+  // Cache operations
+  clearCaches: () => void;
+  getCacheStats: () => any;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: DataProviderProps) {
-  // Create single instance of DataService
-  const dataService = useMemo(() => new DataService(), []);
+  // Get singleton instance of ServiceFactory
+  const serviceFactory = useMemo(() => ServiceFactory.getInstance(), []);
 
   // Process offline queue when coming back online
   useEffect(() => {
     const handleOnline = () => {
       console.log('Back online, processing offline queue...');
-      dataService.processOfflineQueue();
+      serviceFactory.processOfflineQueue();
     };
 
     window.addEventListener('online', handleOnline);
 
     // Process queue on mount if online
     if (navigator.onLine) {
-      dataService.processOfflineQueue();
+      serviceFactory.processOfflineQueue();
     }
 
     return () => {
       window.removeEventListener('online', handleOnline);
     };
-  }, [dataService]);
+  }, [serviceFactory]);
 
-  // Create the context value
+  // Create the context value using services
   const contextValue = useMemo(
     () => ({
-      saveSession: (session: SessionInput) => dataService.saveSession(session),
-      getSessions: () => dataService.getSessions(),
+      // Session operations
+      saveSession: (session: SessionInput) =>
+        serviceFactory.getSessionService().saveSession(session),
+      getSessions: () => serviceFactory.getSessionService().getSessions(),
+      getSessionsInDateRange: (startDate: Date, endDate: Date) =>
+        serviceFactory
+          .getSessionService()
+          .getSessionsInDateRange(startDate, endDate),
+      deleteSession: (sessionId: string) =>
+        serviceFactory.getSessionService().deleteSession(sessionId),
+
+      // Accomplishment operations
       saveAccomplishment: (data: AccomplishmentInput) =>
-        dataService.saveAccomplishment(data),
-      getAccomplishments: () => dataService.getAccomplishments(),
-      saveGoal: (goal: GoalInput) => dataService.saveGoal(goal),
-      getGoals: () => dataService.getGoals(),
-      deleteGoal: (goalId: string) => dataService.deleteGoal(goalId),
-      saveTask: (task: TaskInput) => dataService.saveTask(task),
-      updateTask: (task: TaskUpdateInput) => dataService.updateTask(task),
-      getTasks: () => dataService.getTasks(),
-      deleteTask: (taskId: string) => dataService.deleteTask(taskId),
+        serviceFactory.getAccomplishmentService().saveAccomplishment(data),
+      getAccomplishments: () =>
+        serviceFactory.getAccomplishmentService().getAccomplishments(),
+
+      // Goal operations
+      saveGoal: (goal: GoalInput) =>
+        serviceFactory.getGoalService().saveGoal(goal),
+      getGoals: () => serviceFactory.getGoalService().getGoals(),
+      deleteGoal: (goalId: string) =>
+        serviceFactory.getGoalService().deleteGoal(goalId),
       updateGoal: async (goalToUpdate: Goal): Promise<void> => {
-        // For now, we'll delete and recreate
-        await dataService.deleteGoal(goalToUpdate.id);
-        await dataService.saveGoal({
+        const goalService = serviceFactory.getGoalService();
+        const updates: Partial<GoalInput> = {
           title: goalToUpdate.title,
           description: goalToUpdate.description,
           type: goalToUpdate.type,
@@ -96,10 +120,24 @@ export function DataProvider({ children }: DataProviderProps) {
           activity: goalToUpdate.activity,
           startDate: goalToUpdate.startDate,
           endDate: goalToUpdate.endDate,
-        });
+        };
+        await goalService.updateGoal(goalToUpdate.id, updates);
       },
+
+      // Task operations
+      saveTask: (task: TaskInput) =>
+        serviceFactory.getTaskService().saveTask(task),
+      updateTask: (task: TaskUpdateInput) =>
+        serviceFactory.getTaskService().updateTask(task),
+      getTasks: () => serviceFactory.getTaskService().getTasks(),
+      deleteTask: (taskId: string) =>
+        serviceFactory.getTaskService().deleteTask(taskId),
+
+      // Cache operations
+      clearCaches: () => serviceFactory.clearAllCaches(),
+      getCacheStats: () => serviceFactory.getCacheStats(),
     }),
-    [dataService]
+    [serviceFactory]
   );
 
   return (
