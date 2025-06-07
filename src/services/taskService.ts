@@ -6,6 +6,7 @@ import { QueuedOperation } from '@/utils/offlineQueue';
 import { emitDataUpdate } from '@/utils/events';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
+type TaskUpdate = Database['public']['Tables']['tasks']['Update'];
 
 export interface TaskInput {
   goalId?: string;
@@ -102,7 +103,7 @@ export class TaskService extends BaseService {
       const user = await this.getCurrentUser();
       const { id, ...updates } = taskUpdate;
       
-      const updateData: any = {};
+      const updateData: Partial<TaskUpdate> = {};
       if (updates.goalId !== undefined) updateData.goal_id = updates.goalId;
       if (updates.text !== undefined) updateData.text = updates.text;
       if (updates.completed !== undefined) updateData.completed = updates.completed;
