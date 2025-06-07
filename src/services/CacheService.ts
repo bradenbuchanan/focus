@@ -6,8 +6,8 @@ interface CacheEntry<T> {
   }
   
   export class CacheService {
-    private cache = new Map<string, CacheEntry<any>>();
-    private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
+    private cache = new Map<string, CacheEntry<unknown>>();
+    private readonly DEFAULT_TTL = 5 * 60 * 1000;
   
     set<T>(key: string, data: T, ttl: number = this.DEFAULT_TTL): void {
       this.cache.set(key, {
@@ -18,7 +18,7 @@ interface CacheEntry<T> {
     }
   
     get<T>(key: string): T | null {
-      const entry = this.cache.get(key);
+      const entry = this.cache.get(key) as CacheEntry<T> | undefined;
       
       if (!entry) {
         return null;
