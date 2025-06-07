@@ -32,7 +32,7 @@ export abstract class BaseService {
   }
 
   // Helper to convert data to OperationData
-  protected toOperationData(data: any): OperationData {
+  protected toOperationData(data: Record<string, unknown>): OperationData {
     return { ...data } as OperationData;
   }
 
