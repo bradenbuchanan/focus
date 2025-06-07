@@ -6,6 +6,7 @@ import { QueuedOperation } from '@/utils/offlineQueue';
 import { emitDataUpdate } from '@/utils/events';
 
 type Goal = Database['public']['Tables']['goals']['Row'];
+type GoalUpdate = Database['public']['Tables']['goals']['Update'];
 
 export interface GoalInput {
   title: string;
@@ -118,7 +119,7 @@ export class GoalService extends BaseService {
     try {
       const user = await this.getCurrentUser();
       
-      const updateData: any = {};
+      const updateData: Partial<GoalUpdate> = {};
       if (updates.title !== undefined) updateData.title = updates.title;
       if (updates.description !== undefined) updateData.description = updates.description;
       if (updates.type !== undefined) updateData.type = updates.type;
