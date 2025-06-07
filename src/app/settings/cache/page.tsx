@@ -4,12 +4,20 @@
 import { useState } from 'react';
 import { useCache } from '@/hooks/useCache';
 
+// Define a proper type for cache stats
+interface CacheStats {
+  [key: string]: {
+    size: number;
+    keys: string[];
+  };
+}
+
 export default function CacheManagementPage() {
-  const [stats, setStats] = useState<any>(null);
-  const { clearAllCaches, logCacheStats } = useCache();
+  const [stats, setStats] = useState<CacheStats | null>(null);
+  const { clearAllCaches, getCacheStats } = useCache(); // Now we can use getCacheStats
 
   const handleGetStats = () => {
-    const cacheStats = logCacheStats();
+    const cacheStats = getCacheStats(); // This now returns the actual stats
     setStats(cacheStats);
   };
 
@@ -28,7 +36,7 @@ export default function CacheManagementPage() {
     <div className="card">
       <div className="card__header">
         <h1 className="card__title">Cache Management</h1>
-        <p>Manage your application's data cache for better performance</p>
+        <p>Manage your application&apos;s data cache for better performance</p>
       </div>
 
       <div className="card__body">
@@ -47,9 +55,35 @@ export default function CacheManagementPage() {
         {stats && (
           <div className="card card--surface">
             <h4>Current Cache Status</h4>
-            <pre style={{ fontSize: '0.9rem', overflow: 'auto' }}>
-              {JSON.stringify(stats, null, 2)}
-            </pre>
+            <div style={{ marginBottom: '1rem' }}>
+              {Object.entries(stats).map(([cacheName, cacheData]) => (
+                <div key={cacheName} style={{ marginBottom: '0.5rem' }}>
+                  <strong>{cacheName}:</strong> {cacheData.size} items
+                  {cacheData.size > 0 && (
+                    <details style={{ marginLeft: '1rem', fontSize: '0.9rem' }}>
+                      <summary>View keys</summary>
+                      <ul style={{ marginTop: '0.5rem' }}>
+                        {cacheData.keys.map((key, index) => (
+                          <li key={index}>{key}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
+                </div>
+              ))}
+            </div>
+            <details>
+              <summary>Raw JSON</summary>
+              <pre
+                style={{
+                  fontSize: '0.9rem',
+                  overflow: 'auto',
+                  marginTop: '0.5rem',
+                }}
+              >
+                {JSON.stringify(stats, null, 2)}
+              </pre>
+            </details>
           </div>
         )}
 
@@ -61,7 +95,8 @@ export default function CacheManagementPage() {
             <li>Goals and accomplishments are cached for 5 minutes</li>
             <li>Cache is automatically cleared when data is modified</li>
             <li>
-              Use "Clear All Cache" if you're experiencing stale data issues
+              Use &quot;Clear All Cache&quot; if you&apos;re experiencing stale
+              data issues
             </li>
           </ul>
         </div>
